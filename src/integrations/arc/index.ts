@@ -1,12 +1,15 @@
 import { assertConfiguredForProduction, getEnv } from "@/lib/env";
 import { logger } from "@/lib/logger";
 import { formatUsdc, type UsdcAmount } from "@/lib/money";
+import { transferUsdcOnArc } from "./escrow";
+import { isArcOnChainSettlementLive } from "./client";
 import {
   ARC_TESTNET_CHAIN_ID,
   ARC_USDC_ADDRESS,
   ARC_TESTNET_EURC_ADDRESS,
   getArcNetworkConfig,
 } from "./config";
+import { arcExplorerTxUrl } from "./chain";
 
 const log = logger.scoped("arc");
 
@@ -52,12 +55,46 @@ export interface SettlementReceipt {
   status: "settled" | "pending";
   tokenAddress: `0x${string}`;
   route: "arc-native" | "source-to-arc";
-  forwarder: "circle-gateway" | "circle-forwarder-scaffold";
+  forwarder: "circle-gateway" | "circle-forwarder-scaffold" | "arc-native-viem";
 }
 
 /** Resolve the USDC token address for a chain, defaulting to Arc. */
 export function usdcAddress(chainId: number): `0x${string}` {
   return USDC_ADDRESSES[chainId] ?? ARC_USDC_ADDRESS;
+}
+
+function localStubSettlement(
+  req: SettlementRequest,
+  destinationChainId: number,
+  sourceChainId: number,
+  tokenAddress: `0x${string}`,
+  route: "arc-native" | "source-to-arc",
+): SettlementReceipt {
+  assertConfiguredForProduction("arc", false);
+  const fakeHash = `0x${Buffer.from(
+    `${req.fromAddress}${req.toAddress}${req.amount}`,
+  )
+    .toString("hex")
+    .padEnd(64, "0")
+    .slice(0, 64)}` as `0x${string}`;
+  log.debug("arc local settlement", {
+    amount: formatUsdc(req.amount),
+    sourceChainId,
+    destinationChainId,
+    route,
+  });
+  return {
+    settlementId: `local_${req.idempotencyKey ?? fakeHash.slice(2, 10)}`,
+    txHash: fakeHash,
+    chainId: destinationChainId,
+    sourceChainId,
+    destinationChainId,
+    amount: req.amount,
+    status: "settled",
+    tokenAddress,
+    route,
+    forwarder: "circle-forwarder-scaffold",
+  };
 }
 
 /**
@@ -74,35 +111,50 @@ export async function settleUsdc(
   const tokenAddress = usdcAddress(destinationChainId);
   const route = sourceChainId === destinationChainId ? "arc-native" : "source-to-arc";
 
-  if (!env.CIRCLE_API_KEY) {
-    assertConfiguredForProduction("arc", false);
-    const fakeHash = `0x${Buffer.from(
-      `${req.fromAddress}${req.toAddress}${req.amount}`,
-    )
-      .toString("hex")
-      .padEnd(64, "0")
-      .slice(0, 64)}` as `0x${string}`;
-    log.debug("arc local settlement", {
+  if (
+    isArcOnChainSettlementLive() &&
+    sourceChainId === destinationChainId &&
+    destinationChainId === arc.chainId
+  ) {
+    const { txHash } = await transferUsdcOnArc(req.toAddress, req.amount);
+    log.info("arc on-chain settlement confirmed", {
+      txHash,
       amount: formatUsdc(req.amount),
-      sourceChainId,
-      destinationChainId,
-      route,
     });
     return {
-      settlementId: `local_${req.idempotencyKey ?? fakeHash.slice(2, 10)}`,
-      txHash: fakeHash,
+      settlementId: `arc_${req.idempotencyKey ?? txHash.slice(2, 10)}`,
+      txHash,
       chainId: destinationChainId,
       sourceChainId,
       destinationChainId,
       amount: req.amount,
       status: "settled",
       tokenAddress,
-      route,
-      forwarder: "circle-forwarder-scaffold",
+      route: "arc-native",
+      forwarder: "arc-native-viem",
     };
   }
 
-  const res = await fetch(`${env.ARC_RPC_URL ?? "https://api.circle.com"}/v1/transfers`, {
+  if (
+    !env.CIRCLE_API_KEY ||
+    env.NODE_ENV === "test" ||
+    (env.NODE_ENV !== "production" && !isArcOnChainSettlementLive())
+  ) {
+    return localStubSettlement(
+      req,
+      destinationChainId,
+      sourceChainId,
+      tokenAddress,
+      route,
+    );
+  }
+
+  // Circle Wallets / Gateway API — not the blockchain RPC URL.
+  const circleApiBase = env.ARC_RPC_URL?.includes("rpc.")
+    ? "https://api.circle.com"
+    : (env.ARC_RPC_URL ?? "https://api.circle.com");
+
+  const res = await fetch(`${circleApiBase}/v1/transfers`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -152,4 +204,12 @@ export {
   ARC_USDC_ADDRESS,
   ARC_TESTNET_EURC_ADDRESS,
   getArcNetworkConfig,
+  arcExplorerTxUrl,
 };
+export { isArcEscrowLive, isArcOnChainSettlementLive } from "./client";
+export {
+  escrowOnChain,
+  claimOnChain,
+  paymentIdToBytes32,
+  generateClaimCredentials,
+} from "./escrow";

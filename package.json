@@ -11,7 +11,10 @@
     "lint": "eslint . --ext .ts,.tsx",
     "format": "prettier --write \"**/*.{ts,tsx,json,md}\"",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "test:contracts": "forge test",
+    "deploy:escrow": "bash scripts/deploy-escrow.sh",
+    "verify:arc": "node scripts/arc-live-verify.mjs"
   },
   "dependencies": {
     "@dynamic-labs/ethereum": "^4.10.0",

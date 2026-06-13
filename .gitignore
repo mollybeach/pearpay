@@ -42,6 +42,8 @@ coverage/
 
 # ---------- Caches ----------
 .cache/
+contracts/cache/
+contracts/out/
 .eslintcache
 .parcel-cache/
 .rollup.cache/

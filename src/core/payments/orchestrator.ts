@@ -193,6 +193,7 @@ async function processLeg(params: LegParams): Promise<PaymentLeg> {
               : "source-to-arc",
         }),
     claimUrl: claimUrl(payment.claimToken),
+    txHash: payment.escrowTxHash,
     notified,
     private: isPrivate,
   };

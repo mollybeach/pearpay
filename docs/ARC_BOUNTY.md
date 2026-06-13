@@ -105,10 +105,22 @@ Arc RPC configuration, and deployed escrow contract addresses.
 
 ## External Setup Before Live Judging
 
-- Deploy `PearPayEscrow.sol` to Arc and set `ARC_ESCROW_CONTRACT_ADDRESS`.
-- Set `CIRCLE_API_KEY` and validate the Circle Gateway/Forwarder request shape
-  against the final Circle environment.
-- Fund the sender/deployer wallet with Arc testnet gas and Arc USDC.
+- Set `FUNDER_PRIVATE_KEY` in `.env` (funded Arc wallet — never commit).
+- Deploy and verify in one step:
+  ```bash
+  npm run verify:arc
+  ```
+  Or deploy only:
+  ```bash
+  npm run deploy:escrow
+  ```
+  This writes `ARC_ESCROW_CONTRACT_ADDRESS` and `ESCROW_CONTRACT_ADDRESS` to `.env`.
+- With contract + funder key set, claimable payments call `PearPayEscrow.escrow()`
+  on create and `claim()` on claim — explorer URLs are returned from `/api/claim/:token`.
+- Instant Arc settlement uses direct on-chain `USDC.transfer()` via viem when
+  `FUNDER_PRIVATE_KEY` is set (no Circle `/v1/transfers` POST to the RPC URL).
+- Set `CIRCLE_API_KEY` only if using Circle Wallets/Gateway for cross-chain flows.
+- Fund the sender/deployer wallet with Arc testnet USDC from [Circle Faucet](https://faucet.circle.com).
 - Configure durable `ESCROW_DATABASE_URL` for production claimable payments.
 - Configure Twilio, Dynamic, and WebAuthn production credentials for the full
   end-to-end demo.
