@@ -1,3 +1,12 @@
+import {
+  createPublicClient,
+  createWalletClient,
+  defineChain,
+  erc20Abi,
+  http,
+  isAddress,
+} from "viem";
+import { privateKeyToAccount } from "viem/accounts";
 import { assertConfiguredForProduction, getEnv } from "@/lib/env";
 import { logger } from "@/lib/logger";
 import { formatUsdc, type UsdcAmount } from "@/lib/money";
@@ -6,7 +15,10 @@ import {
   ARC_USDC_ADDRESS,
   ARC_TESTNET_EURC_ADDRESS,
   getArcNetworkConfig,
+  type ArcNetworkConfig,
 } from "./config";
+
+const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
 
 const log = logger.scoped("arc");
 
