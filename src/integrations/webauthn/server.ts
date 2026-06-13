@@ -12,7 +12,9 @@ import { getEnv } from "@/lib/env";
 import {
   findCredential,
   getUserCredentials,
+  consumeChallenge,
   saveCredential,
+  saveChallenge,
   updateCredentialCounter,
 } from "./store";
 
@@ -29,7 +31,7 @@ export async function createRegistrationOptions(userId: string) {
   const { rpName, rpID } = webauthnConfig();
   const userCredentials = getUserCredentials(userId);
 
-  return generateRegistrationOptions({
+  const options = await generateRegistrationOptions({
     rpName,
     rpID,
     userName: userId,
@@ -45,6 +47,8 @@ export async function createRegistrationOptions(userId: string) {
       authenticatorAttachment: "platform",
     },
   });
+  saveChallenge(userId, "registration", options.challenge);
+  return options;
 }
 
 export async function verifyRegistration(
@@ -52,6 +56,9 @@ export async function verifyRegistration(
   response: RegistrationResponseJSON,
   expectedChallenge: string,
 ) {
+  if (!consumeChallenge(userId, "registration", expectedChallenge)) {
+    throw new Error("Registration challenge expired or already used");
+  }
   const { rpID, origin } = webauthnConfig();
   const verification = await verifyRegistrationResponse({
     response,
@@ -72,7 +79,7 @@ export async function createAuthenticationOptions(userId: string) {
   const { rpID } = webauthnConfig();
   const userCredentials = getUserCredentials(userId);
 
-  return generateAuthenticationOptions({
+  const options = await generateAuthenticationOptions({
     rpID,
     allowCredentials: userCredentials.map((cred) => ({
       id: cred.credentialID,
@@ -80,6 +87,8 @@ export async function createAuthenticationOptions(userId: string) {
     })),
     userVerification: "required",
   });
+  saveChallenge(userId, "authentication", options.challenge);
+  return options;
 }
 
 export async function verifyAuthentication(
@@ -87,6 +96,9 @@ export async function verifyAuthentication(
   response: AuthenticationResponseJSON,
   expectedChallenge: string,
 ) {
+  if (!consumeChallenge(userId, "authentication", expectedChallenge)) {
+    throw new Error("Authentication challenge expired or already used");
+  }
   const { rpID, origin } = webauthnConfig();
   const credential = findCredential(userId, response.id);
   if (!credential) {

@@ -106,13 +106,11 @@ fastlane/Preview.html
 fastlane/screenshots/**/*.png
 fastlane/test_output
 
-# ---------- Editor / agent tooling ----------
+# ---------- WebAuthn credential store (local dev) ----------
 .lingcode/
 .lingcode
 .cursor/
 .cursor
-
-# ---------- WebAuthn credential store (local dev) ----------
 .webauthn-store.json
 
 # ---------- Misc ----------
@@ -121,4 +119,3 @@ temp/
 *.pid
 *.seed
 *.local
-package-lock.json

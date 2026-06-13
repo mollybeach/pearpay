@@ -1,5 +1,5 @@
 import twilio from "twilio";
-import { getEnv } from "@/lib/env";
+import { assertConfiguredForProduction, getEnv } from "@/lib/env";
 import { logger } from "@/lib/logger";
 
 const log = logger.scoped("twilio");
@@ -17,7 +17,10 @@ let cachedClient: ReturnType<typeof twilio> | null = null;
 function client() {
   if (cachedClient) return cachedClient;
   const env = getEnv();
-  if (!env.TWILIO_ACCOUNT_SID || !env.TWILIO_AUTH_TOKEN) return null;
+  if (!env.TWILIO_ACCOUNT_SID || !env.TWILIO_AUTH_TOKEN) {
+    assertConfiguredForProduction("twilio", false);
+    return null;
+  }
   cachedClient = twilio(env.TWILIO_ACCOUNT_SID, env.TWILIO_AUTH_TOKEN);
   return cachedClient;
 }
@@ -55,6 +58,10 @@ export async function sendClaimLink(
     msg.channel === "whatsapp"
       ? `whatsapp:${env.TWILIO_FROM_NUMBER ?? ""}`
       : env.TWILIO_FROM_NUMBER;
+  if (!env.TWILIO_MESSAGING_SERVICE_SID && !from) {
+    assertConfiguredForProduction("twilio", false);
+    throw new Error("Twilio sender is not configured");
+  }
 
   const result = await c.messages.create({
     to,
@@ -75,6 +82,7 @@ export async function startVerification(
   const env = getEnv();
   const c = client();
   if (!c || !env.TWILIO_VERIFY_SERVICE_SID) {
+    assertConfiguredForProduction("twilio", false);
     return { status: "skipped" };
   }
   const verification = await c.verify.v2
@@ -91,6 +99,7 @@ export async function checkVerification(
   const env = getEnv();
   const c = client();
   if (!c || !env.TWILIO_VERIFY_SERVICE_SID) {
+    assertConfiguredForProduction("twilio", false);
     return { approved: true };
   }
   const check = await c.verify.v2

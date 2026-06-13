@@ -13,6 +13,8 @@ blockchain logic remains server-side.
 | `PaymentComposerView.swift` | Minimal UI to type a natural-language payment |
 | `ApplePayAuthorizer.swift` | PassKit biometric authorization of intent |
 | `PearPayBackend.swift` | HTTP client for `POST /api/payments` |
+| `SenderWalletProvider.swift` | Reads a verified sender wallet from app config or user defaults |
+| `PearPay.xcodeproj` | Host app plus `PearPayMessages` iMessage extension target |
 
 ## Flow
 
@@ -27,6 +29,12 @@ User types "Send Molly $20"
 
 ## Building
 
-Open the Pear Pay Xcode project, select the `PearPayMessages` iMessage extension
-target, set your Apple Pay merchant identifier (`merchant.app.pearpay`), and run
-on a device with Apple Pay configured.
+Open `PearPay.xcodeproj`, set a development team, keep the Apple Pay merchant
+identifier as `merchant.app.pearpay`, and run the `PearPay` host app on a device
+or Simulator. The Simulator path bypasses the Apple Pay sheet so the composer can
+be exercised without a physical card.
+
+Before sending real funds, configure `PearPayBackendURL` and a verified
+`PearPaySenderWalletAddress` in the extension `Info.plist`, or store the address
+through `SenderWalletProvider.storeWalletAddress(_:)` after wallet onboarding.
+The extension refuses to call the backend without a valid sender wallet.
