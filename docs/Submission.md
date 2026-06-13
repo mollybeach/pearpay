@@ -427,7 +427,7 @@ React.js
 
 **Do not select:** `None`, or frameworks Pear Pay does not use (Vue.js, Angular, Svelte, Express, Django, etc.).
 
-**Not in this dropdown — put in "Other specific technologies":** Tailwind CSS, pnpm, Vercel.
+**Not in this dropdown — put in "Other specific technologies":** Tailwind CSS, npm, Vercel.
 
 ---
 
@@ -499,7 +499,7 @@ None
 | `WebAuthn` | Face ID / passkey payment approval |
 | `HTTP 402` | Agent micropayments (x402 paywall demo) |
 | `Tailwind CSS` | UI styling |
-| `pnpm` | Package manager |
+| `npm` | Package manager |
 | `Vercel` | Deploy web app + API |
 | `Xcode` | iMessage extension + Apple Pay (PassKit) |
 | `zod` | API request validation |
@@ -521,7 +521,7 @@ Twilio
 WebAuthn
 HTTP 402
 Tailwind CSS
-pnpm
+npm
 Vercel
 Xcode
 zod
