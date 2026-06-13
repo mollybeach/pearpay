@@ -207,6 +207,28 @@
         content: "Confirm with Side Button"; position: absolute; right: 14px; top: -6px; white-space: nowrap;
         font-size: 10px; color: var(--pear-light); background: rgba(0,0,0,0.6); padding: 3px 7px; border-radius: 6px;
       }
+
+      /* --- extra flows --- */
+      .section-title { text-align: center; font-size: 24px; margin: 64px 0 8px; }
+      .section-sub { text-align: center; color: rgba(243,255,247,0.55); margin: 0 0 28px; }
+      .sms-bubble {
+        align-self: flex-start; background: #34c759; color: #06160e;
+        border-radius: 18px; border-bottom-left-radius: 5px; max-width: 82%; padding: 11px 13px; font-size: 14px; line-height: 1.4;
+      }
+      .sms-claim {
+        display: block; margin-top: 8px; background: rgba(0,0,0,0.18); color: #06160e;
+        border-radius: 8px; padding: 7px 9px; font-size: 12px; font-family: ui-monospace, monospace; text-decoration: none; font-weight: 600;
+      }
+      .claim-btn {
+        display: block; text-align: center; margin-top: 8px; background: #06160e; color: #9be38a;
+        border-radius: 10px; padding: 9px; font-weight: 700; font-size: 13px;
+      }
+      .mask { letter-spacing: 3px; }
+      .avatar.agent { background: linear-gradient(135deg, #8b5cf6, #5b21b6) !important; }
+      .agent-line { font-family: ui-monospace, SFMono-Regular, monospace; font-size: 12px; }
+      .bubble.agent-in { align-self: flex-start; background: #241b3a; border-bottom-left-radius: 5px; }
+      .tag.priv { background: rgba(150,150,150,0.22); color: #ededed; }
+      .tag.x402 { background: rgba(44,124,246,0.2); color: #bcd4ff; }
     </style>
   </head>
   <body>
@@ -325,6 +347,146 @@
           </div>
         </div>
         <div class="step-sub">MSMessage card inserted back into the conversation</div>
+      </div>
+    </div>
+    <h2 class="section-title">More payment flows</h2>
+    <p class="section-sub">The same “type it like a text” UX, three harder cases handled automatically.</p>
+
+    <div class="stage">
+      <!-- FLOW A: CLAIMABLE — sender side -->
+      <div class="step">
+        <div class="step-label">A · Pay someone with no wallet</div>
+        <div class="phone">
+          <div class="screen">
+            <div class="notch"></div>
+            <div class="nav">
+              <div class="chev">‹</div>
+              <div class="avatar">🧑</div>
+              <div class="name">Alex</div>
+            </div>
+            <div class="thread">
+              <div class="ts">iMessage · Today</div>
+              <div class="bubble out">Here’s the $50 for the Airbnb 🏠</div>
+              <div class="pay-card">
+                <div class="row">
+                  <span class="logo">🍐</span>
+                  <span class="badge" style="background:rgba(245,158,11,.18);color:#fcd34d">CLAIMABLE ⏳</span>
+                </div>
+                <div class="amt">$50.00</div>
+                <div class="to">To <b>Alex</b> · not on Pear Pay yet</div>
+                <div class="tags">
+                  <span class="tag">USDC escrowed</span>
+                  <span class="tag">claim via SMS</span>
+                </div>
+              </div>
+              <div class="bubble in">wait i don’t even have a crypto wallet 😅</div>
+            </div>
+          </div>
+        </div>
+        <div class="step-sub">Funds escrowed instantly — payment never blocks on onboarding</div>
+      </div>
+
+      <!-- FLOW A: CLAIMABLE — recipient SMS -->
+      <div class="step">
+        <div class="step-label">…they just get a text</div>
+        <div class="phone">
+          <div class="screen">
+            <div class="notch"></div>
+            <div class="nav">
+              <div class="chev">‹</div>
+              <div class="avatar" style="background:linear-gradient(135deg,#bbb,#888)">#</div>
+              <div class="name">+1 (206) 947-6991</div>
+            </div>
+            <div class="thread">
+              <div class="ts">Text Message · Today</div>
+              <div class="sms-bubble">
+                Molly sent you $50 through Pear&nbsp;Pay 🍐<br />
+                Claim your funds:
+                <a class="sms-claim">pearpay.app/claim/abc123</a>
+                <span class="claim-btn">Claim your $50 →</span>
+              </div>
+              <div class="bubble in">opening it now!</div>
+            </div>
+            <div class="imsg-field">
+              <span class="plus" style="color:#34c759">＋</span>
+              <div class="box">Text Message</div>
+            </div>
+          </div>
+        </div>
+        <div class="step-sub">Twilio SMS → claim page → Dynamic wallet created on tap</div>
+      </div>
+
+      <!-- FLOW B: PRIVATE -->
+      <div class="step">
+        <div class="step-label">B · Private transfer</div>
+        <div class="phone">
+          <div class="screen">
+            <div class="notch"></div>
+            <div class="nav">
+              <div class="chev">‹</div>
+              <div class="avatar">🦋</div>
+              <div class="name">Sarah</div>
+            </div>
+            <div class="thread">
+              <div class="ts">iMessage · Today</div>
+              <div class="bubble out">sent that over privately 🤫</div>
+              <div class="pay-card" style="border-color:rgba(160,160,160,.4)">
+                <div class="row">
+                  <span class="logo">🍐</span>
+                  <span class="badge" style="background:rgba(150,150,150,.25);color:#ededed">PRIVATE 🕶️</span>
+                </div>
+                <div class="amt mask">$ • • •</div>
+                <div class="to">To <b>• • • • •</b> · amount hidden</div>
+                <div class="tags">
+                  <span class="tag priv">🕶️ Unlink</span>
+                  <span class="tag">shielded</span>
+                  <span class="tag rail">🟣 Hedera</span>
+                </div>
+              </div>
+            </div>
+            <div class="imsg-field">
+              <span class="plus">＋</span>
+              <div class="box">iMessage</div>
+            </div>
+          </div>
+        </div>
+        <div class="step-sub">Unlink hides balances, amounts &amp; counterparties</div>
+      </div>
+
+      <!-- FLOW C: AGENT -->
+      <div class="step">
+        <div class="step-label">C · Agent → agent payment</div>
+        <div class="phone">
+          <div class="screen">
+            <div class="notch"></div>
+            <div class="nav">
+              <div class="chev">‹</div>
+              <div class="avatar agent">🤖</div>
+              <div class="name">pearpay-agent.eth</div>
+            </div>
+            <div class="thread">
+              <div class="ts">Autonomous run · x402</div>
+              <div class="bubble out agent-line">Pay openai.eth $0.05 for this API request</div>
+              <div class="bubble agent-in agent-line">⟳ resolving openai.eth … endpoint found</div>
+              <div class="bubble agent-in agent-line">HTTP 402 → paying via Dynamic server wallet</div>
+              <div class="pay-card">
+                <div class="row">
+                  <span class="logo">🍐</span>
+                  <span class="badge">PAID ✅</span>
+                </div>
+                <div class="amt">$0.05</div>
+                <div class="to">Agent paid <b>openai.eth</b></div>
+                <div class="tags">
+                  <span class="tag x402">x402</span>
+                  <span class="tag">USDC</span>
+                  <span class="tag rail">🟣 Hedera</span>
+                </div>
+              </div>
+              <div class="bubble agent-in agent-line">200 OK — response unlocked</div>
+            </div>
+          </div>
+        </div>
+        <div class="step-sub">Server wallet + x402 — no human in the loop</div>
       </div>
     </div>
   </body>
