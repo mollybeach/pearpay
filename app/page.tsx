@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { AgentDemo } from "@/components/AgentDemo";
+import { ARC_CHAIN_ID, ARC_EURC_ADDRESS, ARC_USDC_ADDRESS } from "@/lib/constants";
 
 const FEATURES = [
   {
@@ -60,6 +61,13 @@ const STEPS = [
     title: "They get paid",
     body: "Existing users get funds instantly; new ones claim via a secure link.",
   },
+];
+
+const ARC_HUB_DETAILS = [
+  { label: "Settlement hub", value: `Arc Testnet (${ARC_CHAIN_ID})` },
+  { label: "USDC", value: ARC_USDC_ADDRESS },
+  { label: "EURC", value: ARC_EURC_ADDRESS },
+  { label: "Routing", value: "Source chain -> Arc -> recipient" },
 ];
 
 export default function HomePage() {
@@ -185,6 +193,43 @@ export default function HomePage() {
               </p>
             </div>
           ))}
+        </div>
+      </section>
+
+      {/* Arc settlement */}
+      <section className="mx-auto max-w-6xl px-5 py-16">
+        <div className="rounded-3xl border border-pear-500/25 bg-pear-900/50 p-8 shadow-glow">
+          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-pear-300">
+            Arc USDC liquidity hub
+          </p>
+          <div className="mt-4 grid gap-8 lg:grid-cols-[1.1fr_0.9fr]">
+            <div>
+              <h2 className="text-3xl font-bold sm:text-4xl">
+                One payment surface across chains
+              </h2>
+              <p className="mt-4 max-w-2xl text-cream/70">
+                Pear Pay keeps chain choice out of the conversation. The backend
+                detects the sender&apos;s source chain, routes USDC through Arc, and
+                settles claimable payments with programmable escrow: funds lock on
+                send, release on claim, and refund after expiry.
+              </p>
+            </div>
+            <div className="grid gap-3">
+              {ARC_HUB_DETAILS.map((item) => (
+                <div
+                  key={item.label}
+                  className="rounded-2xl border border-white/10 bg-pear-950/70 p-4"
+                >
+                  <p className="text-xs uppercase tracking-wider text-cream/40">
+                    {item.label}
+                  </p>
+                  <p className="mt-1 break-all font-mono text-sm text-cream/90">
+                    {item.value}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </section>
 

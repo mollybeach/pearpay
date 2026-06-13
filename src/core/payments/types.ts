@@ -21,6 +21,14 @@ export interface PaymentLeg {
   txHash?: `0x${string}`;
   /** Rail-native reference (Hedera tx id, Unlink note id, Arc settlement id). */
   settlementRef?: string;
+  /** Source chain detected by Pear Pay for chain-abstracted routing. */
+  sourceChainId?: number;
+  /** Destination settlement chain; Arc is the USDC liquidity hub. */
+  destinationChainId?: number;
+  /** Stablecoin contract used on the destination settlement chain. */
+  tokenAddress?: `0x${string}`;
+  /** Arc routing mode for Circle-native settlement. */
+  route?: "arc-native" | "source-to-arc";
   /** Claim URL for claimable legs. */
   claimUrl?: string;
   /** Interactive Flow pay link for instant legs (FaceID + OG unfurl). */

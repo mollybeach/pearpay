@@ -3,6 +3,7 @@ import { newClaimToken, newPaymentId } from "@/lib/ids";
 import { logger } from "@/lib/logger";
 import { createEmbeddedWallet } from "@/integrations/dynamic";
 import { logToConsensus } from "@/integrations/hedera";
+import { ARC_TESTNET_CHAIN_ID } from "@/integrations/arc";
 import { selectRail, settleOnRail } from "@/core/payments/settlement";
 import { formatUsdcDisplay } from "@/lib/money";
 import { getEscrowStore } from "./store";
@@ -27,6 +28,10 @@ export async function createClaimablePayment(
   params: CreateEscrowParams,
 ): Promise<ClaimablePayment> {
   const now = Date.now();
+  const env = getEnv();
+  if (env.NODE_ENV === "production" && !env.ESCROW_DATABASE_URL) {
+    throw new Error("ESCROW_DATABASE_URL is required for production escrow");
+  }
   const payment: ClaimablePayment = {
     id: newPaymentId(),
     claimToken: newClaimToken(),
@@ -93,7 +98,8 @@ export async function claimPayment(
     fromAddress: payment.senderAddress,
     toAddress: wallet.address,
     amount: payment.amount,
-    chainId: payment.chainId,
+    sourceChainId: payment.chainId,
+    chainId: ARC_TESTNET_CHAIN_ID,
     memo: payment.memo,
     idempotencyKey: payment.id,
   });

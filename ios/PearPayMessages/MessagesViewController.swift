@@ -21,9 +21,14 @@ final class MessagesViewController: MSMessagesAppViewController {
     /// Capture a payment draft, authorize via Apple Pay, then hand off to the
     /// backend which performs all resolution, routing, and settlement.
     private func handleSend(_ draft: PaymentDraft) {
+        guard let senderAddress = SenderWalletProvider.currentWalletAddress() else {
+            composer.showError("Connect a verified Pear Pay wallet before sending funds.")
+            return
+        }
+
         ApplePayAuthorizer.authorize(amount: draft.amountDisplay) { [weak self] authorized in
             guard authorized else { return }
-            self?.backend.send(message: draft.message, sender: draft.senderAddress) { result in
+            self?.backend.send(message: draft.message, sender: senderAddress) { result in
                 DispatchQueue.main.async {
                     switch result {
                     case .success(let summary):
