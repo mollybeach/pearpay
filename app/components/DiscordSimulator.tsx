@@ -23,14 +23,14 @@ interface Msg {
   pay?: PayInfo;
 }
 
-const DEFAULT_RECIPIENT = "Maya";
-const QUICK = ["/pay maya 25", "/pay dev.eth 100 USDC", "/tip newuser 5"];
+const DEFAULT_RECIPIENT = "molly";
+const QUICK = ["/pay @molly 20", "/pay dev.eth 100 USDC", "/tip newuser 5"];
 
 const INITIAL: Msg[] = [
   {
     id: 1,
     kind: "bottext",
-    text: "Use /pay to send USDC right here in chat. Try `/pay maya 25`.",
+    text: "Use /pay to send USDC right here in chat. Try `/pay @molly 20`.",
   },
 ];
 
@@ -39,7 +39,7 @@ const nextId = () => ++mid;
 
 export function DiscordSimulator() {
   const [messages, setMessages] = useState<Msg[]>(INITIAL);
-  const [draft, setDraft] = useState("/pay maya 25");
+  const [draft, setDraft] = useState("/pay @molly 20");
   const [phase, setPhase] = useState<Phase>("idle");
   const [pending, setPending] = useState<PayInfo | null>(null);
   const [flowId, setFlowId] = useState<number | null>(null);
@@ -75,7 +75,7 @@ export function DiscordSimulator() {
       window.setTimeout(() => {
         push({
           kind: "bottext",
-          text: "❔ I didn't catch a payment there. Try `/pay maya 25`.",
+          text: "❔ I didn't catch a payment there. Try `/pay @molly 20`.",
         });
       }, 450);
     }
@@ -122,7 +122,7 @@ export function DiscordSimulator() {
 
   function resetDemo() {
     setMessages(INITIAL);
-    setDraft("/pay maya 25");
+    setDraft("/pay @molly 20");
     setPhase("idle");
     setPending(null);
     setFlowId(null);
@@ -197,7 +197,7 @@ export function DiscordSimulator() {
             <button
               type="button"
               aria-label="Add"
-              onClick={() => fill("/pay maya 25")}
+              onClick={() => fill("/pay @molly 20")}
               className="flex h-6 w-6 items-center justify-center rounded-full bg-[#b5bac1] text-base leading-none text-[#313338]"
             >
               ＋
