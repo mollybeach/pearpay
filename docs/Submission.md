@@ -58,13 +58,15 @@ Turn conversations into transactions. Conversational USDC payments for humans an
 *(min 280 characters — be clear and detailed)*
 
 ```
-Pear Pay is a conversational payment protocol that lets you send money anywhere you communicate — iMessage, Telegram, WhatsApp, Discord, Slack, or even between AI agents. Instead of wallets, seed phrases, chains, bridges, swaps, and gas, you just express intent: "Send Molly $20," "Pay Alex back for dinner," or "Send Sarah 50 USDC privately."
+Pear Pay is a conversational payment protocol that lets you send money anywhere you communicate — iMessage, Telegram, WhatsApp, Discord, Slack, X, or even between AI agents. Instead of wallets, seed phrases, chains, bridges, swaps, and gas, you just express intent: "Send Molly $20," "Pay Alex back for dinner," or "Send Sarah 50 USDC privately."
 
 Behind that single message, Pear Pay resolves the recipient (ENS name, phone, email, handle, or existing Pear Pay user), picks the optimal settlement rail, settles in USDC, and optionally shields the transfer so amounts and counterparties stay private. Every payment writes a tamper-proof audit receipt to the Hedera Consensus Service.
 
 Crucially, payments never fail because the recipient hasn't onboarded. If they have no wallet, Pear Pay escrows the USDC and delivers a claim link over SMS/WhatsApp via Twilio; the recipient taps it, an embedded wallet is created instantly through Dynamic, and the funds release — solving the cold-start problem that kills most crypto payment apps.
 
 Pear Pay also extends to the agentic economy: AI agents get their own ENS identity and Dynamic server wallet and can pay each other for APIs, compute, and data autonomously using HTTP 402 / x402 — the same infrastructure that powers human payments powering machine-to-machine commerce.
+
+You can try it live: a clickable, screen-recordable Simulator reproduces the in-chat payment experience across six platforms (iMessage, Telegram, Discord, WhatsApp, Slack, X), and a "Try it" page does a real on-chain USDC transfer from your own wallet on Base Sepolia testnet — a genuine, verifiable transaction, not a mock.
 ```
 
 ---
@@ -77,12 +79,14 @@ Pear Pay is one unified TypeScript app: a Next.js (App Router) frontend + API th
 
 The brain is a dependency-free core in TypeScript so it behaves identically across every channel: an NLP parser turns "Send Molly $20 privately" into a structured PaymentIntent; a universal recipient resolver maps ENS / phone / email / handle / existing-user to a delivery mode; a programmable escrow handles claimable payments; and a settlement orchestrator selects the rail per payment and serializes a JSON-safe result for the UI. Blockchain access is via viem/wagmi.
 
+Two demo surfaces show this end to end: (1) a screen-recordable Simulator that reproduces the real in-chat UX across six platforms (iMessage, Telegram, Discord, WhatsApp, Slack, X) — pixel-faithful phone frame, on-screen iOS keyboard, and each platform's native confirmation pattern (Apple Pay sheet, Telegram inline buttons, Discord embeds, WhatsApp quick-replies, Slack Block Kit, X cards) — all sharing one tested component foundation; and (2) a live "Try it" page that does a REAL on-chain USDC transfer on Base Sepolia: connect a browser wallet via wagmi (injected connector), and transfer() Circle's testnet USDC to any address with a verifiable BaseScan link — no sponsor accounts or funded server keys required.
+
 Partner tech and how it helps:
 - Dynamic — embedded wallets for instant onboarding-on-claim and server/agent wallets for autonomous payments; powers login + signing.
 - ENS — human-readable identity and recipient discovery for both people and AI agents (forward/reverse resolution + ENSIP-26 text records for agent endpoints).
 - Hedera — primary settlement rail: USDC via the Hedera Token Service (HTS), and a tamper-proof, ordered audit receipt for every payment/escrow/claim via the Hedera Consensus Service (HCS). Sub-cent fees + 3–5s finality make conversational and nano payments viable.
 - Arc (Circle) — Circle-native USDC settlement and chain-abstracted liquidity for the Arc rail.
-- Unlink — private transfers (deposit/transfer/withdraw) so balances, amounts, and counterparties stay hidden in "private mode."
+- Unlink — private transfers via the real `@unlink-xyz/sdk` client (`createUnlink` + `unlinkAccount.fromMnemonic`, primitives deposit/transfer/withdraw) so balances, amounts, and counterparties stay hidden in "private mode." See `docs/unlink-integration.md`.
 - Twilio — SMS/WhatsApp claim-link delivery + Verify; this is what reaches recipients who don't have a wallet yet and solves the cold-start problem.
 
 On-chain, PearPayEscrow.sol is a programmable USDC/EURC escrow (conditional release behind a keccak256 claim-secret, time-based auto-refund, sender cancellation) designed to deploy to both Arc and Hedera's EVM (Smart Contract Service) from the same bytecode.
@@ -93,8 +97,10 @@ Hacky / notable bits:
 - "Pay with Face ID" uses WebAuthn passkeys (@simplewebauthn) for biometric approval in the browser.
 - Agent-to-agent payments use HTTP 402 / x402 with a Dynamic server wallet — no human in the loop.
 - Every settlement also emits an HCS receipt, giving an immutable audit trail for human and machine transactions.
+- The "Try it" page is genuinely on-chain: wagmi + an injected browser wallet send a real Circle USDC transfer() on Base Sepolia (chain 84532) with a BaseScan receipt — judges can verify an actual transaction with zero sponsor credentials.
+- The Simulator is one reusable foundation: a shared PhoneFrame, a theme-aware on-screen IosKeyboard, and a shared PearPayCard, with each of the six channel components layering on its platform-native chrome and confirmation flow.
 
-The whole thing runs in sandbox/testnet mode for the demo so the full flow is reproducible without funded mainnet keys.
+The sponsor settlement rails (Hedera/Arc/Unlink) run in sandbox/testnet mode for the demo so the full flow is reproducible without funded mainnet keys, while the "Try it" page is live on Base Sepolia.
 ```
 
 ---
@@ -202,8 +208,8 @@ Pear Pay adds an optional private payment mode: users say "Send Sarah 50 USDC pr
 **Link to the line of code where the tech is used:**
 
 ```
-https://github.com/mollybeach/pearpay/blob/main/src/integrations/unlink/index.ts#L45-L65
-https://github.com/mollybeach/pearpay/blob/main/src/integrations/unlink/index.ts#L71-L94
+https://github.com/mollybeach/pearpay/blob/main/src/integrations/unlink/index.ts#L57-L74
+https://github.com/mollybeach/pearpay/blob/main/src/integrations/unlink/index.ts#L98-L126
 https://github.com/mollybeach/pearpay/blob/main/src/core/payments/settlement.ts#L27-L28
 https://github.com/mollybeach/pearpay/blob/main/src/core/payments/settlement.ts#L68-L76
 ```
@@ -260,7 +266,7 @@ Pear Pay uses Dynamic for embedded wallet onboarding on claim, Fireblocks Flow f
 
 **Dynamic qualification checklist:**
 
-- [ ] Dynamic SDK integrated (`@dynamic-labs/sdk-react-core`, `@dynamic-labs/ethereum`)
+- [x] Dynamic SDK integrated (`@dynamic-labs/sdk-react-core`, `@dynamic-labs/ethereum`)
 - [ ] App deployed and usable by judges — https://pearpay.vercel.app/
 - [ ] Flow implemented for Best Use of Flow (see DYNAMIC_BOUNTY.md demo script)
 - [ ] Server wallet + agent autonomy for Best Agentic Build
@@ -284,8 +290,8 @@ Pear Pay adds a private payment mode via Unlink: users say "Send Sarah 50 USDC p
 
 **Unlink qualification checklist:**
 
-- [ ] Unlink SDK integrated (`@unlink-xyz/sdk`)
-- [ ] At least one private primitive demonstrated in demo
+- [x] Unlink SDK integrated (`@unlink-xyz/sdk`) — real `createUnlink` client + deposit/transfer/withdraw
+- [ ] At least one private primitive demonstrated in demo (needs live UNLINK_API_KEY + engine URL)
 - [ ] Public repo + README explaining what is now private
 - [ ] For joint prize: also Dynamic SDK + Circle/Arc tools + MVP + diagram + video
 
@@ -347,7 +353,7 @@ The ETHGlobal form uses a fixed multiselect dropdown. All options from the form:
 | **Hedera** | HTS USDC settlement, HCS audit receipts, Hedera EVM escrow deployment |
 | **Ethereum** | ENS name resolution, default sender chain (chain id 1) |
 | **Arbitrum** | Flow cross-chain funding source — USDC routing in `src/integrations/arc/index.ts` |
-| **Base** | Flow cross-chain funding source — USDC routing |
+| **Base** | Live "Try it" sends a real Circle USDC `transfer()` on Base Sepolia (chain 84532); also a Flow cross-chain funding source |
 | **Optimism** | Flow cross-chain funding source — USDC routing |
 | **Polygon** | Flow cross-chain funding source — USDC routing |
 
@@ -369,7 +375,7 @@ Polygon
 - **None** — Pear Pay settles on multiple chains
 - Chains with no code integration (Aptos, Sui, Bitcoin, Solana-adjacent, etc.)
 
-*(If trimming for a minimal honest set, keep **Arc**, **Hedera**, and **Ethereum** — add L2s only if you demo Flow paying from Arbitrum/Base in the video.)*
+*(If trimming for a minimal honest set, keep **Arc**, **Hedera**, **Ethereum**, and **Base** — the live "Try it" really transacts on Base Sepolia. Add the other L2s only if you demo Flow paying from them in the video.)*
 
 ---
 
