@@ -20,8 +20,12 @@ export function AgentDemo() {
   const [intent, setIntent] = useState("Fetch premium agent intelligence");
 
   async function loadStatus() {
-    const res = await fetch("/api/agent/status");
-    setStatus(await res.json());
+    try {
+      const res = await fetch("/api/agent/status");
+      setStatus(await res.json());
+    } catch {
+      setStatus({ configured: false, wallet_address: null });
+    }
   }
 
   async function runAutonomous() {
