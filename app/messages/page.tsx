@@ -14,32 +14,41 @@ export const metadata: Metadata = {
  */
 export default function MessagesPage() {
   return (
-    <main className="mx-auto max-w-5xl px-5 py-12">
-      <div className="text-center">
-        <h1 className="text-3xl font-extrabold tracking-tight sm:text-4xl">
-          The chat payment <span className="text-pear-400">playground</span>
-        </h1>
-        <p className="mx-auto mt-3 max-w-xl text-cream/70">
-          Send money the way it actually feels inside your chats — iMessage,
-          Telegram, or Discord. Type it like a text, confirm in-app, and watch
-          Pear Pay settle in USDC. Live, clickable, and ready to screen-record.
+    <main className="relative min-h-[calc(100vh-4rem)] bg-[#1e1e1e]">
+      {/* Neutral gray backdrop covering the full viewport (behind the sticky
+          header too) so screen recordings of the simulator don't show the
+          pear-green site branding. */}
+      <div
+        aria-hidden
+        className="pointer-events-none fixed inset-0 -z-10 bg-[#1e1e1e]"
+      />
+      <div className="mx-auto max-w-5xl px-5 py-12">
+        <div className="text-center">
+          <h1 className="text-3xl font-extrabold tracking-tight sm:text-4xl">
+            The chat payment <span className="text-pear-400">playground</span>
+          </h1>
+          <p className="mx-auto mt-3 max-w-xl text-cream/70">
+            Send money the way it actually feels inside your chats — iMessage,
+            Telegram, or Discord. Type it like a text, confirm in-app, and watch
+            Pear Pay settle in USDC. Live, clickable, and ready to screen-record.
+          </p>
+        </div>
+
+        <div className="mt-10">
+          <ChannelPlayground />
+        </div>
+
+        <p className="mt-10 text-center text-xs text-cream/40">
+          Fully simulated on-device for the demo — no real funds move. Prefer the
+          static storyboard?{" "}
+          <a
+            href="/imessage-payment-ux.html"
+            className="text-pear-300 underline-offset-2 hover:underline"
+          >
+            View the step-by-step version →
+          </a>
         </p>
       </div>
-
-      <div className="mt-10">
-        <ChannelPlayground />
-      </div>
-
-      <p className="mt-10 text-center text-xs text-cream/40">
-        Fully simulated on-device for the demo — no real funds move. Prefer the
-        static storyboard?{" "}
-        <a
-          href="/imessage-payment-ux.html"
-          className="text-pear-300 underline-offset-2 hover:underline"
-        >
-          View the step-by-step version →
-        </a>
-      </p>
     </main>
   );
 }
