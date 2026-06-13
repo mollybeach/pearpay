@@ -1,6 +1,13 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  CONTACT,
+  formatAmount,
+  parsePayment,
+  QUICK_PHRASES,
+  type PayInfo,
+} from "@/lib/imessage";
 
 /**
  * Interactive iMessage payment playground.
@@ -9,21 +16,13 @@ import { useCallback, useEffect, useRef, useState } from "react";
  * with the on-screen keyboard (or your physical keyboard), tap send, confirm in
  * a faux Apple Pay sheet with Face ID, and watch a Pear Pay payment card drop
  * into the thread. Everything is simulated client-side so the demo is instant
- * and never depends on backend credentials.
+ * and never depends on backend credentials. Parsing/formatting live in
+ * `@/lib/imessage` so they can be unit-tested.
  */
 
 type Side = "in" | "out";
 type Phase = "idle" | "sheet" | "scanning" | "approved";
 type KbMode = "letters" | "numbers" | "symbols";
-type Outcome = "settled" | "private" | "claimable";
-
-interface PayInfo {
-  amount: number;
-  token: "USD" | "USDC";
-  recipientName: string;
-  recipientLabel: string;
-  outcome: Outcome;
-}
 
 interface Msg {
   id: number;
@@ -33,60 +32,10 @@ interface Msg {
   pay?: PayInfo;
 }
 
-const CONTACT = { name: "Molly", avatar: "🙂" };
-
-const KNOWN = new Set(["molly", "molly.eth", "sarah", "sarah.eth", "alex.eth"]);
-
-const QUICK_PHRASES = [
-  "Send Molly $20",
-  "Send Molly 50 USDC privately",
-  "Send Alex $50",
-];
-
 const INITIAL: Msg[] = [
   { id: 1, side: "in", kind: "text", text: "Can you send me $20 for lunch? 🥗" },
   { id: 2, side: "out", kind: "text", text: "yep one sec" },
 ];
-
-function formatAmount(p: PayInfo): string {
-  return p.token === "USDC"
-    ? `${p.amount} USDC`
-    : `$${p.amount.toFixed(2)}`;
-}
-
-/** Parse a natural-language money request into a payment, or null. */
-function parsePayment(raw: string): PayInfo | null {
-  const text = raw.trim();
-  if (!text) return null;
-
-  const hasIntent =
-    /\b(send|pay|venmo|transfer|paid|split)\b/i.test(text) || /\$\s?\d/.test(text);
-  const amtMatch = text.match(/(\d+(?:\.\d{1,2})?)/);
-  if (!hasIntent || !amtMatch) return null;
-
-  const amount = parseFloat(amtMatch[1] ?? "");
-  if (!Number.isFinite(amount) || amount <= 0) return null;
-
-  const token: PayInfo["token"] = /\busdc\b/i.test(text) ? "USDC" : "USD";
-  const isPrivate = /\bpriv/i.test(text);
-
-  // Recipient: prefer the name after "to", else after "send"/"pay".
-  const toMatch = text.match(/\bto\s+([a-z0-9.@+]+)/i);
-  const sendMatch = text.match(/\b(?:send|pay)\s+([a-z0-9.@]+)/i);
-  let name = (toMatch?.[1] ?? sendMatch?.[1] ?? "").replace(/[.,]+$/, "");
-  if (!name || /^\$?\d/.test(name) || ["me", "you", "the", "a", "an"].includes(name.toLowerCase())) {
-    name = CONTACT.name;
-  }
-
-  const lower = name.toLowerCase();
-  const known = lower.endsWith(".eth") || KNOWN.has(lower);
-  const recipientLabel =
-    lower === "molly" ? "molly.eth" : lower === "sarah" ? "sarah.eth" : name;
-
-  const outcome: Outcome = isPrivate ? "private" : known ? "settled" : "claimable";
-
-  return { amount, token, recipientName: name, recipientLabel, outcome };
-}
 
 /* ----------------------------- keyboard data ----------------------------- */
 
@@ -497,7 +446,7 @@ function PayCard({ pay }: { pay: PayInfo }) {
           {pay.outcome === "private" ? (
             <Tag className="bg-zinc-400/20 text-zinc-100">🕶️ Unlink</Tag>
           ) : (
-            <Tag>{pay.token === "USDC" ? "USDC" : "USDC"}</Tag>
+            <Tag>USDC</Tag>
           )}
           <Tag>
             {pay.outcome === "claimable"
