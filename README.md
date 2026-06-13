@@ -683,7 +683,7 @@ All channels reuse the same TypeScript backend.
 
 ## Tooling
 
-* Package manager: pnpm
+* Package manager: npm
 * Linting / formatting: ESLint + Prettier
 * Deployment: Vercel (web + API), with Xcode for the iOS extension
 

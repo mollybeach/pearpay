@@ -11,8 +11,8 @@ Hard deadline: **Sunday 9:00 AM**. Single unified app in this repo.
 **Run locally:**
 ```bash
 cd pearpay-molly
-pnpm install
-pnpm dev
+npm install
+npm run dev
 ```
 
 ---
