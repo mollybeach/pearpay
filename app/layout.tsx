@@ -4,7 +4,23 @@ import "./globals.css";
 import { Header } from "./components/Header";
 import { Footer } from "./components/Footer";
 
-const SITE_URL = "https://pearpay.app";
+/**
+ * Resolve the public base URL so the social-preview image is an absolute URL
+ * that loads on whatever domain is actually serving the site:
+ *   - NEXT_PUBLIC_SITE_URL  → explicit override
+ *   - VERCEL_PROJECT_PRODUCTION_URL → the project's production domain
+ *   - VERCEL_URL → the current (preview) deployment domain
+ *   - fallback → the canonical custom domain
+ */
+const SITE_URL = (
+  process.env.NEXT_PUBLIC_SITE_URL ??
+  (process.env.VERCEL_PROJECT_PRODUCTION_URL
+    ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+    : process.env.VERCEL_URL
+      ? `https://${process.env.VERCEL_URL}`
+      : "https://pearpay.app")
+).replace(/\/$/, "");
+
 const TITLE = "Pear Pay — Turn Conversations Into Transactions";
 const DESCRIPTION =
   "Send money anywhere you communicate — from messaging apps to AI agents. No wallets, no chains, no addresses. Just say what you want.";
@@ -26,6 +42,7 @@ export const metadata: Metadata = {
     icon: "/PearPayLogo.png",
     apple: "/PearPayLogo.png",
   },
+  alternates: { canonical: "/" },
   // The business card is used as the social sharing preview image.
   openGraph: {
     type: "website",
@@ -36,8 +53,9 @@ export const metadata: Metadata = {
     images: [
       {
         url: "/pearpaybusinesscard.png",
-        width: 1200,
-        height: 630,
+        width: 1536,
+        height: 1024,
+        type: "image/png",
         alt: "Pear Pay — The Apple Pay of Web3",
       },
     ],
