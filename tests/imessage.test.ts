@@ -78,6 +78,41 @@ describe("parsePayment", () => {
     expect(parsePayment("SEND MOLLY $20")?.outcome).toBe("settled");
   });
 
+  describe("per-channel default recipient", () => {
+    it("treats the named chat partner as an instant/known user", () => {
+      // Telegram bot chat with Sasha
+      expect(parsePayment("Send Sasha $20", "Sasha")?.outcome).toBe("settled");
+      // unrelated name on that channel is still claimable
+      expect(parsePayment("Send Jordan $40", "Sasha")).toMatchObject({
+        recipientName: "Jordan",
+        outcome: "claimable",
+      });
+    });
+
+    it("falls back to the channel default when no recipient is named", () => {
+      expect(parsePayment("send $15", "Sasha")?.recipientName).toBe("Sasha");
+    });
+
+    it("parses @-mentions and slash commands (Discord)", () => {
+      expect(parsePayment("/pay maya 25", "Maya")).toMatchObject({
+        amount: 25,
+        recipientName: "maya",
+        outcome: "settled",
+      });
+      expect(parsePayment("/tip @newuser 5", "Maya")).toMatchObject({
+        amount: 5,
+        recipientName: "newuser",
+        outcome: "claimable",
+      });
+      expect(parsePayment("/pay dev.eth 100 USDC", "Maya")).toMatchObject({
+        amount: 100,
+        token: "USDC",
+        recipientLabel: "dev.eth",
+        outcome: "settled",
+      });
+    });
+  });
+
   describe("non-payments return null", () => {
     it.each([
       ["empty string", ""],
