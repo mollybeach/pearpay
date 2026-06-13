@@ -1,0 +1,493 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Pear Pay — iMessage Payment UX</title>
+    <style>
+      :root {
+        --bg: #07140d;
+        --pear: #74b327;
+        --pear-light: #92cf3f;
+        --imsg-gray: #26262a;
+        --imsg-blue: #2c7cf6;
+        --ios-sheet: #1c1c1e;
+        --text: #f3fff7;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        background: radial-gradient(1200px 600px at 50% -10%, rgba(116, 179, 39, 0.18), transparent 70%), var(--bg);
+        color: var(--text);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        padding: 40px 20px 60px;
+      }
+      header { text-align: center; margin-bottom: 36px; }
+      header h1 { font-size: 30px; margin: 0 0 6px; }
+      header p { color: rgba(243, 255, 247, 0.6); margin: 0; }
+      .stage {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 40px 28px;
+        justify-content: center;
+        align-items: flex-start;
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+      .step { width: 300px; }
+      .step-label {
+        text-align: center;
+        font-size: 13px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--pear-light);
+        margin-bottom: 14px;
+      }
+      .step-sub {
+        text-align: center;
+        font-size: 12px;
+        color: rgba(243, 255, 247, 0.5);
+        margin-top: 12px;
+      }
+
+      /* iPhone frame */
+      .phone {
+        position: relative;
+        width: 300px;
+        height: 620px;
+        background: #000;
+        border-radius: 44px;
+        padding: 12px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.55), 0 0 0 2px #2a2a2a inset;
+      }
+      .screen {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        background: #000;
+        border-radius: 33px;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+      }
+      .notch {
+        position: absolute;
+        top: 0; left: 50%;
+        transform: translateX(-50%);
+        width: 130px; height: 26px;
+        background: #000;
+        border-radius: 0 0 16px 16px;
+        z-index: 30;
+      }
+
+      /* Messages chrome */
+      .nav {
+        padding: 30px 14px 10px;
+        background: rgba(20, 20, 22, 0.92);
+        backdrop-filter: blur(8px);
+        text-align: center;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        z-index: 20;
+      }
+      .nav .avatar {
+        width: 42px; height: 42px; border-radius: 50%;
+        background: linear-gradient(135deg, #9acd5a, #5a8c2a);
+        margin: 0 auto 4px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 20px;
+      }
+      .nav .name { font-size: 13px; font-weight: 600; }
+      .nav .chev { position: absolute; left: 16px; top: 40px; color: var(--imsg-blue); font-size: 22px; }
+
+      .thread {
+        flex: 1;
+        padding: 14px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        overflow: hidden;
+      }
+      .bubble {
+        max-width: 78%;
+        padding: 9px 13px;
+        border-radius: 18px;
+        font-size: 14px;
+        line-height: 1.35;
+      }
+      .in {
+        align-self: flex-start;
+        background: var(--imsg-gray);
+        border-bottom-left-radius: 5px;
+      }
+      .out {
+        align-self: flex-end;
+        background: var(--imsg-blue);
+        border-bottom-right-radius: 5px;
+      }
+      .ts { text-align: center; font-size: 10px; color: rgba(255,255,255,0.35); margin: 4px 0; }
+
+      /* Pear Pay payment card bubble */
+      .pay-card {
+        align-self: flex-end;
+        width: 80%;
+        background: linear-gradient(180deg, #16301a, #0a1f12);
+        border: 1px solid rgba(116, 179, 39, 0.35);
+        border-radius: 18px;
+        border-bottom-right-radius: 5px;
+        padding: 14px;
+        box-shadow: 0 6px 20px rgba(116, 179, 39, 0.18);
+      }
+      .pay-card .row { display: flex; align-items: center; justify-content: space-between; }
+      .pay-card .logo { font-size: 22px; }
+      .pay-card .badge {
+        font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 999px;
+        background: rgba(116, 179, 39, 0.2); color: var(--pear-light);
+      }
+      .pay-card .amt { font-size: 30px; font-weight: 800; margin: 8px 0 2px; }
+      .pay-card .to { font-size: 13px; color: rgba(243,255,247,0.7); }
+      .pay-card .tags { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
+      .pay-card .tag {
+        font-size: 10px; padding: 3px 8px; border-radius: 999px;
+        background: rgba(255,255,255,0.06); color: rgba(243,255,247,0.75);
+      }
+      .tag.rail { background: rgba(139, 92, 246, 0.18); color: #d6c8ff; }
+
+      /* Pear Pay iMessage app drawer (composer) */
+      .app-drawer {
+        background: #14140f;
+        border-top: 1px solid rgba(255,255,255,0.08);
+        padding: 14px;
+      }
+      .app-drawer .head { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+      .app-drawer .head b { font-size: 14px; }
+      .app-drawer .head small { color: rgba(243,255,247,0.45); font-size: 11px; }
+      .composer { display: flex; gap: 8px; }
+      .composer input {
+        flex: 1; background: #0a1f12; border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 12px; padding: 10px 12px; color: var(--text); font-size: 14px;
+      }
+      .composer .send {
+        background: var(--pear); color: #06160e; border: none; border-radius: 12px;
+        padding: 10px 14px; font-weight: 700; font-size: 14px; white-space: nowrap;
+      }
+      .chips { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
+      .chip { font-size: 11px; padding: 5px 10px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.1); color: rgba(243,255,247,0.7); }
+
+      /* iMessage typing field */
+      .imsg-field {
+        padding: 10px 14px 16px; display: flex; gap: 8px; align-items: center;
+        background: #0c0c0e; border-top: 1px solid rgba(255,255,255,0.06);
+      }
+      .imsg-field .plus { color: var(--pear-light); font-size: 22px; }
+      .imsg-field .box {
+        flex: 1; border: 1px solid rgba(255,255,255,0.15); border-radius: 16px;
+        padding: 7px 12px; color: rgba(255,255,255,0.4); font-size: 13px;
+      }
+
+      /* Apple Pay sheet */
+      .dim { position: absolute; inset: 0; background: rgba(0,0,0,0.55); z-index: 25; }
+      .apsheet {
+        position: absolute; left: 0; right: 0; bottom: 0; z-index: 26;
+        background: var(--ios-sheet); border-radius: 18px 18px 0 0; padding: 18px 16px 26px;
+        border-top: 1px solid rgba(255,255,255,0.08);
+      }
+      .apsheet .grip { width: 38px; height: 5px; border-radius: 3px; background: rgba(255,255,255,0.25); margin: 0 auto 14px; }
+      .apsheet .ap-title { display:flex; align-items:center; gap:8px; font-weight:700; font-size:18px; }
+      .ap-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.08); font-size: 13px; }
+      .ap-row .label { color: rgba(255,255,255,0.55); }
+      .ap-row .val { font-weight: 600; }
+      .ap-total { display: flex; justify-content: space-between; padding: 14px 0 16px; font-size: 16px; font-weight: 700; }
+      .ap-pay {
+        background: #fff; color: #000; border-radius: 12px; text-align: center;
+        padding: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 8px;
+      }
+      .ap-hint { text-align: center; font-size: 11px; color: rgba(255,255,255,0.5); margin-top: 10px; }
+      .sidebtn { position: absolute; right: -2px; top: 150px; width: 3px; height: 64px; background: #2a2a2a; border-radius: 2px; }
+      .sidebtn::after {
+        content: "Confirm with Side Button"; position: absolute; right: 14px; top: -6px; white-space: nowrap;
+        font-size: 10px; color: var(--pear-light); background: rgba(0,0,0,0.6); padding: 3px 7px; border-radius: 6px;
+      }
+
+      /* --- extra flows --- */
+      .section-title { text-align: center; font-size: 24px; margin: 64px 0 8px; }
+      .section-sub { text-align: center; color: rgba(243,255,247,0.55); margin: 0 0 28px; }
+      .sms-bubble {
+        align-self: flex-start; background: #34c759; color: #06160e;
+        border-radius: 18px; border-bottom-left-radius: 5px; max-width: 82%; padding: 11px 13px; font-size: 14px; line-height: 1.4;
+      }
+      .sms-claim {
+        display: block; margin-top: 8px; background: rgba(0,0,0,0.18); color: #06160e;
+        border-radius: 8px; padding: 7px 9px; font-size: 12px; font-family: ui-monospace, monospace; text-decoration: none; font-weight: 600;
+      }
+      .claim-btn {
+        display: block; text-align: center; margin-top: 8px; background: #06160e; color: #9be38a;
+        border-radius: 10px; padding: 9px; font-weight: 700; font-size: 13px;
+      }
+      .mask { letter-spacing: 3px; }
+      .avatar.agent { background: linear-gradient(135deg, #8b5cf6, #5b21b6) !important; }
+      .agent-line { font-family: ui-monospace, SFMono-Regular, monospace; font-size: 12px; }
+      .bubble.agent-in { align-self: flex-start; background: #241b3a; border-bottom-left-radius: 5px; }
+      .tag.priv { background: rgba(150,150,150,0.22); color: #ededed; }
+      .tag.x402 { background: rgba(44,124,246,0.2); color: #bcd4ff; }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>🍐 Sending a payment inside iMessage</h1>
+      <p>The Pear Pay UX, step by step — type it, confirm with Apple Pay, done.</p>
+    </header>
+
+    <div class="stage">
+      <!-- STEP 1: COMPOSE -->
+      <div class="step">
+        <div class="step-label">1 · Type it like a text</div>
+        <div class="phone">
+          <div class="screen">
+            <div class="notch"></div>
+            <div class="nav">
+              <div class="chev">‹</div>
+              <div class="avatar">🙂</div>
+              <div class="name">Molly</div>
+            </div>
+            <div class="thread">
+              <div class="ts">iMessage · Today 1:24 PM</div>
+              <div class="bubble in">Can you send me $20 for lunch? 🥗</div>
+              <div class="bubble out">yep one sec</div>
+            </div>
+            <!-- Pear Pay app expanded -->
+            <div class="app-drawer">
+              <div class="head">
+                <span class="logo">🍐</span>
+                <b>Pear&nbsp;Pay</b>
+                <small>· send money in chat</small>
+              </div>
+              <div class="composer">
+                <input value="Send Molly $20" readonly />
+                <button class="send">Pay 🍐</button>
+              </div>
+              <div class="chips">
+                <span class="chip">Send Molly $20</span>
+                <span class="chip">50 USDC privately</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="step-sub">PaymentComposerView — natural language, no address</div>
+      </div>
+
+      <!-- STEP 2: APPLE PAY AUTHORIZE -->
+      <div class="step">
+        <div class="step-label">2 · Confirm with Apple Pay</div>
+        <div class="phone">
+          <div class="sidebtn"></div>
+          <div class="screen">
+            <div class="notch"></div>
+            <div class="nav">
+              <div class="chev">‹</div>
+              <div class="avatar">🙂</div>
+              <div class="name">Molly</div>
+            </div>
+            <div class="thread">
+              <div class="ts">iMessage · Today 1:24 PM</div>
+              <div class="bubble in">Can you send me $20 for lunch? 🥗</div>
+              <div class="bubble out">yep one sec</div>
+            </div>
+            <!-- Apple Pay sheet -->
+            <div class="dim"></div>
+            <div class="apsheet">
+              <div class="grip"></div>
+              <div class="ap-title"> Pay&nbsp;<span style="opacity:.6;font-weight:500">· Pear Pay</span></div>
+              <div class="ap-row"><span class="label">To</span><span class="val">molly.eth</span></div>
+              <div class="ap-row"><span class="label">Pay with</span><span class="val">  Apple Cash</span></div>
+              <div class="ap-total"><span>Pear Pay</span><span>$20.00</span></div>
+              <div class="ap-pay"> &nbsp;Pay with Face ID</div>
+              <div class="ap-hint">Settles in USDC · gas &amp; chain handled for you</div>
+            </div>
+          </div>
+        </div>
+        <div class="step-sub">ApplePayAuthorizer — PassKit biometric approval</div>
+      </div>
+
+      <!-- STEP 3: SENT -->
+      <div class="step">
+        <div class="step-label">3 · Sent — settled in USDC</div>
+        <div class="phone">
+          <div class="screen">
+            <div class="notch"></div>
+            <div class="nav">
+              <div class="chev">‹</div>
+              <div class="avatar">🙂</div>
+              <div class="name">Molly</div>
+            </div>
+            <div class="thread">
+              <div class="ts">iMessage · Today 1:24 PM</div>
+              <div class="bubble in">Can you send me $20 for lunch? 🥗</div>
+              <div class="bubble out">yep one sec</div>
+
+              <!-- Payment card inserted into the thread -->
+              <div class="pay-card">
+                <div class="row">
+                  <span class="logo">🍐</span>
+                  <span class="badge">SETTLED ✅</span>
+                </div>
+                <div class="amt">$20.00</div>
+                <div class="to">You paid <b>molly.eth</b></div>
+                <div class="tags">
+                  <span class="tag rail">🟣 Hedera</span>
+                  <span class="tag">USDC</span>
+                  <span class="tag">instant</span>
+                </div>
+              </div>
+              <div class="bubble in">got it, thank you!! 🙏</div>
+            </div>
+            <div class="imsg-field">
+              <span class="plus">＋</span>
+              <div class="box">iMessage</div>
+            </div>
+          </div>
+        </div>
+        <div class="step-sub">MSMessage card inserted back into the conversation</div>
+      </div>
+    </div>
+    <h2 class="section-title">More payment flows</h2>
+    <p class="section-sub">The same “type it like a text” UX, three harder cases handled automatically.</p>
+
+    <div class="stage">
+      <!-- FLOW A: CLAIMABLE — sender side -->
+      <div class="step">
+        <div class="step-label">A · Pay someone with no wallet</div>
+        <div class="phone">
+          <div class="screen">
+            <div class="notch"></div>
+            <div class="nav">
+              <div class="chev">‹</div>
+              <div class="avatar">🧑</div>
+              <div class="name">Alex</div>
+            </div>
+            <div class="thread">
+              <div class="ts">iMessage · Today</div>
+              <div class="bubble out">Here’s the $50 for the Airbnb 🏠</div>
+              <div class="pay-card">
+                <div class="row">
+                  <span class="logo">🍐</span>
+                  <span class="badge" style="background:rgba(245,158,11,.18);color:#fcd34d">CLAIMABLE ⏳</span>
+                </div>
+                <div class="amt">$50.00</div>
+                <div class="to">To <b>Alex</b> · not on Pear Pay yet</div>
+                <div class="tags">
+                  <span class="tag">USDC escrowed</span>
+                  <span class="tag">claim via SMS</span>
+                </div>
+              </div>
+              <div class="bubble in">wait i don’t even have a crypto wallet 😅</div>
+            </div>
+          </div>
+        </div>
+        <div class="step-sub">Funds escrowed instantly — payment never blocks on onboarding</div>
+      </div>
+
+      <!-- FLOW A: CLAIMABLE — recipient SMS -->
+      <div class="step">
+        <div class="step-label">…they just get a text</div>
+        <div class="phone">
+          <div class="screen">
+            <div class="notch"></div>
+            <div class="nav">
+              <div class="chev">‹</div>
+              <div class="avatar" style="background:linear-gradient(135deg,#bbb,#888)">#</div>
+              <div class="name">+1 (206) 947-6991</div>
+            </div>
+            <div class="thread">
+              <div class="ts">Text Message · Today</div>
+              <div class="sms-bubble">
+                Molly sent you $50 through Pear&nbsp;Pay 🍐<br />
+                Claim your funds:
+                <a class="sms-claim">pearpay.app/claim/abc123</a>
+                <span class="claim-btn">Claim your $50 →</span>
+              </div>
+              <div class="bubble in">opening it now!</div>
+            </div>
+            <div class="imsg-field">
+              <span class="plus" style="color:#34c759">＋</span>
+              <div class="box">Text Message</div>
+            </div>
+          </div>
+        </div>
+        <div class="step-sub">Twilio SMS → claim page → Dynamic wallet created on tap</div>
+      </div>
+
+      <!-- FLOW B: PRIVATE -->
+      <div class="step">
+        <div class="step-label">B · Private transfer</div>
+        <div class="phone">
+          <div class="screen">
+            <div class="notch"></div>
+            <div class="nav">
+              <div class="chev">‹</div>
+              <div class="avatar">🦋</div>
+              <div class="name">Sarah</div>
+            </div>
+            <div class="thread">
+              <div class="ts">iMessage · Today</div>
+              <div class="bubble out">sent that over privately 🤫</div>
+              <div class="pay-card" style="border-color:rgba(160,160,160,.4)">
+                <div class="row">
+                  <span class="logo">🍐</span>
+                  <span class="badge" style="background:rgba(150,150,150,.25);color:#ededed">PRIVATE 🕶️</span>
+                </div>
+                <div class="amt mask">$ • • •</div>
+                <div class="to">To <b>• • • • •</b> · amount hidden</div>
+                <div class="tags">
+                  <span class="tag priv">🕶️ Unlink</span>
+                  <span class="tag">shielded</span>
+                  <span class="tag rail">🟣 Hedera</span>
+                </div>
+              </div>
+            </div>
+            <div class="imsg-field">
+              <span class="plus">＋</span>
+              <div class="box">iMessage</div>
+            </div>
+          </div>
+        </div>
+        <div class="step-sub">Unlink hides balances, amounts &amp; counterparties</div>
+      </div>
+
+      <!-- FLOW C: AGENT -->
+      <div class="step">
+        <div class="step-label">C · Agent → agent payment</div>
+        <div class="phone">
+          <div class="screen">
+            <div class="notch"></div>
+            <div class="nav">
+              <div class="chev">‹</div>
+              <div class="avatar agent">🤖</div>
+              <div class="name">pearpay-agent.eth</div>
+            </div>
+            <div class="thread">
+              <div class="ts">Autonomous run · x402</div>
+              <div class="bubble out agent-line">Pay openai.eth $0.05 for this API request</div>
+              <div class="bubble agent-in agent-line">⟳ resolving openai.eth … endpoint found</div>
+              <div class="bubble agent-in agent-line">HTTP 402 → paying via Dynamic server wallet</div>
+              <div class="pay-card">
+                <div class="row">
+                  <span class="logo">🍐</span>
+                  <span class="badge">PAID ✅</span>
+                </div>
+                <div class="amt">$0.05</div>
+                <div class="to">Agent paid <b>openai.eth</b></div>
+                <div class="tags">
+                  <span class="tag x402">x402</span>
+                  <span class="tag">USDC</span>
+                  <span class="tag rail">🟣 Hedera</span>
+                </div>
+              </div>
+              <div class="bubble agent-in agent-line">200 OK — response unlocked</div>
+            </div>
+          </div>
+        </div>
+        <div class="step-sub">Server wallet + x402 — no human in the loop</div>
+      </div>
+    </div>
+  </body>
+</html>
