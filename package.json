@@ -12,6 +12,9 @@
     "format": "prettier --write \"**/*.{ts,tsx,json,md}\"",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
+    "test:contracts": "forge test",
+    "deploy:escrow": "bash scripts/deploy-escrow.sh",
+    "verify:arc": "node scripts/arc-live-verify.mjs",
     "verify:dynamic": "node scripts/verify-dynamic.mjs"
   },
   "dependencies": {

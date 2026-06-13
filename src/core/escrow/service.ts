@@ -3,6 +3,13 @@ import { newClaimToken, newPaymentId } from "@/lib/ids";
 import { logger } from "@/lib/logger";
 import { createEmbeddedWallet } from "@/integrations/dynamic";
 import { ARC_TESTNET_CHAIN_ID } from "@/integrations/arc";
+import {
+  cancelOnChain,
+  claimOnChain,
+  escrowOnChain,
+  isArcEscrowLive,
+  refundOnChain,
+} from "@/integrations/arc/escrow";
 import { selectRail, settleOnRail } from "@/core/payments/settlement";
 import { getEscrowStore } from "./store";
 import type { ClaimablePayment, CreateEscrowParams } from "./types";
@@ -18,9 +25,9 @@ export function claimUrl(claimToken: string): string {
 }
 
 /**
- * Create and persist a claimable payment. Funds are considered escrowed in USDC
- * the moment this returns, so the sender's experience succeeds immediately even
- * if the recipient never onboards.
+ * Create and persist a claimable payment. When Arc escrow is live, USDC is
+ * locked on-chain via PearPayEscrow.escrow(); otherwise funds are tracked
+ * app-layer until claim settlement.
  */
 export async function createClaimablePayment(
   params: CreateEscrowParams,
@@ -47,18 +54,37 @@ export async function createClaimablePayment(
     expiresAt: now + (params.ttlMs ?? DEFAULT_TTL_MS),
   };
 
+  const useOnChain = !payment.private && isArcEscrowLive();
+
+  if (useOnChain) {
+    const onChain = await escrowOnChain({
+      paymentId: payment.id,
+      amount: payment.amount,
+      expiresAtMs: payment.expiresAt,
+    });
+    payment.onChainPaymentId = onChain.onChainPaymentId;
+    payment.claimSecret = onChain.claimSecret;
+    payment.escrowTxHash = onChain.escrowTxHash;
+    payment.escrowExplorerUrl = onChain.explorerUrl;
+    log.info("USDC escrowed on Arc", {
+      id: payment.id,
+      txHash: onChain.escrowTxHash,
+    });
+  }
+
   await getEscrowStore().save(payment);
 
   log.info("claimable payment escrowed", {
     id: payment.id,
     token: payment.claimToken,
+    onChain: Boolean(payment.escrowTxHash),
   });
   return payment;
 }
 
 /**
- * Claim an escrowed payment. Creates an embedded wallet for the recipient if
- * needed, then releases funds via Arc (or Unlink for private transfers).
+ * Claim an escrowed payment. When on-chain escrow exists, releases via
+ * PearPayEscrow.claim(); otherwise settles via the orchestrator rail.
  */
 export async function claimPayment(
   claimToken: string,
@@ -69,7 +95,7 @@ export async function claimPayment(
   if (!payment) throw new Error("Claim not found");
 
   if (payment.status === "claimed") {
-    return payment; // Idempotent: already released.
+    return payment;
   }
   if (payment.status !== "escrowed") {
     throw new Error(`Payment is ${payment.status} and cannot be claimed`);
@@ -78,32 +104,51 @@ export async function claimPayment(
     throw new Error("Claim has expired");
   }
 
-  // Provision the recipient's wallet on the fly (no prior onboarding needed).
   const wallet = await createEmbeddedWallet(recipientIdentifier);
 
-  // Release funds on the optimal rail (Arc by default, Unlink for private).
-  const rail = selectRail({ amount: payment.amount, isPrivate: payment.private });
-  await settleOnRail(rail, {
-    fromAddress: payment.senderAddress,
-    toAddress: wallet.address,
-    amount: payment.amount,
-    sourceChainId: payment.chainId,
-    chainId: ARC_TESTNET_CHAIN_ID,
-    memo: payment.memo,
-    idempotencyKey: payment.id,
-  });
+  let claimTxHash = payment.claimTxHash;
+  let claimExplorerUrl = payment.claimExplorerUrl;
+
+  if (
+    payment.escrowTxHash &&
+    payment.onChainPaymentId &&
+    payment.claimSecret &&
+    isArcEscrowLive()
+  ) {
+    const onChain = await claimOnChain({
+      onChainPaymentId: payment.onChainPaymentId,
+      claimSecret: payment.claimSecret,
+      recipient: wallet.address,
+    });
+    claimTxHash = onChain.claimTxHash;
+    claimExplorerUrl = onChain.explorerUrl;
+  } else {
+    const rail = selectRail({ amount: payment.amount, isPrivate: payment.private });
+    await settleOnRail(rail, {
+      fromAddress: payment.senderAddress,
+      toAddress: wallet.address,
+      amount: payment.amount,
+      sourceChainId: payment.chainId,
+      chainId: ARC_TESTNET_CHAIN_ID,
+      memo: payment.memo,
+      idempotencyKey: payment.id,
+    });
+  }
 
   const released: ClaimablePayment = {
     ...payment,
     status: "claimed",
     claimedAt: Date.now(),
     claimedByAddress: wallet.address,
+    claimTxHash,
+    claimExplorerUrl,
   };
   await store.save(released);
 
   log.info("claimable payment released", {
     id: payment.id,
     to: wallet.address,
+    onChain: Boolean(claimTxHash),
   });
   return released;
 }
@@ -116,6 +161,15 @@ export async function cancelPayment(id: string): Promise<ClaimablePayment> {
   if (payment.status !== "escrowed") {
     throw new Error(`Cannot cancel a ${payment.status} payment`);
   }
+
+  if (
+    payment.onChainPaymentId &&
+    payment.escrowTxHash &&
+    isArcEscrowLive()
+  ) {
+    await cancelOnChain(payment.onChainPaymentId);
+  }
+
   const cancelled: ClaimablePayment = { ...payment, status: "cancelled" };
   await store.save(cancelled);
   log.info("claimable payment cancelled", { id });
@@ -127,6 +181,17 @@ export async function refundExpired(now = Date.now()): Promise<number> {
   const store = getEscrowStore();
   const expired = await store.listExpired(now);
   for (const payment of expired) {
+    if (
+      payment.onChainPaymentId &&
+      payment.escrowTxHash &&
+      isArcEscrowLive()
+    ) {
+      try {
+        await refundOnChain(payment.onChainPaymentId);
+      } catch (err) {
+        log.warn("on-chain refund failed", { id: payment.id, err: String(err) });
+      }
+    }
     await store.save({ ...payment, status: "refunded" });
     log.info("expired escrow refunded", { id: payment.id });
   }

@@ -58,6 +58,10 @@ export async function POST(
     return NextResponse.json({
       status: released.status,
       address: released.claimedByAddress,
+      claimTxHash: released.claimTxHash,
+      claimExplorerUrl: released.claimExplorerUrl,
+      escrowTxHash: released.escrowTxHash,
+      escrowExplorerUrl: released.escrowExplorerUrl,
     });
   } catch (err) {
     log.warn("claim failed", { token: params.token, err: String(err) });
