@@ -20,4 +20,18 @@ describe("Arc stablecoin config", () => {
   it("defaults unknown USDC routes to Arc as the settlement hub", () => {
     expect(usdcAddress(999999)).toBe(ARC_USDC_ADDRESS);
   });
+
+  it("allows deployment env to override Arc stablecoin addresses", () => {
+    const config = getArcNetworkConfig({
+      NEXT_PUBLIC_ARC_USDC_ADDRESS: "0x1111111111111111111111111111111111111111",
+      NEXT_PUBLIC_ARC_EURC_ADDRESS: "0x2222222222222222222222222222222222222222",
+    });
+
+    expect(config.stablecoins.USDC).toBe(
+      "0x1111111111111111111111111111111111111111",
+    );
+    expect(config.stablecoins.EURC).toBe(
+      "0x2222222222222222222222222222222222222222",
+    );
+  });
 });

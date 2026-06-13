@@ -29,7 +29,9 @@ export function getArcNetworkConfig(
     NEXT_PUBLIC_ARC_RPC_URL?: string;
     NEXT_PUBLIC_ARC_EXPLORER_URL?: string;
     NEXT_PUBLIC_ARC_USDC_ADDRESS?: string;
+    NEXT_PUBLIC_ARC_EURC_ADDRESS?: string;
     ARC_USDC_ADDRESS?: string;
+    ARC_EURC_ADDRESS?: string;
   } = {},
 ): ArcNetworkConfig {
   return {
@@ -41,7 +43,11 @@ export function getArcNetworkConfig(
       USDC: normalizeAddress(
         env.NEXT_PUBLIC_ARC_USDC_ADDRESS || env.ARC_USDC_ADDRESS || ARC_USDC_ADDRESS,
       ),
-      EURC: ARC_TESTNET_EURC_ADDRESS,
+      EURC: normalizeAddress(
+        env.NEXT_PUBLIC_ARC_EURC_ADDRESS ||
+          env.ARC_EURC_ADDRESS ||
+          ARC_TESTNET_EURC_ADDRESS,
+      ),
     },
   };
 }
