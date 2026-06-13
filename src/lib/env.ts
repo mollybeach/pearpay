@@ -11,8 +11,36 @@ const envSchema = z.object({
     .enum(["development", "test", "production"])
     .default("development"),
 
-  // Public app URL used to build claim links (pearpay.app/claim/:id).
+  // Public app URL used to build claim and pay links.
   APP_URL: z.string().url().default("https://pearpay.app"),
+  NEXT_PUBLIC_APP_URL: z.string().url().optional(),
+  NEXT_PUBLIC_DYNAMIC_ENVIRONMENT_ID: z.string().optional(),
+  NEXT_PUBLIC_ARC_CHAIN_ID: z.coerce.number().int().positive().default(5042002),
+  NEXT_PUBLIC_ARC_RPC_URL: z
+    .string()
+    .url()
+    .default("https://rpc.testnet.arc.network"),
+  NEXT_PUBLIC_ARC_USDC_ADDRESS: z.string().optional(),
+  NEXT_PUBLIC_ARC_EXPLORER_URL: z
+    .string()
+    .url()
+    .default("https://testnet.arcscan.app"),
+
+  // WebAuthn / Face ID
+  WEBAUTHN_RP_ID: z.string().default("localhost"),
+  WEBAUTHN_RP_NAME: z.string().default("PearPay"),
+  WEBAUTHN_ORIGIN: z.string().url().default("http://localhost:3000"),
+
+  // Dynamic Flow
+  DYNAMIC_FLOW_CHECKOUT_ID: z.string().optional(),
+  DYNAMIC_FLOW_WEBHOOK_SECRET: z.string().optional(),
+  DYNAMIC_WALLET_PASSWORD: z.string().optional(),
+  AGENT_WALLET_ADDRESS: z.string().optional(),
+  ARC_USDC_ADDRESS: z.string().optional(),
+
+  // x402 / Arc funder
+  FUNDER_PRIVATE_KEY: z.string().optional(),
+  X402_GATEWAY_ADDRESS: z.string().optional(),
 
   // Blockchain access (viem / wagmi).
   RPC_URL: z.string().url().optional(),
