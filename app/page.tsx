@@ -212,13 +212,15 @@ export default function HomePage() {
       {/* Waitlist CTA */}
       <section id="waitlist" className="mx-auto max-w-4xl px-5 py-20">
         <div className="rounded-3xl border border-pear-500/30 bg-gradient-to-b from-pear-900/80 to-pear-950 p-10 text-center shadow-glow">
-          <Image
-            src="/PearPayLogo.png"
-            alt="Pear Pay"
-            width={64}
-            height={64}
-            className="mx-auto h-16 w-16 object-contain"
-          />
+          <span className="mx-auto inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-b from-white to-pear-50 p-2 ring-1 ring-white/40">
+            <Image
+              src="/PearPayLogo.png"
+              alt="Pear Pay"
+              width={64}
+              height={64}
+              className="h-12 w-12 object-contain"
+            />
+          </span>
           <h2 className="mt-4 text-3xl font-bold">Send money like a text</h2>
           <p className="mx-auto mt-3 max-w-xl text-cream/70">
             Be first to turn your conversations into transactions. Join the
