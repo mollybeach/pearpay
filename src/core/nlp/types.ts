@@ -12,6 +12,7 @@ export interface RawRecipient {
 }
 
 export type RecipientHint =
+  | "address"
   | "ens"
   | "phone"
   | "email"

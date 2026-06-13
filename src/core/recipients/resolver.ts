@@ -48,6 +48,22 @@ export async function resolveRecipient(
 ): Promise<ResolvedRecipient> {
   const { raw, hint } = recipient;
 
+  // 0. A raw EVM address is a direct, instant on-chain recipient (Arc settles
+  //    straight to it — no claim flow).
+  if (hint === "address" || /^0x[a-fA-F0-9]{40}$/.test(raw)) {
+    const address = raw as `0x${string}`;
+    log.info("resolved raw address recipient", { address });
+    return {
+      raw,
+      hint: "address",
+      label: `${address.slice(0, 6)}…${address.slice(-4)}`,
+      address,
+      isPearPayUser: false,
+      deliveryMode: "instant",
+      notificationChannel: "none",
+    };
+  }
+
   // 1. Existing Pear Pay user (looked up across known identifiers).
   const pearPayUser = await lookupPearPayUser(raw);
   if (pearPayUser) {

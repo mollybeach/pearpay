@@ -3,6 +3,7 @@ import {
   createWalletClient,
   defineChain,
   erc20Abi,
+  getAddress,
   http,
   isAddress,
 } from "viem";
@@ -64,7 +65,30 @@ export interface SettlementReceipt {
   status: "settled" | "pending";
   tokenAddress: `0x${string}`;
   route: "arc-native" | "source-to-arc";
-  forwarder: "circle-gateway" | "circle-forwarder-scaffold";
+  forwarder: "arc-onchain" | "circle-gateway" | "circle-forwarder-scaffold";
+}
+
+/** Build a viem chain object for the configured Arc network. */
+function arcChain(arc: ArcNetworkConfig) {
+  return defineChain({
+    id: arc.chainId,
+    name: arc.name,
+    nativeCurrency: { name: "USDC", symbol: "USDC", decimals: 18 },
+    rpcUrls: { default: { http: [arc.rpcUrl] } },
+    blockExplorers: { default: { name: "ArcScan", url: arc.explorerUrl } },
+    testnet: true,
+  });
+}
+
+/** Address of the configured funder/treasury wallet, if a key is set. */
+export function arcFunderAddress(): `0x${string}` | null {
+  const key = getEnv().FUNDER_PRIVATE_KEY;
+  if (!key) return null;
+  try {
+    return privateKeyToAccount(key as `0x${string}`).address;
+  } catch {
+    return null;
+  }
 }
 
 /** Resolve the USDC token address for a chain, defaulting to Arc. */
@@ -83,79 +107,109 @@ export async function settleUsdc(
   const arc = getArcNetworkConfig(env);
   const destinationChainId = req.chainId ?? arc.chainId;
   const sourceChainId = req.sourceChainId ?? destinationChainId;
-  const tokenAddress = usdcAddress(destinationChainId);
-  const route = sourceChainId === destinationChainId ? "arc-native" : "source-to-arc";
+  // Prefer the env-configured Arc USDC address for the Arc chain.
+  const tokenAddress =
+    destinationChainId === arc.chainId
+      ? arc.stablecoins.USDC
+      : usdcAddress(destinationChainId);
+  const route =
+    sourceChainId === destinationChainId ? "arc-native" : "source-to-arc";
 
-  if (!env.CIRCLE_API_KEY) {
-    assertConfiguredForProduction("arc", false);
-    const fakeHash = `0x${Buffer.from(
-      `${req.fromAddress}${req.toAddress}${req.amount}`,
-    )
-      .toString("hex")
-      .padEnd(64, "0")
-      .slice(0, 64)}` as `0x${string}`;
-    log.debug("arc local settlement", {
-      amount: formatUsdc(req.amount),
-      sourceChainId,
-      destinationChainId,
-      route,
-    });
-    return {
-      settlementId: `local_${req.idempotencyKey ?? fakeHash.slice(2, 10)}`,
-      txHash: fakeHash,
-      chainId: destinationChainId,
-      sourceChainId,
-      destinationChainId,
-      amount: req.amount,
-      status: "settled",
-      tokenAddress,
-      route,
-      forwarder: "circle-forwarder-scaffold",
-    };
+  // Real on-chain settlement is possible when a funder/treasury key is set and
+  // we're settling on the configured Arc chain to a real recipient address.
+  const canSettleOnChain =
+    Boolean(env.FUNDER_PRIVATE_KEY) &&
+    destinationChainId === arc.chainId &&
+    isAddress(req.toAddress, { strict: false }) &&
+    req.toAddress.toLowerCase() !== ZERO_ADDRESS;
+
+  if (canSettleOnChain) {
+    try {
+      const account = privateKeyToAccount(
+        env.FUNDER_PRIVATE_KEY as `0x${string}`,
+      );
+      const chain = arcChain(arc);
+      const wallet = createWalletClient({
+        account,
+        chain,
+        transport: http(arc.rpcUrl),
+      });
+      const publicClient = createPublicClient({
+        chain,
+        transport: http(arc.rpcUrl),
+      });
+
+      // Normalize to a checksummed address (accepts any-case valid input).
+      const recipient = getAddress(req.toAddress.toLowerCase() as `0x${string}`);
+      const txHash = await wallet.writeContract({
+        address: getAddress(tokenAddress.toLowerCase() as `0x${string}`),
+        abi: erc20Abi,
+        functionName: "transfer",
+        args: [recipient, req.amount],
+      });
+      log.info("arc on-chain settlement broadcast", {
+        txHash,
+        amount: formatUsdc(req.amount),
+        to: req.toAddress,
+      });
+
+      // Wait briefly for inclusion; report "pending" if it hasn't confirmed.
+      let status: SettlementReceipt["status"] = "pending";
+      try {
+        const receipt = await publicClient.waitForTransactionReceipt({
+          hash: txHash,
+          timeout: 30_000,
+        });
+        status = receipt.status === "success" ? "settled" : "pending";
+      } catch {
+        /* still pending — return the hash so the caller can poll. */
+      }
+
+      return {
+        settlementId: `arc_${txHash.slice(2, 12)}`,
+        txHash,
+        chainId: destinationChainId,
+        sourceChainId,
+        destinationChainId,
+        amount: req.amount,
+        status,
+        tokenAddress,
+        route,
+        forwarder: "arc-onchain",
+      };
+    } catch (err) {
+      log.error("arc on-chain settlement failed", { err: String(err) });
+      throw new Error(
+        `Arc settlement failed: ${err instanceof Error ? err.message : String(err)}`,
+      );
+    }
   }
 
-  const res = await fetch(`${env.ARC_RPC_URL ?? "https://api.circle.com"}/v1/transfers`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${env.CIRCLE_API_KEY}`,
-      ...(req.idempotencyKey
-        ? { "X-Idempotency-Key": req.idempotencyKey }
-        : {}),
-    },
-    body: JSON.stringify({
-      source: { address: req.fromAddress },
-      destination: { address: req.toAddress },
-      amount: { currency: "USDC", amount: formatUsdc(req.amount) },
-      sourceChainId,
-      destinationChainId,
-      tokenAddress,
-      route,
-    }),
+  // No funder key (or non-Arc / placeholder recipient): deterministic stub so
+  // local demos and tests still work without funded keys.
+  assertConfiguredForProduction("arc", false);
+  const fakeHash = `0x${Buffer.from(
+    `${req.fromAddress}${req.toAddress}${req.amount}`,
+  )
+    .toString("hex")
+    .padEnd(64, "0")
+    .slice(0, 64)}` as `0x${string}`;
+  log.debug("arc stub settlement", {
+    amount: formatUsdc(req.amount),
+    destinationChainId,
+    route,
   });
-
-  if (!res.ok) {
-    throw new Error(`Arc settlement failed: ${res.status}`);
-  }
-
-  const data = (await res.json()) as {
-    id: string;
-    txHash: `0x${string}`;
-    status: string;
-  };
-
-  log.info("arc settlement submitted", { id: data.id, status: data.status });
   return {
-    settlementId: data.id,
-    txHash: data.txHash,
+    settlementId: `local_${req.idempotencyKey ?? fakeHash.slice(2, 10)}`,
+    txHash: fakeHash,
     chainId: destinationChainId,
     sourceChainId,
     destinationChainId,
     amount: req.amount,
-    status: data.status === "complete" ? "settled" : "pending",
+    status: "settled",
     tokenAddress,
     route,
-    forwarder: "circle-gateway",
+    forwarder: "circle-forwarder-scaffold",
   };
 }
 
