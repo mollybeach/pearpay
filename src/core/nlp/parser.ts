@@ -104,6 +104,8 @@ function extractRecipients(text: string): RawRecipient[] {
   const verbs = [...SEND_VERBS, ...REQUEST_VERBS].join("|");
   const nameRe = new RegExp(`\\b(?:${verbs})\\s+([A-Z][a-z]+)`, "gi");
   for (const m of text.matchAll(nameRe)) {
+    const end = (m.index ?? 0) + m[0]!.length;
+    if (text.slice(end, end + 4).toLowerCase() === ".eth") continue;
     add(m[1]!);
   }
 

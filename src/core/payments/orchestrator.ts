@@ -11,6 +11,7 @@ import type {
 } from "@/core/recipients/types";
 import { claimUrl, createClaimablePayment } from "@/core/escrow";
 import { sendClaimLink } from "@/integrations/twilio";
+import { ARC_TESTNET_CHAIN_ID, ARC_USDC_ADDRESS } from "@/integrations/arc";
 import { selectRail, settleOnRail } from "./settlement";
 import type { PaymentLeg, PaymentResult, Sender } from "./types";
 
@@ -68,7 +69,7 @@ export async function processIntent(
       ? splitEvenly(intent.amount, recipients.length)
       : recipients.map(() => intent.amount!);
 
-  const chainId = sender.chainId ?? 1;
+  const sourceChainId = sender.chainId ?? ARC_TESTNET_CHAIN_ID;
   const legs: PaymentLeg[] = [];
 
   for (let i = 0; i < recipients.length; i += 1) {
@@ -79,7 +80,7 @@ export async function processIntent(
         recipient,
         amount,
         sender,
-        chainId,
+        sourceChainId,
         memo: intent.memo,
         isPrivate: intent.private,
       }),
@@ -95,13 +96,13 @@ interface LegParams {
   recipient: ResolvedRecipient;
   amount: UsdcAmount;
   sender: Sender;
-  chainId: number;
+  sourceChainId: number;
   memo?: string;
   isPrivate: boolean;
 }
 
 async function processLeg(params: LegParams): Promise<PaymentLeg> {
-  const { recipient, amount, sender, chainId, memo, isPrivate } = params;
+  const { recipient, amount, sender, sourceChainId, memo, isPrivate } = params;
 
   // Instant settlement: recipient has a wallet/ENS or is a Pear Pay user.
   if (recipient.deliveryMode === "instant" && recipient.address) {
@@ -112,7 +113,8 @@ async function processLeg(params: LegParams): Promise<PaymentLeg> {
       fromAddress: sender.address,
       toAddress: recipient.address,
       amount,
-      chainId,
+      sourceChainId,
+      chainId: ARC_TESTNET_CHAIN_ID,
       memo,
     });
 
@@ -135,6 +137,10 @@ async function processLeg(params: LegParams): Promise<PaymentLeg> {
       rail: settlement.rail,
       txHash: settlement.txHash,
       settlementRef: settlement.ref,
+      sourceChainId: settlement.sourceChainId,
+      destinationChainId: settlement.destinationChainId,
+      tokenAddress: settlement.tokenAddress,
+      route: settlement.route,
       notified: false,
       private: isPrivate,
       payUrl,
@@ -149,7 +155,7 @@ async function processLeg(params: LegParams): Promise<PaymentLeg> {
     recipientContact: recipient.contact,
     notificationChannel: recipient.notificationChannel,
     amount,
-    chainId,
+    chainId: sourceChainId,
     memo,
     private: isPrivate,
   });
@@ -174,6 +180,18 @@ async function processLeg(params: LegParams): Promise<PaymentLeg> {
     recipient,
     amount,
     outcome: "claimable",
+    rail: isPrivate ? "unlink" : "arc",
+    sourceChainId,
+    ...(isPrivate
+      ? {}
+      : {
+          destinationChainId: ARC_TESTNET_CHAIN_ID,
+          tokenAddress: ARC_USDC_ADDRESS,
+          route:
+            sourceChainId === ARC_TESTNET_CHAIN_ID
+              ? "arc-native"
+              : "source-to-arc",
+        }),
     claimUrl: claimUrl(payment.claimToken),
     notified,
     private: isPrivate,

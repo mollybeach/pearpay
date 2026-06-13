@@ -1,6 +1,12 @@
-import { getEnv } from "@/lib/env";
+import { assertConfiguredForProduction, getEnv } from "@/lib/env";
 import { logger } from "@/lib/logger";
 import { formatUsdc, type UsdcAmount } from "@/lib/money";
+import {
+  ARC_TESTNET_CHAIN_ID,
+  ARC_USDC_ADDRESS,
+  ARC_TESTNET_EURC_ADDRESS,
+  getArcNetworkConfig,
+} from "./config";
 
 const log = logger.scoped("arc");
 
@@ -12,6 +18,7 @@ const log = logger.scoped("arc");
 
 /** Canonical USDC token addresses per supported chain. */
 export const USDC_ADDRESSES: Record<number, `0x${string}`> = {
+  [ARC_TESTNET_CHAIN_ID]: ARC_USDC_ADDRESS, // Arc Testnet
   1: "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48", // Ethereum
   8453: "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913", // Base
   42161: "0xaf88d065e77c8cc2239327c5edb3a432268e5831", // Arbitrum
@@ -19,11 +26,18 @@ export const USDC_ADDRESSES: Record<number, `0x${string}`> = {
   137: "0x3c499c542cef5e3811e1192ce70d8cc03d5c3359", // Polygon
 };
 
+export const EURC_ADDRESSES: Record<number, `0x${string}`> = {
+  [ARC_TESTNET_CHAIN_ID]: ARC_TESTNET_EURC_ADDRESS,
+};
+
 export interface SettlementRequest {
   fromAddress: `0x${string}`;
   toAddress: `0x${string}`;
   amount: UsdcAmount;
-  chainId: number;
+  /** Chain where funds originate; users never choose this manually. */
+  sourceChainId?: number;
+  /** Arc settlement chain. Defaults to the configured Arc testnet. */
+  chainId?: number;
   /** Optional idempotency key so retries never double-settle. */
   idempotencyKey?: string;
 }
@@ -32,25 +46,36 @@ export interface SettlementReceipt {
   settlementId: string;
   txHash: `0x${string}`;
   chainId: number;
+  sourceChainId: number;
+  destinationChainId: number;
   amount: UsdcAmount;
   status: "settled" | "pending";
+  tokenAddress: `0x${string}`;
+  route: "arc-native" | "source-to-arc";
+  forwarder: "circle-gateway" | "circle-forwarder-scaffold";
 }
 
-/** Resolve the USDC token address for a chain, defaulting to Ethereum. */
+/** Resolve the USDC token address for a chain, defaulting to Arc. */
 export function usdcAddress(chainId: number): `0x${string}` {
-  return USDC_ADDRESSES[chainId] ?? USDC_ADDRESSES[1]!;
+  return USDC_ADDRESSES[chainId] ?? ARC_USDC_ADDRESS;
 }
 
 /**
- * Settle a USDC transfer through Arc. When Circle credentials are absent a
- * deterministic local receipt is returned so the full flow stays demoable.
+ * Settle a USDC transfer through Arc. Local and test environments can return a
+ * deterministic receipt, but production requires Circle credentials.
  */
 export async function settleUsdc(
   req: SettlementRequest,
 ): Promise<SettlementReceipt> {
   const env = getEnv();
+  const arc = getArcNetworkConfig(env);
+  const destinationChainId = req.chainId ?? arc.chainId;
+  const sourceChainId = req.sourceChainId ?? destinationChainId;
+  const tokenAddress = usdcAddress(destinationChainId);
+  const route = sourceChainId === destinationChainId ? "arc-native" : "source-to-arc";
 
   if (!env.CIRCLE_API_KEY) {
+    assertConfiguredForProduction("arc", false);
     const fakeHash = `0x${Buffer.from(
       `${req.fromAddress}${req.toAddress}${req.amount}`,
     )
@@ -59,14 +84,21 @@ export async function settleUsdc(
       .slice(0, 64)}` as `0x${string}`;
     log.debug("arc local settlement", {
       amount: formatUsdc(req.amount),
-      chainId: req.chainId,
+      sourceChainId,
+      destinationChainId,
+      route,
     });
     return {
       settlementId: `local_${req.idempotencyKey ?? fakeHash.slice(2, 10)}`,
       txHash: fakeHash,
-      chainId: req.chainId,
+      chainId: destinationChainId,
+      sourceChainId,
+      destinationChainId,
       amount: req.amount,
       status: "settled",
+      tokenAddress,
+      route,
+      forwarder: "circle-forwarder-scaffold",
     };
   }
 
@@ -83,7 +115,10 @@ export async function settleUsdc(
       source: { address: req.fromAddress },
       destination: { address: req.toAddress },
       amount: { currency: "USDC", amount: formatUsdc(req.amount) },
-      chainId: req.chainId,
+      sourceChainId,
+      destinationChainId,
+      tokenAddress,
+      route,
     }),
   });
 
@@ -101,8 +136,20 @@ export async function settleUsdc(
   return {
     settlementId: data.id,
     txHash: data.txHash,
-    chainId: req.chainId,
+    chainId: destinationChainId,
+    sourceChainId,
+    destinationChainId,
     amount: req.amount,
     status: data.status === "complete" ? "settled" : "pending",
+    tokenAddress,
+    route,
+    forwarder: "circle-gateway",
   };
 }
+
+export {
+  ARC_TESTNET_CHAIN_ID,
+  ARC_USDC_ADDRESS,
+  ARC_TESTNET_EURC_ADDRESS,
+  getArcNetworkConfig,
+};
