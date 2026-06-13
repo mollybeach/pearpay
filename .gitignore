@@ -112,9 +112,13 @@ fastlane/test_output
 .cursor/
 .cursor
 
+# ---------- WebAuthn credential store (local dev) ----------
+.webauthn-store.json
+
 # ---------- Misc ----------
 tmp/
 temp/
 *.pid
 *.seed
 *.local
+package-lock.json

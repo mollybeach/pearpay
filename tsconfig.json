@@ -22,6 +22,8 @@
       "@/core/*": ["src/core/*"],
       "@/integrations/*": ["src/integrations/*"],
       "@/channels/*": ["src/channels/*"],
+      "@/components/*": ["src/components/*"],
+      "@/hooks/*": ["src/hooks/*"],
       "@/lib/*": ["src/lib/*"]
     }
   },

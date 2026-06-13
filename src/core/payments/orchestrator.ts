@@ -1,5 +1,7 @@
 import { logger } from "@/lib/logger";
-import { formatUsdcDisplay, splitEvenly, type UsdcAmount } from "@/lib/money";
+import { formatUsdc, formatUsdcDisplay, splitEvenly, type UsdcAmount } from "@/lib/money";
+import { newPaymentId } from "@/lib/ids";
+import { buildPayUrl } from "@/lib/pay-link";
 import { parseIntent } from "@/core/nlp";
 import type { PaymentIntent } from "@/core/nlp/types";
 import { resolveRecipients } from "@/core/recipients";
@@ -85,7 +87,8 @@ export async function processIntent(
   }
 
   const ok = legs.length > 0;
-  return { ok, summary: summarize(legs, intent.private), legs };
+  const payUrl = legs.find((leg) => leg.payUrl)?.payUrl;
+  return { ok, summary: summarize(legs, intent.private), legs, payUrl };
 }
 
 interface LegParams {
@@ -114,6 +117,17 @@ async function processLeg(params: LegParams): Promise<PaymentLeg> {
     });
 
     log.info("instant leg settled", { to: recipient.label, rail: settlement.rail });
+
+    const amountDollars = Number(formatUsdc(amount));
+    const intentId = newPaymentId();
+    const payUrl = buildPayUrl({
+      amount: amountDollars,
+      recipient: recipient.address,
+      intentId,
+      recipientLabel: recipient.label,
+      recipientType: recipient.contact?.startsWith("+") ? "phone" : "address",
+    });
+
     return {
       recipient,
       amount,
@@ -123,6 +137,7 @@ async function processLeg(params: LegParams): Promise<PaymentLeg> {
       settlementRef: settlement.ref,
       notified: false,
       private: isPrivate,
+      payUrl,
     };
   }
 
