@@ -18,3 +18,94 @@ body {
 .bg-ambient {
   @apply bg-pear-radial;
 }
+
+/* ---- iMessage simulator animations ---- */
+@keyframes pp-slide-up {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+@keyframes pp-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes pp-pop {
+  0% {
+    transform: scale(0.85);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.03);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+@keyframes pp-blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+}
+@keyframes pp-faceid {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.55;
+  }
+  50% {
+    transform: scale(1.12);
+    opacity: 1;
+  }
+}
+@keyframes pp-bubble-in {
+  from {
+    transform: translateY(8px) scale(0.96);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+@keyframes pp-key-press {
+  from {
+    transform: scale(0.9);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
+.pp-anim-sheet {
+  animation: pp-slide-up 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.pp-anim-dim {
+  animation: pp-fade-in 0.25s ease-out;
+}
+.pp-anim-pop {
+  animation: pp-pop 0.32s ease-out;
+}
+.pp-anim-bubble {
+  animation: pp-bubble-in 0.26s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.pp-caret {
+  animation: pp-blink 1.1s step-end infinite;
+}
+.pp-faceid {
+  animation: pp-faceid 1.1s ease-in-out infinite;
+}
+.pp-key:active {
+  animation: pp-key-press 0.12s ease-out;
+}
