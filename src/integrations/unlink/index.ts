@@ -1,4 +1,4 @@
-import { getEnv } from "@/lib/env";
+import { assertConfiguredForProduction, getEnv } from "@/lib/env";
 import { logger } from "@/lib/logger";
 import { formatUsdc, type UsdcAmount } from "@/lib/money";
 
@@ -29,6 +29,12 @@ function isConfigured(): boolean {
   return Boolean(getEnv().UNLINK_API_KEY);
 }
 
+function requireConfigured() {
+  const configured = isConfigured();
+  assertConfiguredForProduction("unlink", configured);
+  return configured;
+}
+
 function headers(): Record<string, string> {
   return {
     "Content-Type": "application/json",
@@ -42,7 +48,7 @@ export async function deposit(
   amount: UsdcAmount,
   chainId: number,
 ): Promise<{ noteId: string }> {
-  if (!isConfigured()) {
+  if (!requireConfigured()) {
     return { noteId: `note_${fromAddress.slice(2, 10)}_${amount}` };
   }
   const res = await fetch("https://api.unlink.xyz/v1/deposit", {
@@ -65,7 +71,7 @@ export async function deposit(
 export async function privateTransfer(
   req: PrivateTransferRequest,
 ): Promise<PrivateTransferReceipt> {
-  if (!isConfigured()) {
+  if (!requireConfigured()) {
     log.debug("unlink local private transfer", {
       amount: formatUsdc(req.amount),
     });
@@ -100,7 +106,7 @@ export async function withdraw(
   noteId: string,
   toAddress: `0x${string}`,
 ): Promise<{ txHash: `0x${string}` }> {
-  if (!isConfigured()) {
+  if (!requireConfigured()) {
     return {
       txHash: `0x${Buffer.from(noteId).toString("hex").padEnd(64, "0").slice(0, 64)}` as `0x${string}`,
     };

@@ -1,0 +1,206 @@
+// !$*UTF8*$!
+{
+  archiveVersion = 1;
+  classes = {
+  };
+  objectVersion = 56;
+  objects = {
+
+/* Begin PBXBuildFile section */
+    100000000000000000000001 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000011 /* AppDelegate.swift */; };
+    100000000000000000000002 /* MessagesViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000012 /* MessagesViewController.swift */; };
+    100000000000000000000003 /* PaymentComposerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000013 /* PaymentComposerView.swift */; };
+    100000000000000000000004 /* ApplePayAuthorizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000014 /* ApplePayAuthorizer.swift */; };
+    100000000000000000000005 /* PearPayBackend.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000015 /* PearPayBackend.swift */; };
+    100000000000000000000006 /* SenderWalletProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000016 /* SenderWalletProvider.swift */; };
+    100000000000000000000007 /* PearPayMessages.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 100000000000000000000032 /* PearPayMessages.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+/* End PBXBuildFile section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+    100000000000000000000041 /* Embed App Extensions */ = {
+      isa = PBXCopyFilesBuildPhase;
+      buildActionMask = 2147483647;
+      dstPath = "";
+      dstSubfolderSpec = 13;
+      files = (
+        100000000000000000000007 /* PearPayMessages.appex in Embed App Extensions */,
+      );
+      name = "Embed App Extensions";
+      runOnlyForDeploymentPostprocessing = 0;
+    };
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+    100000000000000000000011 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PearPay/AppDelegate.swift; sourceTree = "<group>"; };
+    100000000000000000000012 /* MessagesViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PearPayMessages/MessagesViewController.swift; sourceTree = "<group>"; };
+    100000000000000000000013 /* PaymentComposerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PearPayMessages/PaymentComposerView.swift; sourceTree = "<group>"; };
+    100000000000000000000014 /* ApplePayAuthorizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PearPayMessages/ApplePayAuthorizer.swift; sourceTree = "<group>"; };
+    100000000000000000000015 /* PearPayBackend.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PearPayMessages/PearPayBackend.swift; sourceTree = "<group>"; };
+    100000000000000000000016 /* SenderWalletProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PearPayMessages/SenderWalletProvider.swift; sourceTree = "<group>"; };
+    100000000000000000000017 /* PearPay Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = PearPay/Info.plist; sourceTree = "<group>"; };
+    100000000000000000000018 /* PearPayMessages Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = PearPayMessages/Info.plist; sourceTree = "<group>"; };
+    100000000000000000000019 /* PearPay.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = PearPay/PearPay.entitlements; sourceTree = "<group>"; };
+    100000000000000000000020 /* PearPayMessages.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = PearPayMessages/PearPayMessages.entitlements; sourceTree = "<group>"; };
+    100000000000000000000031 /* PearPay.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PearPay.app; sourceTree = BUILT_PRODUCTS_DIR; };
+    100000000000000000000032 /* PearPayMessages.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = PearPayMessages.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+    100000000000000000000051 /* Frameworks */ = {isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
+    100000000000000000000052 /* Frameworks */ = {isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+    100000000000000000000061 = {
+      isa = PBXGroup;
+      children = (
+        100000000000000000000062 /* PearPay */,
+        100000000000000000000063 /* PearPayMessages */,
+        100000000000000000000064 /* Products */,
+      );
+      sourceTree = "<group>";
+    };
+    100000000000000000000062 /* PearPay */ = {
+      isa = PBXGroup;
+      children = (
+        100000000000000000000011 /* AppDelegate.swift */,
+        100000000000000000000017 /* PearPay Info.plist */,
+        100000000000000000000019 /* PearPay.entitlements */,
+      );
+      path = PearPay;
+      sourceTree = "<group>";
+    };
+    100000000000000000000063 /* PearPayMessages */ = {
+      isa = PBXGroup;
+      children = (
+        100000000000000000000012 /* MessagesViewController.swift */,
+        100000000000000000000013 /* PaymentComposerView.swift */,
+        100000000000000000000014 /* ApplePayAuthorizer.swift */,
+        100000000000000000000015 /* PearPayBackend.swift */,
+        100000000000000000000016 /* SenderWalletProvider.swift */,
+        100000000000000000000018 /* PearPayMessages Info.plist */,
+        100000000000000000000020 /* PearPayMessages.entitlements */,
+      );
+      path = PearPayMessages;
+      sourceTree = "<group>";
+    };
+    100000000000000000000064 /* Products */ = {
+      isa = PBXGroup;
+      children = (
+        100000000000000000000031 /* PearPay.app */,
+        100000000000000000000032 /* PearPayMessages.appex */,
+      );
+      name = Products;
+      sourceTree = "<group>";
+    };
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+    100000000000000000000071 /* PearPay */ = {
+      isa = PBXNativeTarget;
+      buildConfigurationList = 100000000000000000000091 /* Build configuration list for PBXNativeTarget "PearPay" */;
+      buildPhases = (
+        100000000000000000000081 /* Sources */,
+        100000000000000000000051 /* Frameworks */,
+        100000000000000000000041 /* Embed App Extensions */,
+      );
+      buildRules = ();
+      dependencies = (
+        1000000000000000000000A1 /* PBXTargetDependency */,
+      );
+      name = PearPay;
+      productName = PearPay;
+      productReference = 100000000000000000000031 /* PearPay.app */;
+      productType = "com.apple.product-type.application";
+    };
+    100000000000000000000072 /* PearPayMessages */ = {
+      isa = PBXNativeTarget;
+      buildConfigurationList = 100000000000000000000092 /* Build configuration list for PBXNativeTarget "PearPayMessages" */;
+      buildPhases = (
+        100000000000000000000082 /* Sources */,
+        100000000000000000000052 /* Frameworks */,
+      );
+      buildRules = ();
+      dependencies = ();
+      name = PearPayMessages;
+      productName = PearPayMessages;
+      productReference = 100000000000000000000032 /* PearPayMessages.appex */;
+      productType = "com.apple.product-type.app-extension.messages";
+    };
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+    100000000000000000000080 /* Project object */ = {
+      isa = PBXProject;
+      attributes = {
+        LastSwiftUpdateCheck = 1540;
+        LastUpgradeCheck = 1540;
+        TargetAttributes = {
+          100000000000000000000071 = {CreatedOnToolsVersion = 15.4;};
+          100000000000000000000072 = {CreatedOnToolsVersion = 15.4;};
+        };
+      };
+      buildConfigurationList = 100000000000000000000090 /* Build configuration list for PBXProject "PearPay" */;
+      compatibilityVersion = "Xcode 14.0";
+      developmentRegion = en;
+      hasScannedForEncodings = 0;
+      knownRegions = (en, Base);
+      mainGroup = 100000000000000000000061;
+      productRefGroup = 100000000000000000000064 /* Products */;
+      projectDirPath = "";
+      projectRoot = "";
+      targets = (
+        100000000000000000000071 /* PearPay */,
+        100000000000000000000072 /* PearPayMessages */,
+      );
+    };
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+    100000000000000000000081 /* Sources */ = {
+      isa = PBXSourcesBuildPhase;
+      buildActionMask = 2147483647;
+      files = (
+        100000000000000000000001 /* AppDelegate.swift in Sources */,
+      );
+      runOnlyForDeploymentPostprocessing = 0;
+    };
+    100000000000000000000082 /* Sources */ = {
+      isa = PBXSourcesBuildPhase;
+      buildActionMask = 2147483647;
+      files = (
+        100000000000000000000002 /* MessagesViewController.swift in Sources */,
+        100000000000000000000003 /* PaymentComposerView.swift in Sources */,
+        100000000000000000000004 /* ApplePayAuthorizer.swift in Sources */,
+        100000000000000000000005 /* PearPayBackend.swift in Sources */,
+        100000000000000000000006 /* SenderWalletProvider.swift in Sources */,
+      );
+      runOnlyForDeploymentPostprocessing = 0;
+    };
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+    1000000000000000000000A1 /* PBXTargetDependency */ = {isa = PBXTargetDependency; target = 100000000000000000000072 /* PearPayMessages */; targetProxy = 1000000000000000000000A2 /* PBXContainerItemProxy */; };
+/* End PBXTargetDependency section */
+
+/* Begin PBXContainerItemProxy section */
+    1000000000000000000000A2 /* PBXContainerItemProxy */ = {isa = PBXContainerItemProxy; containerPortal = 100000000000000000000080 /* Project object */; proxyType = 1; remoteGlobalIDString = 100000000000000000000072; remoteInfo = PearPayMessages; };
+/* End PBXContainerItemProxy section */
+
+/* Begin XCBuildConfiguration section */
+    1000000000000000000000B1 /* Debug */ = {isa = XCBuildConfiguration; buildSettings = {ALWAYS_SEARCH_USER_PATHS = NO; CLANG_ENABLE_MODULES = YES; DEVELOPMENT_TEAM = ""; IPHONEOS_DEPLOYMENT_TARGET = 17.0; SDKROOT = iphoneos; SWIFT_VERSION = 5.0;}; name = Debug; };
+    1000000000000000000000B2 /* Release */ = {isa = XCBuildConfiguration; buildSettings = {ALWAYS_SEARCH_USER_PATHS = NO; CLANG_ENABLE_MODULES = YES; DEVELOPMENT_TEAM = ""; IPHONEOS_DEPLOYMENT_TARGET = 17.0; SDKROOT = iphoneos; SWIFT_VERSION = 5.0;}; name = Release; };
+    1000000000000000000000B3 /* Debug */ = {isa = XCBuildConfiguration; buildSettings = {CODE_SIGN_ENTITLEMENTS = PearPay/PearPay.entitlements; INFOPLIST_FILE = PearPay/Info.plist; PRODUCT_BUNDLE_IDENTIFIER = app.pearpay; PRODUCT_NAME = "$(TARGET_NAME)"; SWIFT_VERSION = 5.0; TARGETED_DEVICE_FAMILY = "1,2";}; name = Debug; };
+    1000000000000000000000B4 /* Release */ = {isa = XCBuildConfiguration; buildSettings = {CODE_SIGN_ENTITLEMENTS = PearPay/PearPay.entitlements; INFOPLIST_FILE = PearPay/Info.plist; PRODUCT_BUNDLE_IDENTIFIER = app.pearpay; PRODUCT_NAME = "$(TARGET_NAME)"; SWIFT_VERSION = 5.0; TARGETED_DEVICE_FAMILY = "1,2";}; name = Release; };
+    1000000000000000000000B5 /* Debug */ = {isa = XCBuildConfiguration; buildSettings = {CODE_SIGN_ENTITLEMENTS = PearPayMessages/PearPayMessages.entitlements; INFOPLIST_FILE = PearPayMessages/Info.plist; PRODUCT_BUNDLE_IDENTIFIER = app.pearpay.messages; PRODUCT_NAME = "$(TARGET_NAME)"; SKIP_INSTALL = YES; SWIFT_VERSION = 5.0; TARGETED_DEVICE_FAMILY = "1,2";}; name = Debug; };
+    1000000000000000000000B6 /* Release */ = {isa = XCBuildConfiguration; buildSettings = {CODE_SIGN_ENTITLEMENTS = PearPayMessages/PearPayMessages.entitlements; INFOPLIST_FILE = PearPayMessages/Info.plist; PRODUCT_BUNDLE_IDENTIFIER = app.pearpay.messages; PRODUCT_NAME = "$(TARGET_NAME)"; SKIP_INSTALL = YES; SWIFT_VERSION = 5.0; TARGETED_DEVICE_FAMILY = "1,2";}; name = Release; };
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+    100000000000000000000090 /* Build configuration list for PBXProject "PearPay" */ = {isa = XCConfigurationList; buildConfigurations = (1000000000000000000000B1 /* Debug */, 1000000000000000000000B2 /* Release */); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
+    100000000000000000000091 /* Build configuration list for PBXNativeTarget "PearPay" */ = {isa = XCConfigurationList; buildConfigurations = (1000000000000000000000B3 /* Debug */, 1000000000000000000000B4 /* Release */); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
+    100000000000000000000092 /* Build configuration list for PBXNativeTarget "PearPayMessages" */ = {isa = XCConfigurationList; buildConfigurations = (1000000000000000000000B5 /* Debug */, 1000000000000000000000B6 /* Release */); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
+/* End XCConfigurationList section */
+  };
+  rootObject = 100000000000000000000080 /* Project object */;
+}

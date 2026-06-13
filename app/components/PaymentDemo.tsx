@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
+import type { SerializedPaymentLeg, SerializedPaymentResult } from "@/core/payments/serialize";
 
 /**
  * Interactive payment demo.
@@ -22,30 +23,8 @@ const PROMPTS = [
   "Send $25 to +1 (206) 947-6991 for dinner",
 ];
 
-interface LegDTO {
-  recipientLabel: string;
-  recipientHint: string;
-  isPearPayUser: boolean;
-  amount: string;
-  outcome: "instant" | "claimable";
-  rail?: "hedera" | "arc" | "unlink";
-  txHash?: string;
-  settlementRef?: string;
-  claimUrl?: string;
-  notificationChannel: string;
-  notified: boolean;
-  private: boolean;
-}
-
-interface ResultDTO {
-  ok: boolean;
-  summary: string;
-  error?: string;
-  legs: LegDTO[];
-}
-
 const RAIL: Record<
-  NonNullable<LegDTO["rail"]>,
+  NonNullable<SerializedPaymentLeg["rail"]>,
   { label: string; icon: string; className: string }
 > = {
   hedera: {
@@ -71,7 +50,7 @@ export function PaymentDemo() {
   const [status, setStatus] = useState<"idle" | "sending" | "done" | "error">(
     "idle",
   );
-  const [result, setResult] = useState<ResultDTO | null>(null);
+  const [result, setResult] = useState<SerializedPaymentResult | null>(null);
   const [sentMessage, setSentMessage] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
 
@@ -97,7 +76,7 @@ export function PaymentDemo() {
       });
 
       const data = (await res.json().catch(() => null)) as
-        | Partial<ResultDTO>
+        | Partial<SerializedPaymentResult>
         | null;
 
       // Guard every non-success shape: 400 (unparseable), 422 (understood but
@@ -113,7 +92,7 @@ export function PaymentDemo() {
         return;
       }
 
-      setResult(data as ResultDTO);
+      setResult(data as SerializedPaymentResult);
       setStatus("done");
     } catch (err) {
       setStatus("error");
@@ -200,7 +179,7 @@ export function PaymentDemo() {
           </div>
 
           {result.legs.map((leg, i) => (
-            <PaymentCard key={`${leg.recipientLabel}-${i}`} leg={leg} />
+            <PaymentCard key={`${leg.recipient.label}-${i}`} leg={leg} />
           ))}
         </div>
       ) : null}
@@ -208,27 +187,28 @@ export function PaymentDemo() {
   );
 }
 
-function PaymentCard({ leg }: { leg: LegDTO }) {
+function PaymentCard({ leg }: { leg: SerializedPaymentLeg }) {
   const instant = leg.outcome === "instant";
   const rail = leg.rail ? RAIL[leg.rail] : null;
+  const { recipient, amount } = leg;
 
   return (
     <div className="overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-b from-pear-900/70 to-pear-950 shadow-glow">
       <div className="flex items-center justify-between border-b border-white/5 px-5 py-3">
         <div className="flex items-center gap-2">
           <span className="flex h-8 w-8 items-center justify-center rounded-full bg-pear-500/20 text-sm">
-            {leg.recipientHint === "ens"
+            {recipient.hint === "ens"
               ? "🪪"
-              : leg.recipientHint === "phone"
+              : recipient.hint === "phone"
                 ? "📱"
-                : leg.recipientHint === "email"
+                : recipient.hint === "email"
                   ? "✉️"
                   : "👤"}
           </span>
           <div>
-            <p className="font-semibold leading-tight">{leg.recipientLabel}</p>
+            <p className="font-semibold leading-tight">{recipient.label}</p>
             <p className="text-xs text-cream/45">
-              {leg.isPearPayUser ? "Pear Pay user" : "new recipient"}
+              {recipient.isPearPayUser ? "Pear Pay user" : "new recipient"}
             </p>
           </div>
         </div>
@@ -244,7 +224,7 @@ function PaymentCard({ leg }: { leg: LegDTO }) {
       </div>
 
       <div className="px-5 py-4">
-        <p className="text-3xl font-extrabold tracking-tight">{leg.amount}</p>
+        <p className="text-3xl font-extrabold tracking-tight">{amount.display}</p>
 
         <div className="mt-3 flex flex-wrap gap-2">
           {rail ? (
@@ -261,7 +241,12 @@ function PaymentCard({ leg }: { leg: LegDTO }) {
           ) : null}
           {!instant ? (
             <span className="rounded-full bg-white/5 px-3 py-1 text-xs font-medium text-cream/70">
-              via {leg.notificationChannel.toUpperCase()}
+              via {recipient.notificationChannel.toUpperCase()}
+            </span>
+          ) : null}
+          {leg.route ? (
+            <span className="rounded-full bg-white/5 px-3 py-1 text-xs font-medium text-cream/70">
+              {leg.route}
             </span>
           ) : null}
         </div>

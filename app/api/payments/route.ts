@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { processMessage, serializePaymentResult } from "@/core/payments";
+import { processMessage } from "@/core/payments";
+import { serializePaymentResult } from "@/core/payments/serialize";
 import { logger } from "@/lib/logger";
 
 const log = logger.scoped("api:payments");
@@ -55,7 +56,6 @@ export async function POST(request: Request) {
       { label: sender.label, address: sender.address as `0x${string}`, chainId: sender.chainId },
       { channel },
     );
-    // Serialize to a JSON-safe DTO (PaymentResult holds bigint USDC amounts).
     return NextResponse.json(serializePaymentResult(result), {
       status: result.ok ? 200 : 422,
     });

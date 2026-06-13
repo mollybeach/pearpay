@@ -12,6 +12,11 @@ enum ApplePayAuthorizer {
         amount: String,
         completion: @escaping (Bool) -> Void
     ) {
+        #if targetEnvironment(simulator)
+        completion(true)
+        return
+        #endif
+
         guard PKPaymentAuthorizationController.canMakePayments() else {
             completion(false)
             return
