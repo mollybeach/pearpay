@@ -97,7 +97,7 @@ function extractRecipients(text: string): RawRecipient[] {
 
   for (const re of [ENS_RE, EMAIL_RE, PHONE_RE, HANDLE_RE]) {
     const m = text.match(re);
-    if (m) add(m[0]);
+    if (m) add(m[0]!);
   }
 
   // Capture "Send <Name> ..." / "Pay <Name> back" style proper-noun names.

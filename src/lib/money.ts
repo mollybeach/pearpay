@@ -24,7 +24,7 @@ export function parseUsdc(input: string | number): UsdcAmount {
     throw new Error(`Invalid USDC amount: "${input}"`);
   }
 
-  const [whole, fraction = ""] = raw.split(".");
+  const [whole = "0", fraction = ""] = raw.split(".");
   const paddedFraction = fraction.padEnd(USDC_DECIMALS, "0");
   const units = BigInt(whole) * USDC_SCALAR + BigInt(paddedFraction || "0");
 
