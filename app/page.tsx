@@ -88,12 +88,12 @@ export default function HomePage() {
           </p>
 
           <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row">
-            <a
-              href="#waitlist"
+            <Link
+              href="/pay"
               className="rounded-xl bg-pear-500 px-6 py-3 font-semibold text-pear-950 shadow-glow transition hover:bg-pear-400"
             >
-              Join the waitlist
-            </a>
+              Try the demo
+            </Link>
             <Link
               href="/about"
               className="rounded-xl border border-white/10 px-6 py-3 font-semibold text-cream transition hover:bg-white/5"

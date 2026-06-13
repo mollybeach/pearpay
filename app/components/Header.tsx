@@ -28,6 +28,12 @@ export function Header() {
             Home
           </Link>
           <Link
+            href="/pay"
+            className="rounded-lg px-3 py-2 text-sm font-medium text-cream/80 transition hover:bg-white/5 hover:text-cream"
+          >
+            Try it
+          </Link>
+          <Link
             href="/about"
             className="rounded-lg px-3 py-2 text-sm font-medium text-cream/80 transition hover:bg-white/5 hover:text-cream"
           >
