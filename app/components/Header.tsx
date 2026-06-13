@@ -36,6 +36,12 @@ export function Header() {
             Try it
           </Link>
           <Link
+            href="/messages"
+            className="rounded-lg px-3 py-2 text-sm font-medium text-cream/80 transition hover:bg-white/5 hover:text-cream"
+          >
+            Messages
+          </Link>
+          <Link
             href="/about"
             className="rounded-lg px-3 py-2 text-sm font-medium text-cream/80 transition hover:bg-white/5 hover:text-cream"
           >
