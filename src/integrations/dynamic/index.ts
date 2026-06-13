@@ -44,7 +44,7 @@ function requireConfigured() {
 }
 
 /**
- * Look up whether a given identifier (handle, email, phone, ENS, address) maps
+ * Look up whether a given identifier (handle, email, phone, address) maps
  * to an existing Pear Pay user with a Dynamic wallet.
  */
 export async function lookupPearPayUser(

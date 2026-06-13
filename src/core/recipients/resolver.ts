@@ -38,7 +38,7 @@ function channelForHint(
  *
  * Resolution order mirrors the README's Universal Recipient Resolution:
  *   1. Existing Pear Pay user  → instant settlement.
- *   2. Discoverable wallet/ENS → instant delivery to address.
+ *   2. Discoverable wallet → instant delivery to address.
  *   3. New user                → claimable escrow + notification.
  */
 export async function resolveRecipient(
