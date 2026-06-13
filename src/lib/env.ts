@@ -83,8 +83,11 @@ const envSchema = z.object({
     .optional(),
   ESCROW_DATABASE_URL: z.string().url().optional(),
 
-  // Unlink privacy SDK.
+  // Unlink privacy SDK (private balances + transfers).
   UNLINK_API_KEY: z.string().optional(),
+  UNLINK_ENGINE_URL: z.string().url().optional(),
+  UNLINK_ENVIRONMENT: z.string().default("arc-testnet"),
+  UNLINK_ACCOUNT_MNEMONIC: z.string().optional(),
 
   // Twilio notification + delivery.
   TWILIO_ACCOUNT_SID: z.string().optional(),
@@ -141,7 +144,7 @@ const PRODUCTION_REQUIRED: Record<string, Array<keyof Env>> = {
     "HEDERA_HCS_TOPIC_ID",
   ],
   arc: ["CIRCLE_API_KEY", "ARC_RPC_URL"],
-  unlink: ["UNLINK_API_KEY"],
+  unlink: ["UNLINK_API_KEY", "UNLINK_ENGINE_URL", "UNLINK_ACCOUNT_MNEMONIC"],
   twilio: [
     "TWILIO_ACCOUNT_SID",
     "TWILIO_AUTH_TOKEN",
