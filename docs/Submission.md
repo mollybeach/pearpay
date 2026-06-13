@@ -131,7 +131,94 @@ TODO: add the recorded demo link before final submission
 
 Select **Arc**, **Dynamic**, and **Unlink** on the form. Apply to the bounties below and name the track in your submission text / demo video.
 
-### Arc — $15,000
+---
+
+### Partner prize form *(copy-paste into ETHGlobal)*
+
+Fill in each block below when the form asks **"How are you using this Protocol / API?"**
+
+#### Arc — $15,000
+
+**Why you're applicable** *(1–2 sentences):*
+
+```
+Pear Pay uses Arc as its default USDC settlement and liquidity hub. Users never pick a chain — they send a message like "Pay Alex $20" and Pear Pay routes funds to Arc via PearPayEscrow.sol (conditional claim-secret release, expiry refund, sender cancel) and chain-abstracted settlement through our Arc integration. Claimable payments escrow USDC on Arc until the recipient onboards via Dynamic and claims.
+```
+
+**Link to the line of code where the tech is used:**
+
+```
+https://github.com/mollybeach/pearpay/blob/main/contracts/PearPayEscrow.sol#L68-L74
+https://github.com/mollybeach/pearpay/blob/main/src/integrations/arc/index.ts#L67-L75
+https://github.com/mollybeach/pearpay/blob/main/src/core/payments/settlement.ts#L78-L90
+```
+
+**How easy is it to use the API / Protocol? (1–10):** `8`
+
+**Additional feedback for the Sponsor:**
+
+```
+Arc's USDC-native model maps cleanly to conversational payments — one settlement surface, no chain picker in UX. Foundry deploy + Arc testnet USDC address were straightforward. Circle Gateway/Forwarder for live source-to-Arc routing would benefit from a single end-to-end TypeScript example (detect source chain → quote → settle on Arc) in the docs; we scaffolded this in src/integrations/arc/ but had to infer request shapes from scattered Circle docs. A canonical "claimable escrow on Arc" reference repo would help hackathon teams ship faster.
+```
+
+---
+
+#### Dynamic — $10,000
+
+**Why you're applicable** *(1–2 sentences):*
+
+```
+Pear Pay uses Dynamic for embedded wallet onboarding when recipients claim funds (no seed phrases), Fireblocks Flow for cross-chain checkout that settles USDC on Arc, and server wallets for autonomous agent payments (HTTP 402 / x402). Human path: NLP → WebAuthn Face ID → Flow checkout → Arc. Agent path: natural-language intent → Dynamic server wallet → pay gated API → retry on 402.
+```
+
+**Link to the line of code where the tech is used:**
+
+```
+https://github.com/mollybeach/pearpay/blob/main/src/components/Providers.tsx#L13-L21
+https://github.com/mollybeach/pearpay/blob/main/app/api/flow/payment/start/route.ts#L46-L50
+https://github.com/mollybeach/pearpay/blob/main/src/integrations/dynamic/index.ts#L86-L112
+https://github.com/mollybeach/pearpay/blob/main/src/integrations/dynamic/index.ts#L118-L133
+https://github.com/mollybeach/pearpay/blob/main/app/api/agent/run-intent/route.ts#L36-L42
+```
+
+**How easy is it to use the API / Protocol? (1–10):** `8`
+
+**Additional feedback for the Sponsor:**
+
+```
+Dynamic SDK integration for embedded wallets and auth was smooth — Providers + wallet button worked in under an hour. Flow's multi-step checkout (create → source → quote → prepare → broadcast → webhook) is powerful but dense; a single "happy path" sequence diagram with expected JSON payloads per step would reduce integration time. Server wallet REST API for agentic x402 flows is a strong differentiator — clearer docs on signing/submitting txs from server wallets (not just creating them) would unlock more agent builds.
+```
+
+---
+
+#### Unlink — $5,000
+
+**Why you're applicable** *(1–2 sentences):*
+
+```
+Pear Pay adds an optional private payment mode: users say "Send Sarah 50 USDC privately" and the orchestrator routes through Unlink's deposit/transfer/withdraw primitives so balances, amounts, and counterparties stay hidden while Arc still settles the public leg when needed. Private rail selection is automatic when isPrivate is set — no separate UX for shielding.
+```
+
+**Link to the line of code where the tech is used:**
+
+```
+https://github.com/mollybeach/pearpay/blob/main/src/integrations/unlink/index.ts#L45-L65
+https://github.com/mollybeach/pearpay/blob/main/src/integrations/unlink/index.ts#L71-L94
+https://github.com/mollybeach/pearpay/blob/main/src/core/payments/settlement.ts#L27-L28
+https://github.com/mollybeach/pearpay/blob/main/src/core/payments/settlement.ts#L68-L76
+```
+
+**How easy is it to use the API / Protocol? (1–10):** `7`
+
+**Additional feedback for the Sponsor:**
+
+```
+Unlink's privacy primitives (deposit → private transfer → withdraw) fit naturally as a "private mode" toggle on top of conversational payments. Local stub mode made hackathon development fast. For production, clearer docs on how private balances interact with USDC on Arc (settlement timing, fee model, and error codes on failed shield/transfer) would help. A minimal Next.js example showing one private peer-to-peer transfer end-to-end would complement the SDK reference.
+```
+
+---
+
+### Arc — $15,000 *(bounty tracks)*
 
 **Apply for:**
 
@@ -154,7 +241,7 @@ Pear Pay settles conversational payments in USDC on Arc. PearPayEscrow.sol imple
 
 ---
 
-### Dynamic — $10,000
+### Dynamic — $10,000 *(bounty tracks)*
 
 **Apply for:**
 
@@ -180,7 +267,7 @@ Pear Pay uses Dynamic for embedded wallet onboarding on claim, Fireblocks Flow f
 
 ---
 
-### Unlink — $5,000
+### Unlink — $5,000 *(bounty tracks)*
 
 **Apply for:**
 
