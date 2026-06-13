@@ -3,7 +3,11 @@ const nextConfig = {
   reactStrictMode: true,
   experimental: {
     // Sponsor SDKs are server-only; keep them out of the client bundle.
-    serverComponentsExternalPackages: ["twilio", "@hashgraph/sdk"],
+    serverComponentsExternalPackages: [
+      "twilio",
+      "@hashgraph/sdk",
+      "@unlink-xyz/sdk",
+    ],
   },
 };
 
