@@ -69,8 +69,7 @@ final class PaymentComposerView: UIView {
         // a placeholder is used here for the composer demo.
         let draft = PaymentDraft(
             message: message,
-            amountDisplay: "$0",
-            senderAddress: "0x0000000000000000000000000000000000000000"
+            amountDisplay: "$0"
         )
         onSend?(draft)
     }

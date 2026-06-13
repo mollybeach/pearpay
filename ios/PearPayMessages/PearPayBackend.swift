@@ -7,7 +7,6 @@ import Foundation
 struct PaymentDraft {
     let message: String
     let amountDisplay: String
-    let senderAddress: String
 }
 
 final class PearPayBackend {
@@ -15,11 +14,21 @@ final class PearPayBackend {
     private let session: URLSession
 
     init(
-        baseURL: URL = URL(string: "https://pearpay.app")!,
+        baseURL: URL = PearPayBackend.defaultBaseURL,
         session: URLSession = .shared
     ) {
         self.baseURL = baseURL
         self.session = session
+    }
+
+    private static var defaultBaseURL: URL {
+        if
+            let value = Bundle.main.object(forInfoDictionaryKey: "PearPayBackendURL") as? String,
+            let url = URL(string: value)
+        {
+            return url
+        }
+        return URL(string: "https://pearpay.app")!
     }
 
     /// Send a payment message to the backend and return its summary string.

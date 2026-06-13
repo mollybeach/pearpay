@@ -21,6 +21,7 @@
 * [Why This Matters](#why-this-matters)
 * [Updated User Journey](#updated-user-journey)
 * [Technical Architecture](#technical-architecture)
+* [Arc Bounty Architecture](#arc-bounty-architecture)
 * [Twilio Notification and Delivery Layer](#twilio-notification-and-delivery-layer)
 * [Updated Architecture](#updated-architecture)
 * [Hackathon Story](#hackathon-story)
@@ -374,7 +375,7 @@ Pear Pay automatically:
 1. Identifies Alex
 2. Checks for an existing wallet
 3. Creates a claimable payment if needed
-4. Selects the optimal settlement rail (Hedera or Arc)
+4. Routes USDC through Arc as the liquidity hub
 5. Settles funds in USDC and writes an HCS audit receipt
 6. Protects transaction privacy through Unlink
 7. Sends Alex a claim notification
@@ -431,14 +432,17 @@ optimal rail.
 
 ## Arc
 
-Arc serves as the settlement and liquidity layer.
+Arc serves as Pear Pay's default USDC settlement and liquidity hub.
 
 Responsibilities:
 
-* USDC settlement
-* Chain abstraction
-* Agentic payment infrastructure
-* Stablecoin-native execution
+* USDC settlement on Arc mainnet/testnet using
+  `0x3600000000000000000000000000000000000000`
+* Arc Testnet EURC support via
+  `0x89B50855Aa3bE2F677cD6303Cec089B5F319D72a`
+* Chain abstraction: Pear Pay detects the source chain and routes to Arc
+* Claimable payments: escrow on send, release on claim, refund after expiry
+* Circle Gateway / Forwarder path for source-to-Arc conditional transfers
 
 ---
 
@@ -466,6 +470,43 @@ Capabilities:
 * Voice AI payments via Twilio Voice
 
 Twilio is what lets Pear Pay reach recipients who do not yet have a wallet, solving the cold-start problem that blocks most crypto payment apps.
+
+---
+
+# Arc Bounty Architecture
+
+Pear Pay targets both Arc bounties as one integrated payment app:
+
+* Smart Contracts on Arc with Advanced Stablecoin Logic — `PearPayEscrow.sol`
+  implements conditional release, time-based refunds, sender cancellation, and
+  multi-step settlement for USDC/EURC.
+* Chain Abstracted USDC App Using Arc as a Liquidity Hub — users never select a
+  chain; Pear Pay routes non-private payments through Arc and returns Arc route
+  metadata from the payment API.
+
+```mermaid
+flowchart TD
+  Message[Conversation or agent intent]
+  Parser[NLP parser]
+  Resolver[Recipient resolver]
+  Orchestrator[Payment orchestrator]
+  ArcHub[Arc USDC liquidity hub]
+  Escrow[PearPayEscrow.sol]
+  Circle[Circle Gateway / Forwarder]
+  Claim[Claim link + Dynamic wallet]
+  HCS[Hedera HCS audit]
+
+  Message --> Parser --> Resolver --> Orchestrator
+  Orchestrator -->|Existing wallet| ArcHub --> Circle
+  Orchestrator -->|New recipient| Escrow --> Claim
+  Claim --> Escrow --> ArcHub
+  Escrow -->|Expired| Message
+  Orchestrator --> HCS
+  Escrow --> HCS
+```
+
+See `ARC_BOUNTY.md` for the full architecture diagram, Circle developer tools,
+video demo script, and live-judging setup checklist.
 
 ---
 
@@ -910,6 +951,36 @@ Qualification checklist (Unlink):
 * For the joint prize: also use the Dynamic SDK and Circle's tools, with an MVP, diagram, and presentation
 
 Resources: [Unlink docs](https://docs.unlink.xyz) · [Dynamic x Unlink x Arc integration guide](https://docs.unlink.xyz/partner-integrations) · [Circle Nanopayments](https://developers.circle.com/gateway/nanopayments) · [unlink.xyz](https://unlink.xyz)
+
+---
+
+# Production Deploy Checklist
+
+Before switching the app to `NODE_ENV=production`, attach `pearpay.app` to the
+deployment and set `APP_URL`, `NEXT_PUBLIC_APP_URL`, `NEXT_PUBLIC_SITE_URL`,
+`WEBAUTHN_ORIGIN`, and `TWILIO_WEBHOOK_URL` to `https://pearpay.app`.
+
+Configure all live integration secrets in the deployment environment:
+
+* Dynamic: `DYNAMIC_ENV_ID`, `DYNAMIC_API_TOKEN`,
+  `NEXT_PUBLIC_DYNAMIC_ENVIRONMENT_ID`, Flow checkout/webhook values, and any
+  agent wallet password or funding keys.
+* Twilio: account SID, auth token, messaging service, Verify service, sender
+  number, and inbound webhook URL.
+* WebAuthn: production RP id `pearpay.app`, RP name, origin, and a durable
+  credential store path or database-backed implementation.
+* Hedera: operator id/key, HTS USDC token id, HCS topic id, mirror-node URL, and
+  deployed escrow address after contract deployment.
+* Arc/Circle: Circle API key, Arc RPC URL, USDC token address, explorer URL, and
+  deployed escrow address.
+* Persistence: `ESCROW_DATABASE_URL` for durable claimable-payment storage.
+* Unlink and x402: API key, funder private key, and gateway address.
+
+After secrets are set, run a smoke test for each live path: Dynamic user lookup
+and wallet creation, Twilio SMS/WhatsApp delivery plus Verify, signed Twilio and
+Dynamic webhooks, WebAuthn registration/authentication on the live domain,
+Hedera HTS settlement plus HCS receipt, Arc/Circle transfer with explorer link,
+Unlink private transfer, and social-share preview rendering for `/pay/[data]`.
 
 ---
 
