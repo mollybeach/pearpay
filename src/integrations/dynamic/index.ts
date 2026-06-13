@@ -1,4 +1,4 @@
-import { getEnv } from "@/lib/env";
+import { assertConfiguredForProduction, getEnv } from "@/lib/env";
 import { logger } from "@/lib/logger";
 
 const log = logger.scoped("dynamic");
@@ -8,8 +8,8 @@ const log = logger.scoped("dynamic");
  *
  * Dynamic powers onboarding (no seed phrases), instant wallet creation on
  * claim, and server/agent wallets for autonomous transactions. This adapter
- * wraps the Dynamic REST API; calls are stubbed to deterministic values when
- * credentials are absent so local demos and tests run without a network.
+ * wraps the Dynamic REST API. Local demos and tests can run without a network,
+ * while production fails fast unless real Dynamic credentials are configured.
  */
 
 export interface PearPayUser {
@@ -38,6 +38,12 @@ function isConfigured(): boolean {
   return Boolean(env.DYNAMIC_API_TOKEN && env.DYNAMIC_ENV_ID);
 }
 
+function requireConfigured() {
+  const configured = isConfigured();
+  assertConfiguredForProduction("dynamic", configured);
+  return configured;
+}
+
 /**
  * Look up whether a given identifier (handle, email, phone, ENS, address) maps
  * to an existing Pear Pay user with a Dynamic wallet.
@@ -45,7 +51,7 @@ function isConfigured(): boolean {
 export async function lookupPearPayUser(
   identifier: string,
 ): Promise<PearPayUser | null> {
-  if (!isConfigured()) {
+  if (!requireConfigured()) {
     log.debug("dynamic not configured; treating user as new", { identifier });
     return null;
   }
@@ -80,8 +86,7 @@ export async function lookupPearPayUser(
 export async function createEmbeddedWallet(
   identifier: string,
 ): Promise<WalletHandle> {
-  if (!isConfigured()) {
-    // Deterministic local stub so the claim flow is demoable offline.
+  if (!requireConfigured()) {
     const stub = `0x${Buffer.from(identifier).toString("hex").padEnd(40, "0").slice(0, 40)}` as `0x${string}`;
     log.debug("dynamic stub embedded wallet", { identifier, address: stub });
     return { walletId: `stub_${identifier}`, address: stub, kind: "embedded" };
@@ -113,7 +118,7 @@ export async function createEmbeddedWallet(
 export async function createAgentWallet(
   agentId: string,
 ): Promise<WalletHandle> {
-  if (!isConfigured()) {
+  if (!requireConfigured()) {
     const stub = `0xa6e0${Buffer.from(agentId).toString("hex").padEnd(36, "0").slice(0, 36)}` as `0x${string}`;
     return { walletId: `agent_${agentId}`, address: stub, kind: "server" };
   }

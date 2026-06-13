@@ -1,62 +1,84 @@
-import { formatUsdcDisplay } from "@/lib/money";
+import { formatUsdc, formatUsdcDisplay } from "@/lib/money";
 import type { PaymentLeg, PaymentResult } from "./types";
 
-/**
- * JSON-safe view of a payment result.
- *
- * PaymentResult holds USDC amounts as bigint base units, which cannot be
- * JSON-serialized. This DTO converts every leg into plain strings so API
- * responses (and the payment-card UI) can render them directly.
- */
-export interface PaymentLegDTO {
-  recipientLabel: string;
-  recipientHint: string;
-  isPearPayUser: boolean;
-  /** Display amount, e.g. "$20". */
-  amount: string;
-  /** Raw USDC base units as a string, e.g. "20000000". */
-  amountBaseUnits: string;
-  outcome: "instant" | "claimable";
-  rail?: "hedera" | "arc" | "unlink";
-  txHash?: string;
+export interface SerializedPaymentLeg {
+  recipient: {
+    raw: string;
+    label: string;
+    hint: PaymentLeg["recipient"]["hint"];
+    isPearPayUser: boolean;
+    address?: `0x${string}`;
+    contact?: string;
+    deliveryMode: PaymentLeg["recipient"]["deliveryMode"];
+    notificationChannel: PaymentLeg["recipient"]["notificationChannel"];
+  };
+  amount: {
+    usdc: string;
+    baseUnits: string;
+    display: string;
+  };
+  outcome: PaymentLeg["outcome"];
+  rail?: PaymentLeg["rail"];
+  txHash?: PaymentLeg["txHash"];
   settlementRef?: string;
+  sourceChainId?: number;
+  destinationChainId?: number;
+  tokenAddress?: `0x${string}`;
+  route?: PaymentLeg["route"];
   claimUrl?: string;
-  notificationChannel: string;
+  payUrl?: string;
   notified: boolean;
   private: boolean;
 }
 
-export interface PaymentResultDTO {
+export interface SerializedPaymentResult {
   ok: boolean;
   summary: string;
+  legs: SerializedPaymentLeg[];
+  payUrl?: string;
   error?: string;
-  legs: PaymentLegDTO[];
 }
 
-function serializeLeg(leg: PaymentLeg): PaymentLegDTO {
+export function serializePaymentLeg(leg: PaymentLeg): SerializedPaymentLeg {
   return {
-    recipientLabel: leg.recipient.label,
-    recipientHint: leg.recipient.hint,
-    isPearPayUser: leg.recipient.isPearPayUser,
-    amount: formatUsdcDisplay(leg.amount),
-    amountBaseUnits: leg.amount.toString(),
+    recipient: {
+      raw: leg.recipient.raw,
+      label: leg.recipient.label,
+      hint: leg.recipient.hint,
+      isPearPayUser: leg.recipient.isPearPayUser,
+      address: leg.recipient.address,
+      contact: leg.recipient.contact,
+      deliveryMode: leg.recipient.deliveryMode,
+      notificationChannel: leg.recipient.notificationChannel,
+    },
+    amount: {
+      usdc: formatUsdc(leg.amount),
+      baseUnits: leg.amount.toString(),
+      display: formatUsdcDisplay(leg.amount),
+    },
     outcome: leg.outcome,
     rail: leg.rail,
     txHash: leg.txHash,
     settlementRef: leg.settlementRef,
+    sourceChainId: leg.sourceChainId,
+    destinationChainId: leg.destinationChainId,
+    tokenAddress: leg.tokenAddress,
+    route: leg.route,
     claimUrl: leg.claimUrl,
-    notificationChannel: leg.recipient.notificationChannel,
+    payUrl: leg.payUrl,
     notified: leg.notified,
     private: leg.private,
   };
 }
 
-/** Convert a PaymentResult into a JSON-safe DTO for API responses and the UI. */
-export function serializePaymentResult(result: PaymentResult): PaymentResultDTO {
+export function serializePaymentResult(
+  result: PaymentResult,
+): SerializedPaymentResult {
   return {
     ok: result.ok,
     summary: result.summary,
+    legs: result.legs.map(serializePaymentLeg),
+    payUrl: result.payUrl,
     error: result.error,
-    legs: result.legs.map(serializeLeg),
   };
 }

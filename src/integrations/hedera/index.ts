@@ -8,7 +8,7 @@ import {
   TopicMessageSubmitTransaction,
   TransferTransaction,
 } from "@hashgraph/sdk";
-import { getEnv } from "@/lib/env";
+import { assertConfiguredForProduction, getEnv } from "@/lib/env";
 import { logger } from "@/lib/logger";
 import { formatUsdc, type UsdcAmount } from "@/lib/money";
 
@@ -24,7 +24,7 @@ const log = logger.scoped("hedera");
  *
  * Hedera gives sub-cent fees and 3-5s finality, which is ideal for
  * conversational payments and nanopayments. Calls fall back to deterministic
- * local stubs when no operator is configured so the flow stays demoable.
+ * local receipts when no operator is configured outside production.
  */
 
 let cachedClient: Client | null = null;
@@ -75,6 +75,7 @@ export async function settleUsdcOnHedera(params: {
   const env = getEnv();
 
   if (!isConfigured() || !env.HEDERA_USDC_TOKEN_ID) {
+    assertConfiguredForProduction("hedera", false);
     const stubId = `0.0.0@${Math.floor(Date.now() / 1000)}.000000000`;
     log.debug("hedera local HTS settlement", {
       amount: formatUsdc(params.amount),
@@ -114,6 +115,7 @@ export async function settleHbar(params: {
 }): Promise<HederaSettlement> {
   const env = getEnv();
   if (!isConfigured()) {
+    assertConfiguredForProduction("hedera", false);
     return {
       transactionId: `0.0.0@${Math.floor(Date.now() / 1000)}.000000000`,
       status: "settled",
@@ -156,6 +158,7 @@ export async function logToConsensus(
   const message = JSON.stringify({ ...receipt, ts: Date.now() });
 
   if (!isConfigured() || !env.HEDERA_HCS_TOPIC_ID) {
+    assertConfiguredForProduction("hedera", false);
     log.debug("hedera local HCS audit log", { kind: receipt.kind });
     return { topicId: env.HEDERA_HCS_TOPIC_ID ?? "0.0.0" };
   }

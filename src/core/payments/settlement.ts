@@ -1,4 +1,5 @@
 import { formatUsdcDisplay, type UsdcAmount } from "@/lib/money";
+import { ARC_TESTNET_CHAIN_ID } from "@/integrations/arc";
 import { settleUsdc } from "@/integrations/arc";
 import { privateTransfer } from "@/integrations/unlink";
 import { logToConsensus, settleUsdcOnHedera } from "@/integrations/hedera";
@@ -10,8 +11,8 @@ import { logToConsensus, settleUsdcOnHedera } from "@/integrations/hedera";
  * the optimal settlement rail per payment and records a tamper-proof receipt on
  * the Hedera Consensus Service (HCS) regardless of which rail settled funds.
  *
- *   - hedera  → default: sub-cent fees, 3-5s finality (conversational + nano).
- *   - arc     → Circle-native USDC flows / other EVM destinations.
+ *   - arc     → default: chain-abstracted Circle-native USDC hub.
+ *   - hedera  → optional low-cost USDC rail plus HCS audit receipts.
  *   - unlink  → private transfers (amounts and counterparties hidden).
  */
 export type Rail = "hedera" | "arc" | "unlink";
@@ -26,14 +27,17 @@ export interface RailSelectionInput {
 export function selectRail(input: RailSelectionInput): Rail {
   if (input.isPrivate) return "unlink";
   if (input.prefer) return input.prefer;
-  return "hedera";
+  return "arc";
 }
 
 export interface RailSettlementParams {
   fromAddress: `0x${string}`;
   toAddress: `0x${string}`;
   amount: UsdcAmount;
-  chainId: number;
+  /** Source chain detected from sender/channel context. */
+  sourceChainId?: number;
+  /** Destination settlement chain, defaulting to Arc testnet. */
+  chainId?: number;
   memo?: string;
   idempotencyKey?: string;
 }
@@ -45,6 +49,10 @@ export interface RailSettlement {
   /** Rail-native reference (Hedera tx id, Unlink note id, Arc settlement id). */
   ref: string;
   status: string;
+  sourceChainId?: number;
+  destinationChainId?: number;
+  tokenAddress?: `0x${string}`;
+  route?: "arc-native" | "source-to-arc";
 }
 
 /**
@@ -62,7 +70,7 @@ export async function settleOnRail(
         fromAddress: params.fromAddress,
         toAddress: params.toAddress,
         amount: params.amount,
-        chainId: params.chainId,
+        chainId: params.chainId ?? params.sourceChainId ?? ARC_TESTNET_CHAIN_ID,
       });
       settlement = { rail, ref: r.noteId, status: r.status };
       break;
@@ -72,6 +80,7 @@ export async function settleOnRail(
         fromAddress: params.fromAddress,
         toAddress: params.toAddress,
         amount: params.amount,
+        sourceChainId: params.sourceChainId,
         chainId: params.chainId,
         idempotencyKey: params.idempotencyKey,
       });
@@ -80,6 +89,10 @@ export async function settleOnRail(
         txHash: r.txHash,
         ref: r.settlementId,
         status: r.status,
+        sourceChainId: r.sourceChainId,
+        destinationChainId: r.destinationChainId,
+        tokenAddress: r.tokenAddress,
+        route: r.route,
       };
       break;
     }
