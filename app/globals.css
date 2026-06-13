@@ -1,0 +1,20 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  @apply bg-pear-950 text-cream antialiased;
+}
+
+/* Subtle ambient glow behind the page content. */
+.bg-ambient {
+  @apply bg-pear-radial;
+}
