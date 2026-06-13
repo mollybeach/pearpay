@@ -10,6 +10,7 @@ import { waitForTransactionReceipt } from "viem/actions";
 import { ERC20_ABI, PEARPAY_ESCROW_ABI } from "./abi";
 import {
   getArcPublicClient,
+  getArcSignerAccount,
   getArcWalletClient,
   getEscrowContractAddress,
   isArcEscrowLive,
@@ -70,19 +71,19 @@ async function ensureUsdcApproval(
 ): Promise<void> {
   const publicClient = getArcPublicClient();
   const walletClient = getArcWalletClient();
-  const [account] = await walletClient.getAddresses();
+  const account = getArcSignerAccount();
 
   const allowance = await publicClient.readContract({
     address: token,
     abi: ERC20_ABI,
     functionName: "allowance",
-    args: [account!, spender],
+    args: [account.address, spender],
   });
 
   if (allowance >= amount) return;
 
   const approveHash = await walletClient.writeContract({
-    account: account!,
+    account,
     address: token,
     abi: ERC20_ABI,
     functionName: "approve",
@@ -110,10 +111,10 @@ export async function escrowOnChain(
 
   const publicClient = getArcPublicClient();
   const walletClient = getArcWalletClient();
-  const [account] = await walletClient.getAddresses();
+  const account = getArcSignerAccount();
 
   const escrowTxHash = await walletClient.writeContract({
-    account: account!,
+    account,
     address: contract,
     abi: PEARPAY_ESCROW_ABI,
     functionName: "escrow",
@@ -149,10 +150,10 @@ export async function claimOnChain(
   const contract = getEscrowContractAddress()!;
   const publicClient = getArcPublicClient();
   const walletClient = getArcWalletClient();
-  const [account] = await walletClient.getAddresses();
+  const account = getArcSignerAccount();
 
   const claimTxHash = await walletClient.writeContract({
-    account: account!,
+    account,
     address: contract,
     abi: PEARPAY_ESCROW_ABI,
     functionName: "claim",
@@ -177,10 +178,10 @@ export async function cancelOnChain(
   const contract = getEscrowContractAddress()!;
   const publicClient = getArcPublicClient();
   const walletClient = getArcWalletClient();
-  const [account] = await walletClient.getAddresses();
+  const account = getArcSignerAccount();
 
   const hash = await walletClient.writeContract({
-    account: account!,
+    account,
     address: contract,
     abi: PEARPAY_ESCROW_ABI,
     functionName: "cancel",
@@ -197,10 +198,10 @@ export async function refundOnChain(
   const contract = getEscrowContractAddress()!;
   const publicClient = getArcPublicClient();
   const walletClient = getArcWalletClient();
-  const [account] = await walletClient.getAddresses();
+  const account = getArcSignerAccount();
 
   const hash = await walletClient.writeContract({
-    account: account!,
+    account,
     address: contract,
     abi: PEARPAY_ESCROW_ABI,
     functionName: "refund",
@@ -218,10 +219,10 @@ export async function transferUsdcOnArc(
 ): Promise<{ txHash: `0x${string}`; explorerUrl: string }> {
   const publicClient = getArcPublicClient();
   const walletClient = getArcWalletClient();
-  const [account] = await walletClient.getAddresses();
+  const account = getArcSignerAccount();
 
   const txHash = await walletClient.writeContract({
-    account: account!,
+    account,
     address: ARC_USDC_ADDRESS,
     abi: ERC20_ABI,
     functionName: "transfer",

@@ -2,6 +2,7 @@ import {
   createPublicClient,
   createWalletClient,
   http,
+  type Account,
   type PublicClient,
   type WalletClient,
 } from "viem";
@@ -12,6 +13,7 @@ import { getArcNetworkConfig } from "./config";
 
 let publicClient: PublicClient | null = null;
 let walletClient: WalletClient | null = null;
+let signerAccount: Account | null = null;
 
 export function getArcRpcUrl(): string {
   const env = getEnv();
@@ -37,13 +39,25 @@ export function getArcWalletClient(): WalletClient {
       throw new Error("FUNDER_PRIVATE_KEY is required for Arc on-chain signing");
     }
     const normalized = key.startsWith("0x") ? key : `0x${key}`;
+    signerAccount = privateKeyToAccount(normalized as `0x${string}`);
     walletClient = createWalletClient({
-      account: privateKeyToAccount(normalized as `0x${string}`),
+      account: signerAccount,
       chain: arcTestnet,
       transport: http(getArcRpcUrl()),
     });
   }
   return walletClient;
+}
+
+/**
+ * The local signing account for backend Arc txs. Write calls must pass this
+ * account object (not the bare address string) so viem signs locally and uses
+ * `eth_sendRawTransaction`; Arc's RPC does not support node-side
+ * `wallet_sendTransaction`.
+ */
+export function getArcSignerAccount(): Account {
+  getArcWalletClient();
+  return signerAccount!;
 }
 
 export function getEscrowContractAddress(): `0x${string}` | null {
