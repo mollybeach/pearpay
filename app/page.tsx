@@ -67,15 +67,22 @@ export default function HomePage() {
     <main>
       {/* Hero */}
       <section className="relative overflow-hidden">
-        <div className="mx-auto flex max-w-4xl flex-col items-center px-5 pb-20 pt-16 text-center sm:pt-24">
-          <Image
-            src="/PearPayLogo.png"
-            alt="Pear Pay logo"
-            width={180}
-            height={180}
-            priority
-            className="h-36 w-36 object-contain drop-shadow-[0_0_40px_rgba(116,179,39,0.35)] sm:h-44 sm:w-44"
-          />
+        {/* Soft light glow behind the hero logo */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute left-1/2 top-10 h-72 w-72 -translate-x-1/2 rounded-full bg-pear-300/25 blur-3xl"
+        />
+        <div className="relative mx-auto flex max-w-4xl flex-col items-center px-5 pb-20 pt-16 text-center sm:pt-24">
+          <div className="rounded-[2rem] bg-gradient-to-b from-white to-pear-50 p-5 shadow-glow ring-1 ring-white/40 sm:p-6">
+            <Image
+              src="/PearPayLogo.png"
+              alt="Pear Pay logo"
+              width={180}
+              height={180}
+              priority
+              className="h-32 w-32 object-contain sm:h-40 sm:w-40"
+            />
+          </div>
 
           <h1 className="mt-6 text-4xl font-extrabold tracking-tight sm:text-6xl">
             Turn Conversations

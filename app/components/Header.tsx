@@ -7,14 +7,16 @@ export function Header() {
     <header className="sticky top-0 z-50 border-b border-white/5 bg-pear-950/80 backdrop-blur">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-5">
         <Link href="/" className="flex items-center gap-2">
-          <Image
-            src="/PearPayLogo.png"
-            alt="Pear Pay"
-            width={40}
-            height={40}
-            priority
-            className="h-10 w-10 object-contain"
-          />
+          <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-b from-white to-pear-50 p-1 shadow-sm ring-1 ring-black/5">
+            <Image
+              src="/PearPayLogo.png"
+              alt="Pear Pay"
+              width={40}
+              height={40}
+              priority
+              className="h-8 w-8 object-contain"
+            />
+          </span>
           <span className="text-lg font-bold tracking-tight">
             Pear<span className="text-pear-400">Pay</span>
           </span>
