@@ -69,14 +69,21 @@ function isKnown(name: string): boolean {
  * Parse a natural-language money request into a {@link PayInfo}, or `null` when
  * the text isn't a payment. Handles intent verbs, ENS/name/phone recipients,
  * USDC vs USD, privacy, and comma-grouped amounts ("$1,000").
+ *
+ * `defaultRecipient` is the chat partner used when no recipient is named (and
+ * is always treated as an existing/instant user, since you're paying someone
+ * you're already talking to). Each channel passes its own contact.
  */
-export function parsePayment(raw: string): PayInfo | null {
+export function parsePayment(
+  raw: string,
+  defaultRecipient: string = CONTACT.name,
+): PayInfo | null {
   const text = raw.trim();
   if (!text) return null;
 
   // Must look like a money request: a payment verb, or a "$<number>".
   const hasIntent =
-    /\b(send|pay|venmo|transfer|paid|split|request)\b/i.test(text) ||
+    /\b(send|pay|venmo|transfer|paid|split|request|tip)\b/i.test(text) ||
     /\$\s?\d/.test(text);
 
   // First number, allowing thousands separators and up to 2 decimals.
@@ -89,19 +96,22 @@ export function parsePayment(raw: string): PayInfo | null {
   const token: PaymentToken = /\busdc\b/i.test(text) ? "USDC" : "USD";
   const isPrivate = /\bpriv/i.test(text);
 
-  // Recipient: prefer the token after "to", else after "send"/"pay".
-  const toMatch = text.match(/\bto\s+([a-z0-9.@+]+)/i);
-  const sendMatch = text.match(/\b(?:send|pay|request)\s+([a-z0-9.@]+)/i);
-  let name = (toMatch?.[1] ?? sendMatch?.[1] ?? "").replace(/[.,]+$/, "");
+  // Recipient: prefer the token after "to", else after a verb. Allow a leading
+  // "@" mention (Telegram/Discord) and strip it from the displayed name.
+  const toMatch = text.match(/\bto\s+@?([a-z0-9.@+_]+)/i);
+  const verbMatch = text.match(/\b(?:send|pay|request|tip)\s+@?([a-z0-9.@_]+)/i);
+  let name = (toMatch?.[1] ?? verbMatch?.[1] ?? "").replace(/[.,]+$/, "");
 
   // Drop non-name captures (amounts, pronouns/stop-words) → default contact.
   if (!name || /^\$?\d/.test(name) || STOP_WORDS.has(name.toLowerCase())) {
-    name = CONTACT.name;
+    name = defaultRecipient;
   }
 
+  const known =
+    isKnown(name) || name.toLowerCase() === defaultRecipient.toLowerCase();
   const outcome: PaymentOutcome = isPrivate
     ? "private"
-    : isKnown(name)
+    : known
       ? "settled"
       : "claimable";
 
