@@ -29,13 +29,15 @@ export default function AboutPage() {
     <main className="mx-auto max-w-4xl px-5 py-16">
       {/* Intro */}
       <div className="flex flex-col items-center text-center">
-        <Image
-          src="/PearPayLogo.png"
-          alt="Pear Pay logo"
-          width={120}
-          height={120}
-          className="h-28 w-28 object-contain drop-shadow-[0_0_40px_rgba(116,179,39,0.35)]"
-        />
+        <div className="rounded-[1.75rem] bg-gradient-to-b from-white to-pear-50 p-5 shadow-glow ring-1 ring-white/40">
+          <Image
+            src="/PearPayLogo.png"
+            alt="Pear Pay logo"
+            width={120}
+            height={120}
+            className="h-24 w-24 object-contain"
+          />
+        </div>
         <h1 className="mt-6 text-4xl font-extrabold tracking-tight sm:text-5xl">
           About <span className="text-pear-400">Pear Pay</span>
         </h1>
