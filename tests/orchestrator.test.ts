@@ -35,6 +35,30 @@ vi.mock("@/integrations/unlink", () => ({
   })),
 }));
 
+vi.mock("@/integrations/arc", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/integrations/arc")>();
+  return {
+    ...actual,
+    settleUsdc: vi.fn(async (req) => {
+      const destinationChainId = req.chainId ?? actual.ARC_TESTNET_CHAIN_ID;
+      const sourceChainId = req.sourceChainId ?? destinationChainId;
+      return {
+        settlementId: `local_${req.idempotencyKey ?? "test"}`,
+        txHash: `0x${"ab".repeat(32)}` as `0x${string}`,
+        chainId: destinationChainId,
+        sourceChainId,
+        destinationChainId,
+        amount: req.amount,
+        status: "settled" as const,
+        tokenAddress: actual.ARC_USDC_ADDRESS,
+        route:
+          sourceChainId === destinationChainId ? "arc-native" : "source-to-arc",
+        forwarder: "circle-forwarder-scaffold" as const,
+      };
+    }),
+  };
+});
+
 const sender = {
   label: "Molly",
   address: "0x1111111111111111111111111111111111111111" as const,
