@@ -65,6 +65,7 @@ export function SlackSimulator() {
   const [draft, setDraft] = useState("Split lunch with the engineering team");
   const [phase, setPhase] = useState<Phase>("idle");
   const [flowId, setFlowId] = useState<number | null>(null);
+  const [settledIds, setSettledIds] = useState<Set<number>>(() => new Set());
 
   const threadRef = useRef<HTMLDivElement>(null);
   const push = useCallback((m: Omit<Msg, "id">) => {
@@ -122,8 +123,10 @@ export function SlackSimulator() {
 
   function confirm() {
     if (phase !== "review") return;
+    const id = flowId;
     setPhase("processing");
     window.setTimeout(() => {
+      if (id !== null) setSettledIds((s) => new Set(s).add(id));
       setPhase("idle");
       setFlowId(null);
     }, 1300);
@@ -140,6 +143,7 @@ export function SlackSimulator() {
     setDraft("Split lunch with the engineering team");
     setPhase("idle");
     setFlowId(null);
+    setSettledIds(new Set());
   }
 
   const fill = (t: string) => {
@@ -199,7 +203,7 @@ export function SlackSimulator() {
               key={m.id}
               msg={m}
               active={m.id === flowId && phase !== "idle"}
-              done={m.id === flowId && phase === "idle"}
+              done={settledIds.has(m.id)}
               phase={phase}
               onConfirm={confirm}
               onCancel={cancel}
