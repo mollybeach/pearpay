@@ -102,7 +102,7 @@ function extractRecipients(text: string): RawRecipient[] {
 
   // Capture "Send <Name> ..." / "Pay <Name> back" style proper-noun names.
   const verbs = [...SEND_VERBS, ...REQUEST_VERBS].join("|");
-  const nameRe = new RegExp(`\\b(?:${verbs})\\s+([A-Z][a-z]+)`, "g");
+  const nameRe = new RegExp(`\\b(?:${verbs})\\s+([A-Z][a-z]+)`, "gi");
   for (const m of text.matchAll(nameRe)) {
     add(m[1]!);
   }

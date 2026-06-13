@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { Header } from "./components/Header";
 import { Footer } from "./components/Footer";
+import { Providers } from "@/components/Providers";
 
 /**
  * Resolve the public base URL so the social-preview image is an absolute URL
@@ -73,9 +74,11 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
       <body className="bg-ambient min-h-screen font-sans">
-        <Header />
-        {children}
-        <Footer />
+        <Providers>
+          <Header />
+          {children}
+          <Footer />
+        </Providers>
       </body>
     </html>
   );

@@ -15,7 +15,11 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@dynamic-labs/ethereum": "^4.10.0",
+    "@dynamic-labs/sdk-react-core": "^4.10.0",
     "@hashgraph/sdk": "^2.62.0",
+    "@simplewebauthn/browser": "^13.1.0",
+    "@simplewebauthn/server": "^13.1.0",
     "next": "^14.2.0",
     "react": "^18.3.0",
     "react-dom": "^18.3.0",
