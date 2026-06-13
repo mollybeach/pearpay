@@ -181,10 +181,11 @@ Docs: [Unlink docs](https://docs.unlink.xyz) · [Partner guide (Dynamic × Unlin
 
 | Variable | How to obtain |
 |----------|---------------|
-| `UNLINK_API_KEY` | Unlink developer onboarding / ETHGlobal sponsor desk / [docs quickstart](https://docs.unlink.xyz) |
-| `UNLINK_ENGINE_URL` | Engine endpoint for your environment (e.g. arc-testnet) — provided with API access |
+| `UNLINK_API_KEY` | [dashboard.unlink.xyz](https://dashboard.unlink.xyz) → create project on **Arc Testnet** → **API Keys** → Create key (shown once) |
+| `UNLINK_ENGINE_URL` | `https://arc-testnet-production-api.unlink.xyz` (fixed hosted URL for Arc Testnet — same for all projects) |
+| `UNLINK_PROJECT_ID` | Project UUID from Unlink dashboard (optional reference — not read by SDK wrapper) |
 | `UNLINK_ENVIRONMENT` | `arc-testnet` (default — matches Pear Pay's Arc settlement chain) |
-| `UNLINK_ACCOUNT_MNEMONIC` | Generate a **new** 12- or 24-word BIP-39 mnemonic for the server-side Unlink account (`unlinkAccount.fromMnemonic`). **Never reuse a personal wallet seed.** |
+| `UNLINK_ACCOUNT_MNEMONIC` | `cast wallet new-mnemonic` — **12/24-word phrase**, not `cast wallet new`. **Quote the phrase** in `.env` if your loader splits on spaces: `UNLINK_ACCOUNT_MNEMONIC="word1 word2 …"`. Never reuse a personal wallet seed. |
 
 All three of `UNLINK_API_KEY`, `UNLINK_ENGINE_URL`, and `UNLINK_ACCOUNT_MNEMONIC` must be set for live private transfers. Otherwise `privateTransfer()` returns deterministic stubs.
 

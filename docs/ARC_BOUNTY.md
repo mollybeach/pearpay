@@ -98,6 +98,32 @@ Arc RPC configuration, and deployed escrow contract addresses.
 7. Close with the user experience: Pear Pay hides cross-chain complexity while
    Arc acts as the USDC settlement and liquidity hub.
 
+## Live judging demo script
+
+**Duration:** ~2 minutes · **Name the bounty:** *Best Smart Contracts on Arc with Advanced Stablecoin Logic* and/or *Best Chain Abstracted USDC Apps Using Arc as a Liquidity Hub*.
+
+### What to show
+
+1. **`/prizes` → Arc tab** — smart contract features + chain abstraction narrative.
+2. **`npm run verify:arc`** — live `escrow()` + `claim()` on Arc Testnet; paste ArcScan URLs for judges.
+3. **API rail selection:**
+   ```bash
+   curl -s -X POST http://localhost:3000/api/payments \
+     -H 'content-type: application/json' \
+     -d '{"message":"Send Alex $12.50 for dinner","sender":{"label":"Molly","address":"0xB214f8D70AB85F2628b8ba684D0C45a1a5bE4763"}}'
+   ```
+   Point out `rail: "arc"`, `destinationChainId: 5042002`, Arc USDC token address.
+4. **Claimable flow** — send to a phone number; show escrow-on-send + claim link (Twilio + Dynamic claim).
+5. **Foundry tests** — `npm run test:contracts` for PearPayEscrow lifecycle.
+
+### What to say
+
+> *Users never pick a chain. Pear Pay routes USDC through Arc as the liquidity hub. Claimable payments lock funds in PearPayEscrow on Arc until the recipient onboards via Dynamic and claims — with expiry refund and sender cancel.*
+
+**Master checklist:** [`docs/JUDGING.md`](./JUDGING.md) · **Run all pools:** `npm run judge:demo`
+
+---
+
 ## External Setup Before Live Judging
 
 - Set `FUNDER_PRIVATE_KEY` in `.env` (funded Arc wallet — never commit).

@@ -433,7 +433,7 @@ Unlink's privacy primitives (deposit → private transfer → withdraw) fit natu
 TODO: add the recorded demo link before final submission
 ```
 
-**Suggested demo script:** see `docs/DYNAMIC_BOUNTY.md` and `docs/ARC_BOUNTY.md`.
+**Suggested demo script:** see [`docs/JUDGING.md`](./JUDGING.md) · [`docs/ARC_BOUNTY.md`](./ARC_BOUNTY.md) · [`docs/DYNAMIC_BOUNTY.md`](./DYNAMIC_BOUNTY.md) · [`docs/UNLINK_BOUNTY.md`](./UNLINK_BOUNTY.md) · run `npm run judge:demo` before recording.
 
 **Cover in the video:**
 
@@ -484,8 +484,10 @@ After ETHGlobal NYC, Pear Pay will ship production escrow persistence (Postgres/
 
 | Doc | Purpose |
 |-----|---------|
+| `docs/JUDGING.md` | Master live-judging checklist (all 3 prize pools) |
 | `docs/ARC_BOUNTY.md` | Arc demo script + architecture |
 | `docs/DYNAMIC_BOUNTY.md` | Flow + agentic demo script |
+| `docs/UNLINK_BOUNTY.md` | Unlink private-mode demo + env setup |
 | `docs/AI_ATTRIBUTION.md` | AI tool disclosure |
 | `README.md` | Architecture diagram + quick start |
 

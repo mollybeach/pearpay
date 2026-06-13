@@ -39,7 +39,22 @@ ARC_USDC_ADDRESS=0x3600000000000000000000000000000000000000
 | Agent server wallet | Dynamic Node SDK (`@dynamic-labs-wallet/node-evm`) |
 | x402 agent pay | Server-wallet signed `X-Payment` header |
 
-Run `node scripts/verify-dynamic.mjs` to check env + unit tests.
+Run `npm run verify:dynamic` to check env + unit tests.
+
+**Master checklist:** [`docs/JUDGING.md`](./JUDGING.md) · **Run all pools:** `npm run judge:demo`
+
+## Live judging demo script
+
+**Duration:** ~2 minutes · **Name the bounty:** *Best Use of Flow* and/or *Best Agentic Build*.
+
+### What judges need to see
+
+| Track | Must demonstrate |
+|-------|------------------|
+| Best Use of Flow | Dynamic wallet connect → Face ID → Flow 8-step checkout → USDC on Arc |
+| Best Agentic Build | Server wallet autonomously pays x402-gated API without human per-call approval |
+| Best Overall Use | End-to-end conversational payment with Dynamic embedded wallet |
+| Joint nanopayments | Mention Unlink private mode + Arc settlement in same sentence |
 
 ## Demo script for judges
 

@@ -1,8 +1,9 @@
 # Unlink Integration — Private Payments for Pear Pay
 
-> Status: **wired & passing in stub mode.** The real `@unlink-xyz/sdk` is
-> installed and the code calls the actual SDK primitives; it activates the
-> moment the three Unlink env vars are set (see [Flip it on](#flip-it-on)).
+> Status: **live & verified on Arc testnet.** The real `@unlink-xyz/sdk@0.3.x`
+> is wired and a private payment has been confirmed end-to-end (shielded
+> deposit → withdraw to a fresh recipient). It falls back to a deterministic
+> stub when the Unlink env vars are unset (see [Flip it on](#flip-it-on)).
 
 This document is the single source of truth for how Pear Pay integrates Unlink:
 the prize we're targeting, the official docs, the SDK API, what becomes private,
@@ -23,9 +24,9 @@ default. Core primitives: `deposit()`, `transfer()`, `withdraw()`, `execute()`.
 
 **Qualification checklist:**
 
-- [x] Integrate the Unlink SDK (`@unlink-xyz/sdk`) **during the event**
-- [x] Use at least one private primitive: `deposit()` / `transfer()` / `withdraw()` / `execute()` — we use **transfer + deposit + withdraw**
-- [ ] Working demo showing the flow running **privately** (needs a live API key)
+- [x] Integrate the Unlink SDK (`@unlink-xyz/sdk@0.3.x`) **during the event**
+- [x] Use at least one private primitive: `deposit()` / `transfer()` / `withdraw()` / `execute()` — we use **deposit + withdraw**
+- [x] Working demo showing the flow running **privately** — verified live on Arc testnet (`LIVE_UNLINK=1 … tests/unlink-live.test.ts`)
 - [x] Public repo + README explaining exactly **what is now private**
 - [ ] **Joint prize:** also use the Dynamic SDK + Circle's tools (we already do)
 
@@ -39,24 +40,34 @@ default. Core primitives: `deposit()`, `transfer()`, `withdraw()`, `execute()`.
 - Circle Nanopayments (Gateway): <https://developers.circle.com/gateway/nanopayments>
 - <https://unlink.xyz>
 
-### The real SDK API (`@unlink-xyz/sdk@0.0.2-canary.0`)
+### The real SDK API (`@unlink-xyz/sdk@0.3.0-canary.621`)
+
+The Arc-testnet engine authorizes shielded transactions with an ERC-4337
+`execution_intent_v1` scheme (see `GET /info/environment`), so deposits must be
+signed by an EVM provider. The `0.3.x` SDK implements this; the older `0.0.2`
+Permit2-only deposit path is rejected by this engine.
 
 ```ts
-import { createUnlink, unlinkAccount } from "@unlink-xyz/sdk";
+import { createUnlinkClient, account, evm } from "@unlink-xyz/sdk/client";
 
-const account = unlinkAccount.fromMnemonic({ mnemonic });      // also fromSeed / fromKeys
-const client = createUnlink({ engineUrl, apiKey, account });   // backend client
+const client = createUnlinkClient({
+  engineUrl,                                          // arc-testnet-production-api.unlink.xyz
+  account: account.fromMnemonic({ mnemonic }),        // server Unlink account
+  evm: evm.fromViem({ walletClient, publicClient }),  // signs Permit2 + execution intent
+  register: async () => {},                           // server account is pre-registered
+  authorizationToken: { provider: async () => ({ token: apiKey, expiresAt }) },
+});
 await client.ensureRegistered();
 
-// The four private operations on UnlinkClient:
-await client.deposit({ token, amount });                                  // shield public → private
-await client.transfer({ token, amount, recipientAddress });              // private hop (amount + party hidden)
-await client.withdraw({ recipientEvmAddress, token, amount });           // exit to a fresh public EOA
-// (execute() is the contract-call primitive; not exposed on the client in
-//  this canary — transfer is our private primitive of record.)
-// → each returns TransactionResult { txId, status }
+// Private operations on UnlinkClient (amounts are BASE-UNIT strings, e.g. "50000"):
+await client.depositWithApproval({ token, amount }); // shield public → private (+ ERC-20 approval)
+await client.transfer({ token, amount, recipientAddress }); // private hop to an unlink1… address
+await client.withdraw({ recipientEvmAddress, token, amount }); // exit to a public EOA
+// → each returns a TransactionHandle; await handle.wait() → TransactionResult { txId, txHash, status }
 ```
 
+Delivering a private payment to an **EVM recipient** is **deposit → withdraw**
+(transfer's `recipientAddress` is a bech32m `unlink1…` address, not an EVM one).
 `environment` for our settlement chain is **`arc-testnet`**.
 
 ---
@@ -90,8 +101,10 @@ and the counterparties are hidden on-chain.**
 3. **Settlement** (`settleOnRail("unlink", …)`) calls
    `privateTransfer()` so amounts and counterparties stay shielded.
 4. **Integration** (`src/integrations/unlink/index.ts`) wraps the SDK:
-   - `deposit()` → `client.deposit({ token: USDC, amount })`
-   - `privateTransfer()` → `client.transfer({ token, amount, recipientAddress })`
+   - `deposit()` → `client.depositWithApproval({ token: USDC, amount })`
+   - `privateTransfer()` → shields the shortfall (`depositWithApproval`) then
+     `client.withdraw({ recipientEvmAddress, token, amount })` so funds reach an
+     EVM recipient through the pool, unlinkable from the funder
    - `withdraw()` → `client.withdraw({ recipientEvmAddress, token, amount })`
    - Gated by config; **deterministic stub** (no SDK/network) when unset, so
      demos and tests run offline. Client is created lazily + cached.
@@ -123,11 +136,14 @@ private micropayments for AI inference and pay-per-request APIs.
 Set these in `.env` (all already scaffolded), then restart:
 
 ```bash
-UNLINK_API_KEY=          # from https://docs.unlink.xyz quickstart
-UNLINK_ENGINE_URL=       # Unlink engine endpoint for arc-testnet
+UNLINK_API_KEY=          # dashboard.unlink.xyz → project → API Keys
+UNLINK_ENGINE_URL=https://arc-testnet-production-api.unlink.xyz
+UNLINK_PROJECT_ID=       # dashboard project UUID (reference; optional)
 UNLINK_ENVIRONMENT=arc-testnet
-UNLINK_ACCOUNT_MNEMONIC= # server-side Unlink account seed (12/24 words)
+UNLINK_ACCOUNT_MNEMONIC= # cast wallet new-mnemonic — NOT cast wallet new
 ```
+
+See [`docs/UNLINK_BOUNTY.md`](./UNLINK_BOUNTY.md) for the full judging demo script.
 
 With all three (key + engine + mnemonic) present, `isConfigured()` flips true
 and every private payment runs through the **real** Unlink SDK. Verify:
