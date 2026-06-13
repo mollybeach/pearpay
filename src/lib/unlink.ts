@@ -1,7 +1,12 @@
 import type { PaymentPayload } from "@/lib/payload";
 
+/**
+ * Client-side helper that asks the backend to shield a payment through Unlink.
+ * Returns the real status + note id reported by `/api/privacy/shield`.
+ */
 export interface ShieldResult {
-  status: "shielded" | "stub";
+  status: "shielded" | "settled" | "stub";
+  noteId?: string;
   intentId: string;
 }
 
@@ -18,6 +23,17 @@ export async function shieldPayment(
     }),
   });
 
-  await res.json();
-  return { status: "stub", intentId: payload.intent_id };
+  const data = (await res.json().catch(() => null)) as {
+    status?: string;
+    note_id?: string;
+  } | null;
+
+  const status: ShieldResult["status"] =
+    data?.status === "settled"
+      ? "settled"
+      : data?.status === "shielded"
+        ? "shielded"
+        : "stub";
+
+  return { status, noteId: data?.note_id, intentId: payload.intent_id };
 }
