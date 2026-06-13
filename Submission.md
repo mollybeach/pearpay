@@ -210,100 +210,246 @@ Copy the selections below into each ETHGlobal dropdown. Use **Other** / free-tex
 
 ### Are you using any Ethereum developer tools for your project?
 
+The ETHGlobal form uses a fixed multiselect dropdown. All options from the form:
+
+`1"` · `Alchemy` · `Alchemyweb3` · `Anon Aadhaar` · `ASI` · `Avail` · `Bandada` · `Brownie` · `cmtp` · `Create Eth App` · `Curvegrid` · `Dappsys` · `Embark` · `Epirus` · `Etherlime` · `ethers-rs` · `ethers.js` · `Fluence` · `Foundry` · `Hardhat` · `HQ20` · `Hyperlane` · `LayerZero` · `Ledger` · `light.js` · `Lighthouse` · `MACI` · `MUD` · `None` · `Ocean` · `OpenZeppelin SDK` · `Privy` · `Proof of Email` · `Remix` · `Reown` · `Saga` · `scaffold-eth` · `Self` · `Semaphore` · `Sindri` · `The Graph` · `Truffle` · `TypeChain` · `vlayer` · `Waffle` · `Walrus` · `web3-wrapper` · `web3.js` · `Web3j`
+
+**Select ONLY these for Pear Pay** (do not select the whole list):
+
+| Form option | Why |
+|-------------|-----|
+| **Foundry** | `foundry.toml`, `contracts/test/PearPayEscrow.t.sol`, `contracts/script/DeployPearPayEscrow.s.sol` — compile, test, and deploy `PearPayEscrow.sol` on Arc / Hedera EVM |
+| **Reown** | Wallet connectivity via wagmi / Dynamic (`@reown/appkit` in the dependency tree) |
+
+**Quick copy-paste checklist:**
+
 ```
-Solidity
+Foundry
+Reown
+```
+
+**Do not select:** `None`, `Hardhat`, `Truffle`, `Brownie`, `Remix`, `ethers.js`, `web3.js`, `Alchemy`, `OpenZeppelin SDK`, `Privy`, `scaffold-eth`, `The Graph`, `LayerZero`, or anything else unless Pear Pay uses it directly.
+
+**Not in this dropdown — add under "Other specific technologies" below:**
+
+```
 viem
 wagmi
 ENS
-Hardhat / Foundry (contract compile & deploy)
-Circle Developer tools (USDC, Gateway, Wallets)
 Dynamic SDK
+Circle Arc
 Unlink SDK
-Twilio (claim delivery — not Ethereum-native but part of stack)
-Hedera SDK (@hashgraph/sdk — HCS audit + HTS USDC)
+Hedera SDK
+Twilio
+WebAuthn
 ```
-
-*(If the form only allows standard picks, select: **Solidity**, **viem**, **wagmi**, **ENS**, **Hardhat** or **Foundry**.)*
 
 ---
 
 ### Which blockchain networks will your project interact with?
 
+The ETHGlobal form uses a fixed multiselect dropdown. All options from the form:
+
+`0G` · `Aleo` · `Aptos` · `Arc` · `Arcology` · `Arbitrum` · `Base` · `Binance Smart Chain` · `Bitcoin` · `Cardano` · `Celo` · `Chiliz` · `Citrea` · `Cosmos` · `Ethereum` · `Etherlink` · `EVVM` · `Filecoin` · `Flare` · `Flow` · `Gnosis` · `Hedera` · `Integra` · `Internet Computer (ICP)` · `Intmax` · `Iron Fish` · `Kadena` · `Loopring` · `Mantle` · `Mina` · `Monad` · `None` · `Oasis` · `Optimism` · `Polkadot` · `Polygon` · `Polygon POS` · `Polygon zkEVM` · `Ripple` · `Ronin` · `Rootstock` · `Scroll` · `Starknet` · `Stellar` · `Sui` · `Tezos` · `Ton` · `Tron` · `Worldchain` · `xDai` · `XRP Ledger` · `Yellow` · `Zircuit` · `zkSync`
+
+**Select these for Pear Pay:**
+
+| Form option | Why |
+|-------------|-----|
+| **Arc** | Primary USDC settlement hub — `PearPayEscrow.sol`, Arc testnet (chain 5042002), Flow settles here |
+| **Hedera** | HTS USDC settlement, HCS audit receipts, Hedera EVM escrow deployment |
+| **Ethereum** | ENS name resolution, default sender chain (chain id 1) |
+| **Arbitrum** | Flow cross-chain funding source — USDC routing in `src/integrations/arc/index.ts` |
+| **Base** | Flow cross-chain funding source — USDC routing |
+| **Optimism** | Flow cross-chain funding source — USDC routing |
+| **Polygon** | Flow cross-chain funding source — USDC routing |
+
+**Quick copy-paste checklist:**
+
 ```
-Arc (Circle L1 — primary USDC settlement)
-Hedera (HTS USDC + HCS audit receipts)
-Ethereum (ENS resolution)
+Arc
+Hedera
+Ethereum
 Arbitrum
 Base
 Optimism
 Polygon
-Any EVM chain supported by Dynamic Flow (cross-chain funding)
 ```
 
-*(Minimum honest set: **Arc**, **Ethereum**, **Hedera**, plus any Flow source chains you demo — e.g. **Arbitrum**, **Base**.)*
+**Do not select:**
+
+- **Flow** — that is the Flow blockchain (Dapper), not Dynamic Fireblocks Flow
+- **None** — Pear Pay settles on multiple chains
+- Chains with no code integration (Aptos, Sui, Bitcoin, Solana-adjacent, etc.)
+
+*(If trimming for a minimal honest set, keep **Arc**, **Hedera**, and **Ethereum** — add L2s only if you demo Flow paying from Arbitrum/Base in the video.)*
 
 ---
 
 ### Which programming languages are you using in your project?
+
+The ETHGlobal form uses a fixed multiselect dropdown. All options from the form:
+
+`APL` · `Assembly` · `Bash/Shell` · `C` · `C#` · `C++` · `Cadence` · `Cairo` · `Clojure` · `COBOL` · `Crystal` · `Dart` · `Delphi` · `Elixir` · `Erlang` · `F#` · `Fe` · `Go` · `Groovy` · `Haskell` · `HTML/CSS` · `Java` · `JavaScript` · `Julia` · `Kotlin` · `LISP` · `Matlab` · `Node.js` · `None` · `Objective-C` · `Perl` · `PHP` · `PowerShell` · `Python` · `R` · `Ruby` · `Rust` · `Scala` · `Solidity` · `SQL` · `Swift` · `TypeScript` · `VBA` · `Vyper`
+
+**Select these for Pear Pay:**
+
+| Form option | Why |
+|-------------|-----|
+| **TypeScript** | Primary language — Next.js app, API routes, payment orchestrator, integrations |
+| **JavaScript** | Config/tooling (`next.config.mjs`, ESLint, etc.) |
+| **Solidity** | `PearPayEscrow.sol` — claimable payment escrow on Arc / Hedera EVM |
+| **Swift** | Native iMessage extension (`ios/PearPayMessages/`) |
+| **Node.js** | Backend runtime for Next.js API routes and webhooks |
+
+**Quick copy-paste checklist:**
 
 ```
 TypeScript
 JavaScript
 Solidity
 Swift
+Node.js
 ```
+
+**Optional:** `HTML/CSS` if you want to count the Tailwind/Next.js UI layer (not required).
+
+**Do not select:** `None`, or languages with no project code (Python, Rust, Go, etc.).
 
 ---
 
 ### Are you using any web frameworks for your project?
 
+The ETHGlobal form uses a fixed multiselect dropdown. All options from the form:
+
+`Angular` · `Angular.js` · `ASP.NET` · `ASP.NET Core` · `Django` · `Drupal` · `Express` · `FastAPI` · `Flask` · `Gatsby` · `jQuery` · `Laravel` · `Next.js` · `None` · `React.js` · `Ruby on Rails` · `Spring` · `Svelte` · `Symfony` · `Vue.js`
+
+**Select these for Pear Pay:**
+
+| Form option | Why |
+|-------------|-----|
+| **Next.js** | Full-stack app — App Router UI, API routes, claim pages, webhooks |
+| **React.js** | All client components (`PaymentDemo`, `PaymentFlow`, `AgentDemo`, etc.) — form label is `React.js`, not `React` |
+
+**Quick copy-paste checklist:**
+
 ```
 Next.js
-React
-Tailwind CSS
+React.js
 ```
+
+**Do not select:** `None`, or frameworks Pear Pay does not use (Vue.js, Angular, Svelte, Express, Django, etc.).
+
+**Not in this dropdown — put in "Other specific technologies":** Tailwind CSS, pnpm, Vercel.
 
 ---
 
 ### Are you using any databases for your project?
 
+The ETHGlobal form uses a fixed multiselect dropdown. All options from the form:
+
+`AvionDB` · `Cassandra` · `Couchbase` · `DynamoDB` · `Elasticsearch` · `Firebase` · `IBM DB2` · `IPDB` · `LevelDB` · `MariaDB` · `Microsoft SQL Server` · `MongoDB` · `MySQL` · `None` · `Oracle` · `OrbitDB` · `PostgreSQL` · `Redis` · `SQLite` · `Supabase`
+
+**Select this for Pear Pay:**
+
+| Form option | Why |
+|-------------|-----|
+| **None** | No external database in the demo — claimable payments use an in-memory `EscrowStore`; WebAuthn uses a local JSON file (`.webauthn-store.json`), not Postgres/Mongo/etc. |
+
+**Quick copy-paste checklist:**
+
 ```
-None (in-memory store for hackathon MVP)
+None
 ```
 
-*(Escrow/claim state uses an in-memory `EscrowStore` for zero-infra demo. Production path is Postgres/KV — do **not** claim a DB unless you wire one before submit.)*
+**Do not select:** PostgreSQL, Redis, MongoDB, Supabase, etc. — Pear Pay does not wire any of these for the hackathon MVP.
+
+*(Production path is Postgres/KV for escrow persistence — only update this answer if you actually integrate a DB before submitting.)*
 
 ---
 
 ### Are you using any design tools for your project?
 
+The ETHGlobal form uses a fixed multiselect dropdown. All options from the form:
+
+`Figma` · `Flutter` · `Illustrator` · `MS Paint` · `None` · `Photoshop` · `Sketch` · `Webflow` · `Zeppelin`
+
+**Select this for Pear Pay:**
+
+| Form option | Why |
+|-------------|-----|
+| **None** | UI was built directly in code — Next.js + Tailwind for the web app, HTML iMessage previews (`public/imessage-payment-ux.html`), and SwiftUI in Xcode for the iMessage extension. No Figma, Sketch, or Webflow files in the repo. |
+
+**Quick copy-paste checklist:**
+
 ```
-Figma
-Cursor (UI iteration)
+None
 ```
 
-*(Adjust if your team used something else — e.g. none, Sketch, Penpot.)*
+**Do not select:** Figma, Sketch, Webflow, etc. unless your team actually used them for mockups.
+
+**Not in this dropdown — put in "Other specific technologies" or AI attribution:** Cursor (UI iteration / scaffolding during the hackathon).
 
 ---
 
 ### Other specific technologies, libraries, frameworks, or tools
 
+*(Free-text multiselect — type each value and hit Enter to add it. Use this for everything that does not fit the categories above.)*
+
+**Add these for Pear Pay** (type one at a time, press Enter after each):
+
+| Value to type | Why |
+|---------------|-----|
+| `viem` | EVM reads, ENS resolution, Flow signing |
+| `wagmi` | Wallet hooks and chain context |
+| `ENS` | Human-readable recipient identity (`molly.eth`) |
+| `Dynamic SDK` | Embedded wallets, server/agent wallets, auth |
+| `Fireblocks Flow` | Cross-chain funding → USDC settlement on Arc |
+| `Circle Arc` | USDC liquidity hub and settlement |
+| `Unlink SDK` | Private balances and transfers |
+| `Hedera SDK` | HTS USDC settlement + HCS audit receipts |
+| `Twilio` | SMS/WhatsApp claim links + Verify |
+| `WebAuthn` | Face ID / passkey payment approval |
+| `HTTP 402` | Agent micropayments (x402 paywall demo) |
+| `Tailwind CSS` | UI styling |
+| `pnpm` | Package manager |
+| `Vercel` | Deploy web app + API |
+| `Xcode` | iMessage extension + Apple Pay (PassKit) |
+| `zod` | API request validation |
+| `vitest` | Unit/integration tests |
+| `Cursor` | AI-assisted scaffolding and docs (reviewed by team) |
+
+**Quick copy-paste list** (add each line separately in the form):
+
 ```
-@dynamic-labs/sdk-react-core
-@dynamic-labs/ethereum
-@hashgraph/sdk
-@simplewebauthn/browser
-@simplewebauthn/server
-twilio
-zod
-vitest
+viem
+wagmi
+ENS
+Dynamic SDK
+Fireblocks Flow
+Circle Arc
+Unlink SDK
+Hedera SDK
+Twilio
+WebAuthn
+HTTP 402
+Tailwind CSS
 pnpm
 Vercel
-Xcode / Messages framework / PassKit (iMessage extension)
-OpenAI (Twilio Voice + NLP assist — if demoed)
-HTTP 402 / x402 (agent micropayments)
-PearPayEscrow.sol (Arc + Hedera EVM)
+Xcode
+zod
+vitest
+Cursor
 ```
+
+**Optional** (add only if you demo them):
+
+```
+OpenAI
+Twilio Voice
+```
+
+**Already covered in other form fields — do not duplicate here:** Next.js, React.js, Foundry/Reown (Ethereum dev tools), Arc/Hedera/Ethereum/Arbitrum/Base/Optimism/Polygon (networks), TypeScript/JavaScript/Solidity/Swift/Node.js (languages), None (databases), None (design tools).
 
 ---
 

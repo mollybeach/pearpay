@@ -26,15 +26,15 @@ interface Msg {
   pay?: PayInfo;
 }
 
-const CONTACT = "Sasha";
-const QUICK = ["Send Sasha $20", "Pay sasha.eth 15 USDC", "Send Jordan $40"];
+const CONTACT = "Molly";
+const QUICK = ["Send Molly $20", "Pay molly.eth 15 USDC", "Send Jordan $40"];
 
 const INITIAL: Msg[] = [
   {
     id: 1,
     from: "bot",
     kind: "text",
-    text: "👋 I'm the Pear Pay bot. Tell me who to pay — e.g. “Send Sasha $20”.",
+    text: "👋 I'm the Pear Pay bot. Tell me who to pay — e.g. “Send Molly $20”.",
   },
 ];
 
@@ -43,7 +43,7 @@ const nextId = () => ++mid;
 
 export function TelegramSimulator() {
   const [messages, setMessages] = useState<Msg[]>(INITIAL);
-  const [draft, setDraft] = useState("Send Sasha $20");
+  const [draft, setDraft] = useState("Send Molly $20");
   const [phase, setPhase] = useState<Phase>("idle");
   const [pending, setPending] = useState<PayInfo | null>(null);
   const [reviewId, setReviewId] = useState<number | null>(null);
@@ -83,7 +83,7 @@ export function TelegramSimulator() {
         push({
           from: "bot",
           kind: "text",
-          text: "I can send money for you 💸 Try “Send Sasha $20” or “Pay sasha.eth 15 USDC”.",
+          text: "I can send money for you 💸 Try “Send Molly $20” or “Pay molly.eth 15 USDC”.",
         });
       }, 450);
     }
@@ -134,7 +134,7 @@ export function TelegramSimulator() {
 
   function resetDemo() {
     setMessages(INITIAL);
-    setDraft("Send Sasha $20");
+    setDraft("Send Molly $20");
     setPhase("idle");
     setPending(null);
     setReviewId(null);
