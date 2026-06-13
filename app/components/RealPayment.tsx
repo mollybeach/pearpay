@@ -19,8 +19,8 @@ import {
   EXPLORER_TX,
   USDC_BASE_SEPOLIA,
   USDC_FAUCET,
-  wagmiConfig,
-} from "@/lib/wagmi";
+  demoWagmiConfig,
+} from "@/lib/wagmi-demo";
 
 /**
  * Live "Try it" payment — a REAL on-chain USDC transfer on Base Sepolia.
@@ -31,12 +31,12 @@ import {
  * it works regardless of the app-wide (Dynamic) provider state.
  */
 
-const queryClient = new QueryClient();
+const demoQueryClient = new QueryClient();
 
 export function RealPayment() {
   return (
-    <WagmiProvider config={wagmiConfig}>
-      <QueryClientProvider client={queryClient}>
+    <WagmiProvider config={demoWagmiConfig}>
+      <QueryClientProvider client={demoQueryClient}>
         <RealPaymentInner />
       </QueryClientProvider>
     </WagmiProvider>

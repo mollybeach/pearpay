@@ -1,25 +1,15 @@
-import {
-  createPublicClient,
-  createWalletClient,
-  defineChain,
-  erc20Abi,
-  getAddress,
-  http,
-  isAddress,
-} from "viem";
-import { privateKeyToAccount } from "viem/accounts";
 import { assertConfiguredForProduction, getEnv } from "@/lib/env";
 import { logger } from "@/lib/logger";
 import { formatUsdc, type UsdcAmount } from "@/lib/money";
+import { transferUsdcOnArc } from "./escrow";
+import { isArcOnChainSettlementLive } from "./client";
 import {
   ARC_TESTNET_CHAIN_ID,
   ARC_USDC_ADDRESS,
   ARC_TESTNET_EURC_ADDRESS,
   getArcNetworkConfig,
-  type ArcNetworkConfig,
 } from "./config";
-
-const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
+import { arcExplorerTxUrl } from "./chain";
 
 const log = logger.scoped("arc");
 
@@ -65,30 +55,7 @@ export interface SettlementReceipt {
   status: "settled" | "pending";
   tokenAddress: `0x${string}`;
   route: "arc-native" | "source-to-arc";
-  forwarder: "arc-onchain" | "circle-gateway" | "circle-forwarder-scaffold";
-}
-
-/** Build a viem chain object for the configured Arc network. */
-function arcChain(arc: ArcNetworkConfig) {
-  return defineChain({
-    id: arc.chainId,
-    name: arc.name,
-    nativeCurrency: { name: "USDC", symbol: "USDC", decimals: 18 },
-    rpcUrls: { default: { http: [arc.rpcUrl] } },
-    blockExplorers: { default: { name: "ArcScan", url: arc.explorerUrl } },
-    testnet: true,
-  });
-}
-
-/** Address of the configured funder/treasury wallet, if a key is set. */
-export function arcFunderAddress(): `0x${string}` | null {
-  const key = getEnv().FUNDER_PRIVATE_KEY;
-  if (!key) return null;
-  try {
-    return privateKeyToAccount(key as `0x${string}`).address;
-  } catch {
-    return null;
-  }
+  forwarder: "circle-gateway" | "circle-forwarder-scaffold" | "arc-native-viem";
 }
 
 /** Resolve the USDC token address for a chain, defaulting to Arc. */
@@ -96,97 +63,13 @@ export function usdcAddress(chainId: number): `0x${string}` {
   return USDC_ADDRESSES[chainId] ?? ARC_USDC_ADDRESS;
 }
 
-/**
- * Settle a USDC transfer through Arc. Local and test environments can return a
- * deterministic receipt, but production requires Circle credentials.
- */
-export async function settleUsdc(
+function localStubSettlement(
   req: SettlementRequest,
-): Promise<SettlementReceipt> {
-  const env = getEnv();
-  const arc = getArcNetworkConfig(env);
-  const destinationChainId = req.chainId ?? arc.chainId;
-  const sourceChainId = req.sourceChainId ?? destinationChainId;
-  // Prefer the env-configured Arc USDC address for the Arc chain.
-  const tokenAddress =
-    destinationChainId === arc.chainId
-      ? arc.stablecoins.USDC
-      : usdcAddress(destinationChainId);
-  const route =
-    sourceChainId === destinationChainId ? "arc-native" : "source-to-arc";
-
-  // Real on-chain settlement is possible when a funder/treasury key is set and
-  // we're settling on the configured Arc chain to a real recipient address.
-  const canSettleOnChain =
-    Boolean(env.FUNDER_PRIVATE_KEY) &&
-    destinationChainId === arc.chainId &&
-    isAddress(req.toAddress, { strict: false }) &&
-    req.toAddress.toLowerCase() !== ZERO_ADDRESS;
-
-  if (canSettleOnChain) {
-    try {
-      const account = privateKeyToAccount(
-        env.FUNDER_PRIVATE_KEY as `0x${string}`,
-      );
-      const chain = arcChain(arc);
-      const wallet = createWalletClient({
-        account,
-        chain,
-        transport: http(arc.rpcUrl),
-      });
-      const publicClient = createPublicClient({
-        chain,
-        transport: http(arc.rpcUrl),
-      });
-
-      // Normalize to a checksummed address (accepts any-case valid input).
-      const recipient = getAddress(req.toAddress.toLowerCase() as `0x${string}`);
-      const txHash = await wallet.writeContract({
-        address: getAddress(tokenAddress.toLowerCase() as `0x${string}`),
-        abi: erc20Abi,
-        functionName: "transfer",
-        args: [recipient, req.amount],
-      });
-      log.info("arc on-chain settlement broadcast", {
-        txHash,
-        amount: formatUsdc(req.amount),
-        to: req.toAddress,
-      });
-
-      // Wait briefly for inclusion; report "pending" if it hasn't confirmed.
-      let status: SettlementReceipt["status"] = "pending";
-      try {
-        const receipt = await publicClient.waitForTransactionReceipt({
-          hash: txHash,
-          timeout: 30_000,
-        });
-        status = receipt.status === "success" ? "settled" : "pending";
-      } catch {
-        /* still pending — return the hash so the caller can poll. */
-      }
-
-      return {
-        settlementId: `arc_${txHash.slice(2, 12)}`,
-        txHash,
-        chainId: destinationChainId,
-        sourceChainId,
-        destinationChainId,
-        amount: req.amount,
-        status,
-        tokenAddress,
-        route,
-        forwarder: "arc-onchain",
-      };
-    } catch (err) {
-      log.error("arc on-chain settlement failed", { err: String(err) });
-      throw new Error(
-        `Arc settlement failed: ${err instanceof Error ? err.message : String(err)}`,
-      );
-    }
-  }
-
-  // No funder key (or non-Arc / placeholder recipient): deterministic stub so
-  // local demos and tests still work without funded keys.
+  destinationChainId: number,
+  sourceChainId: number,
+  tokenAddress: `0x${string}`,
+  route: "arc-native" | "source-to-arc",
+): SettlementReceipt {
   assertConfiguredForProduction("arc", false);
   const fakeHash = `0x${Buffer.from(
     `${req.fromAddress}${req.toAddress}${req.amount}`,
@@ -194,8 +77,9 @@ export async function settleUsdc(
     .toString("hex")
     .padEnd(64, "0")
     .slice(0, 64)}` as `0x${string}`;
-  log.debug("arc stub settlement", {
+  log.debug("arc local settlement", {
     amount: formatUsdc(req.amount),
+    sourceChainId,
     destinationChainId,
     route,
   });
@@ -213,9 +97,119 @@ export async function settleUsdc(
   };
 }
 
+/**
+ * Settle a USDC transfer through Arc. Local and test environments can return a
+ * deterministic receipt, but production requires Circle credentials.
+ */
+export async function settleUsdc(
+  req: SettlementRequest,
+): Promise<SettlementReceipt> {
+  const env = getEnv();
+  const arc = getArcNetworkConfig(env);
+  const destinationChainId = req.chainId ?? arc.chainId;
+  const sourceChainId = req.sourceChainId ?? destinationChainId;
+  const tokenAddress = usdcAddress(destinationChainId);
+  const route = sourceChainId === destinationChainId ? "arc-native" : "source-to-arc";
+
+  if (
+    isArcOnChainSettlementLive() &&
+    sourceChainId === destinationChainId &&
+    destinationChainId === arc.chainId
+  ) {
+    const { txHash } = await transferUsdcOnArc(req.toAddress, req.amount);
+    log.info("arc on-chain settlement confirmed", {
+      txHash,
+      amount: formatUsdc(req.amount),
+    });
+    return {
+      settlementId: `arc_${req.idempotencyKey ?? txHash.slice(2, 10)}`,
+      txHash,
+      chainId: destinationChainId,
+      sourceChainId,
+      destinationChainId,
+      amount: req.amount,
+      status: "settled",
+      tokenAddress,
+      route: "arc-native",
+      forwarder: "arc-native-viem",
+    };
+  }
+
+  if (
+    !env.CIRCLE_API_KEY ||
+    env.NODE_ENV === "test" ||
+    (env.NODE_ENV !== "production" && !isArcOnChainSettlementLive())
+  ) {
+    return localStubSettlement(
+      req,
+      destinationChainId,
+      sourceChainId,
+      tokenAddress,
+      route,
+    );
+  }
+
+  // Circle Wallets / Gateway API — not the blockchain RPC URL.
+  const circleApiBase = env.ARC_RPC_URL?.includes("rpc.")
+    ? "https://api.circle.com"
+    : (env.ARC_RPC_URL ?? "https://api.circle.com");
+
+  const res = await fetch(`${circleApiBase}/v1/transfers`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${env.CIRCLE_API_KEY}`,
+      ...(req.idempotencyKey
+        ? { "X-Idempotency-Key": req.idempotencyKey }
+        : {}),
+    },
+    body: JSON.stringify({
+      source: { address: req.fromAddress },
+      destination: { address: req.toAddress },
+      amount: { currency: "USDC", amount: formatUsdc(req.amount) },
+      sourceChainId,
+      destinationChainId,
+      tokenAddress,
+      route,
+    }),
+  });
+
+  if (!res.ok) {
+    throw new Error(`Arc settlement failed: ${res.status}`);
+  }
+
+  const data = (await res.json()) as {
+    id: string;
+    txHash: `0x${string}`;
+    status: string;
+  };
+
+  log.info("arc settlement submitted", { id: data.id, status: data.status });
+  return {
+    settlementId: data.id,
+    txHash: data.txHash,
+    chainId: destinationChainId,
+    sourceChainId,
+    destinationChainId,
+    amount: req.amount,
+    status: data.status === "complete" ? "settled" : "pending",
+    tokenAddress,
+    route,
+    forwarder: "circle-gateway",
+  };
+}
+
 export {
   ARC_TESTNET_CHAIN_ID,
   ARC_USDC_ADDRESS,
   ARC_TESTNET_EURC_ADDRESS,
   getArcNetworkConfig,
+  arcExplorerTxUrl,
 };
+export { isArcEscrowLive, isArcOnChainSettlementLive } from "./client";
+export {
+  escrowOnChain,
+  claimOnChain,
+  paymentIdToBytes32,
+  generateClaimCredentials,
+} from "./escrow";

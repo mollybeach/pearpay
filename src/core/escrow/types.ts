@@ -27,6 +27,16 @@ export interface ClaimablePayment {
   expiresAt: number;
   claimedAt?: number;
   claimedByAddress?: `0x${string}`;
+  /** bytes32 payment key on PearPayEscrow (keccak256 of backend id). */
+  onChainPaymentId?: `0x${string}`;
+  /** Server-held secret for on-chain claim(); never expose via public API. */
+  claimSecret?: `0x${string}`;
+  /** Arc explorer link for the escrow() transaction. */
+  escrowTxHash?: `0x${string}`;
+  escrowExplorerUrl?: string;
+  /** Arc explorer link for the claim() transaction. */
+  claimTxHash?: `0x${string}`;
+  claimExplorerUrl?: string;
 }
 
 /** Parameters for creating a new escrowed claimable payment. */

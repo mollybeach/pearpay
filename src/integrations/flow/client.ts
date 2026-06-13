@@ -1,9 +1,17 @@
 /**
  * Fireblocks Flow HTTP client — checkout payment lifecycle.
- * Handles the Dynamic Flow checkout lifecycle for PearPay.
+ * Sessions persist to disk so multi-step API routes work on serverless.
  */
 
 import { getEnv } from "@/lib/env";
+import {
+  getFlowSessionByIntent,
+  getFlowSessionByTransaction,
+  saveFlowSession,
+  updateFlowSession,
+  updateFlowSessionByTransaction,
+  type FlowSessionRecord,
+} from "./store";
 
 export class FlowError extends Error {
   constructor(
@@ -15,19 +23,7 @@ export class FlowError extends Error {
   }
 }
 
-interface FlowSession {
-  transaction_id: string;
-  session_token: string;
-  intent_id: string;
-  amount: number;
-  recipient: string;
-  checkout_id: string;
-  settlement?: Record<string, unknown>;
-  status?: string;
-}
-
-const sessions = new Map<string, FlowSession>();
-const transactions = new Map<string, FlowSession>();
+export type FlowSession = FlowSessionRecord;
 
 const DYNAMIC_API_BASE = "https://app.dynamicauth.com/api/v0";
 const ARC_CHAIN_ID = "5042002";
@@ -118,6 +114,7 @@ export class FlowClient {
             destinations: [
               {
                 chainName: "EVM",
+                chainId: ARC_CHAIN_ID,
                 type: "address",
                 identifier: settlementAddress,
               },
@@ -149,7 +146,7 @@ export class FlowClient {
             recipient: params.recipient,
           },
           destinationAddresses: [
-            { address: params.recipient, chain: "EVM" },
+            { address: params.recipient, chain: "EVM", chainId: ARC_CHAIN_ID },
           ],
         },
       },
@@ -163,9 +160,10 @@ export class FlowClient {
       amount: params.amount,
       recipient: params.recipient,
       checkout_id: params.checkoutId,
+      status: "initiated",
+      created_at: Date.now(),
     };
-    sessions.set(params.intentId, record);
-    transactions.set(record.transaction_id, record);
+    saveFlowSession(record);
     return record;
   }
 
@@ -178,7 +176,7 @@ export class FlowClient {
       fromChainName?: string;
     },
   ): Promise<Record<string, unknown>> {
-    return this.request(
+    const result = await this.request(
       "POST",
       `/sdk/${this.envId}/transactions/${transactionId}/source`,
       {
@@ -191,6 +189,8 @@ export class FlowClient {
         },
       },
     );
+    updateFlowSessionByTransaction(transactionId, { status: "source_attached" });
+    return result;
   }
 
   async getQuote(
@@ -198,7 +198,7 @@ export class FlowClient {
     sessionToken: string,
     params: { fromTokenAddress: string; slippage?: number },
   ): Promise<Record<string, unknown>> {
-    return this.request(
+    const result = await this.request(
       "POST",
       `/sdk/${this.envId}/transactions/${transactionId}/quote`,
       {
@@ -209,13 +209,15 @@ export class FlowClient {
         },
       },
     );
+    updateFlowSessionByTransaction(transactionId, { status: "quoted" });
+    return result;
   }
 
   async prepare(
     transactionId: string,
     sessionToken: string,
   ): Promise<Record<string, unknown>> {
-    return this.request(
+    const result = await this.request(
       "POST",
       `/sdk/${this.envId}/transactions/${transactionId}/prepare`,
       {
@@ -226,6 +228,8 @@ export class FlowClient {
         },
       },
     );
+    updateFlowSessionByTransaction(transactionId, { status: "prepared" });
+    return result;
   }
 
   async recordBroadcast(
@@ -233,7 +237,7 @@ export class FlowClient {
     sessionToken: string,
     txHash: string,
   ): Promise<Record<string, unknown>> {
-    return this.request(
+    const result = await this.request(
       "POST",
       `/sdk/${this.envId}/transactions/${transactionId}/broadcast`,
       {
@@ -241,6 +245,11 @@ export class FlowClient {
         body: { txHash },
       },
     );
+    updateFlowSessionByTransaction(transactionId, {
+      status: "broadcast",
+      settlement: { txHash },
+    });
+    return result;
   }
 
   async getTransaction(transactionId: string): Promise<Record<string, unknown>> {
@@ -259,7 +268,13 @@ export class FlowClient {
       const tx = await this.getTransaction(transactionId);
       const settlement = tx.settlementState as string | undefined;
       const execution = tx.executionState as string | undefined;
-      if (settlement === "completed") return tx;
+      if (settlement === "completed") {
+        updateFlowSessionByTransaction(transactionId, {
+          status: "completed",
+          settlement: tx,
+        });
+        return tx;
+      }
       if (
         settlement === "failed" ||
         execution === "failed" ||
@@ -277,19 +292,18 @@ export class FlowClient {
   }
 
   getSession(intentId: string): FlowSession | undefined {
-    return sessions.get(intentId);
+    return getFlowSessionByIntent(intentId);
   }
 
   getSessionByTx(transactionId: string): FlowSession | undefined {
-    return transactions.get(transactionId);
+    return getFlowSessionByTransaction(transactionId);
   }
 
   markSettled(transactionId: string, data: Record<string, unknown>): void {
-    const record = transactions.get(transactionId);
-    if (record) {
-      record.settlement = data;
-      record.status = "completed";
-    }
+    updateFlowSessionByTransaction(transactionId, {
+      settlement: data,
+      status: "completed",
+    });
   }
 }
 
