@@ -36,21 +36,23 @@ npm run dev
 
 ---
 
-## Phase 3 — Dynamic Flow + Arc ✅ (scaffold)
+## Phase 3 — Dynamic Flow + Arc (live wiring)
 
 - [x] TypeScript Flow client (`src/integrations/flow/client.ts`)
-- [x] `/api/flow/payment/*` routes
-- [x] `useFlowPayment` hook + Dynamic wallet UI
-- [ ] Wire Dynamic + Arc USDC keys
+- [x] Persistent Flow session store (`.flow-store.json`)
+- [x] `/api/flow/payment/*` routes + HMAC webhooks
+- [x] `useFlowPayment` hook + wallet-gated Dynamic pay UI
+- [ ] Set Dynamic env vars in `.env` (see `docs/DYNAMIC_SETUP.md`)
 - [ ] One real cross-chain Flow payment on testnet
 
 ---
 
-## Phase 4 — Agent x402 ✅ (scaffold)
+## Phase 4 — Agent x402 (live wiring)
 
 - [x] `/api/agent/*` routes + `AgentDemo` on homepage
-- [x] `/api/x402/premium/data` paywalled endpoint
-- [ ] Real Dynamic server wallet + x402 gateway (optional)
+- [x] Dynamic Node server wallet SDK (`@dynamic-labs-wallet/node-evm`)
+- [x] Signed x402 payment proofs via server wallet
+- [ ] Set `DYNAMIC_WALLET_PASSWORD` and run live agent demo
 
 ---
 
