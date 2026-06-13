@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { AgentDemo } from "@/components/AgentDemo";
+import { WaitlistForm } from "./components/WaitlistForm";
 
 const FEATURES = [
   {
@@ -226,21 +227,7 @@ export default function HomePage() {
             Be first to turn your conversations into transactions. Join the
             waitlist and we’ll reach out when Pear Pay is ready.
           </p>
-          <div className="mx-auto mt-8 flex max-w-md flex-col gap-3 sm:flex-row">
-            <input
-              type="email"
-              inputMode="email"
-              placeholder="you@example.com"
-              aria-label="Email address"
-              className="w-full rounded-xl border border-white/10 bg-pear-950 px-4 py-3 text-cream placeholder:text-cream/40 focus:border-pear-500 focus:outline-none"
-            />
-            <a
-              href="mailto:hello@pearpay.app?subject=Join%20the%20Pear%20Pay%20waitlist"
-              className="rounded-xl bg-pear-500 px-6 py-3 text-center font-semibold text-pear-950 transition hover:bg-pear-400"
-            >
-              Join
-            </a>
-          </div>
+          <WaitlistForm />
         </div>
       </section>
     </main>

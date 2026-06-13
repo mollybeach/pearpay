@@ -96,14 +96,24 @@ export function PaymentDemo() {
         }),
       });
 
-      if (res.status === 400) {
+      const data = (await res.json().catch(() => null)) as
+        | Partial<ResultDTO>
+        | null;
+
+      // Guard every non-success shape: 400 (unparseable), 422 (understood but
+      // not settleable), 500 (`{ error }` with no `legs`), or malformed JSON.
+      // Without this, `result.legs.map` throws on responses that lack `legs`.
+      if (!res.ok || !data || !Array.isArray(data.legs)) {
         setStatus("error");
-        setErrorMsg("I couldn't understand that request. Try a sample below.");
+        setErrorMsg(
+          res.status === 400 || res.status === 422
+            ? "I couldn't understand that request. Try a sample below."
+            : "Something went wrong settling that payment. Please try again.",
+        );
         return;
       }
 
-      const data = (await res.json()) as ResultDTO;
-      setResult(data);
+      setResult(data as ResultDTO);
       setStatus("done");
     } catch (err) {
       setStatus("error");
