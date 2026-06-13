@@ -104,10 +104,10 @@ interface LegParams {
 async function processLeg(params: LegParams): Promise<PaymentLeg> {
   const { recipient, amount, sender, sourceChainId, memo, isPrivate } = params;
 
-  // Instant settlement: recipient has a wallet/ENS or is a Pear Pay user.
+  // Instant settlement: recipient has a wallet address or is a Pear Pay user.
   if (recipient.deliveryMode === "instant" && recipient.address) {
-    // Pick the optimal settlement rail (Hedera by default, Arc for Circle-native
-    // flows, Unlink for private transfers) and record an HCS audit receipt.
+    // Pick the optimal settlement rail (Arc for Circle-native USDC, Unlink for
+    // private transfers).
     const rail = selectRail({ amount, isPrivate });
     const settlement = await settleOnRail(rail, {
       fromAddress: sender.address,

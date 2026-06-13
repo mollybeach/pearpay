@@ -357,7 +357,7 @@ function ApplePaySheet({
         <>
           <ApRow label="To" value={pay.recipientLabel} />
           <ApRow label="Pay with" value="Pear Pay · USDC" />
-          <ApRow label="Network" value="Hedera → Arc" />
+          <ApRow label="Network" value="Arc" />
           <div className="flex items-center justify-between py-3.5 text-[17px] font-bold text-white">
             <span>Total</span>
             <span>{total}</span>

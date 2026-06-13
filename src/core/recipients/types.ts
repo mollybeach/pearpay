@@ -22,12 +22,10 @@ export interface ResolvedRecipient {
   /** The original reference from the message ("Molly", "@molly", ...). */
   raw: string;
   hint: RecipientHint;
-  /** Canonical display label, e.g. "molly.eth" or "+1 (206) 947-6991". */
+  /** Canonical display label, e.g. "Molly" or "+1 (206) 947-6991". */
   label: string;
-  /** On-chain address when known (existing wallet or ENS resolution). */
+  /** On-chain address when known (existing wallet). */
   address?: `0x${string}`;
-  /** ENS name when known. */
-  ens?: string;
   /** Whether this person already has a Pear Pay account. */
   isPearPayUser: boolean;
   deliveryMode: DeliveryMode;

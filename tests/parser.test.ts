@@ -10,10 +10,14 @@ describe("parseIntent", () => {
     expect(intent.recipients[0]?.hint).toBe("name");
   });
 
-  it("detects ENS recipients", () => {
-    const intent = parseIntent("Send 50 USDC to molly.eth");
-    expect(intent.recipients[0]?.raw).toBe("molly.eth");
-    expect(intent.recipients[0]?.hint).toBe("ens");
+  it("detects raw 0x address recipients", () => {
+    const intent = parseIntent(
+      "Send 50 USDC to 0x4E2B5C9a1f0e3D2c8b7A6F5e4D3c2B1a09f8E7d6",
+    );
+    expect(intent.recipients[0]?.raw).toBe(
+      "0x4E2B5C9a1f0e3D2c8b7A6F5e4D3c2B1a09f8E7d6",
+    );
+    expect(intent.recipients[0]?.hint).toBe("address");
     expect(intent.amount).toBe(50_000_000n);
   });
 

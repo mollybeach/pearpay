@@ -5,12 +5,7 @@ import type { PaymentIntent } from "@/core/nlp/types";
 
 vi.mock("@/integrations/dynamic", () => ({
   lookupPearPayUser: vi.fn(async (identifier: string) => {
-    const users: Record<string, { userId: string; address: `0x${string}`; ens?: string }> = {
-      "molly.eth": {
-        userId: "usr_molly",
-        address: "0x2222222222222222222222222222222222222222",
-        ens: "molly.eth",
-      },
+    const users: Record<string, { userId: string; address: `0x${string}` }> = {
       "@alice": {
         userId: "usr_alice",
         address: "0x3333333333333333333333333333333333333333",
@@ -29,24 +24,8 @@ vi.mock("@/integrations/dynamic", () => ({
   })),
 }));
 
-vi.mock("@/integrations/ens", () => ({
-  resolveEns: vi.fn(async () => null),
-}));
-
 vi.mock("@/integrations/twilio", () => ({
   sendClaimLink: vi.fn(async () => ({ sid: "SM_test", delivered: true })),
-}));
-
-vi.mock("@/integrations/hedera", () => ({
-  settleUsdcOnHedera: vi.fn(async () => ({
-    transactionId: "0.0.1001@1718200000.000000000",
-    status: "settled",
-    network: "testnet",
-  })),
-  logToConsensus: vi.fn(async () => ({
-    topicId: "0.0.2002",
-    sequenceNumber: 1,
-  })),
 }));
 
 vi.mock("@/integrations/unlink", () => ({
@@ -68,7 +47,7 @@ describe("payment orchestrator", () => {
   });
 
   it("settles an instant send and serializes without bigint leaks", async () => {
-    const result = await processMessage("Send molly.eth $12.50 for dinner", sender);
+    const result = await processMessage("Send $12.50 to 0x2222222222222222222222222222222222222222 for dinner", sender);
     expect(result.ok).toBe(true);
     expect(result.legs[0]?.outcome).toBe("instant");
     expect(result.legs[0]?.rail).toBe("arc");
@@ -125,7 +104,7 @@ describe("payment orchestrator", () => {
   });
 
   it("routes private sends through the private rail", async () => {
-    const result = await processMessage("Send molly.eth $2 privately", sender);
+    const result = await processMessage("Send $2 to 0x2222222222222222222222222222222222222222 privately", sender);
     expect(result.ok).toBe(true);
     expect(result.legs[0]?.rail).toBe("unlink");
     expect(result.legs[0]?.settlementRef).toBe("note_private");

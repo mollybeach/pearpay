@@ -16,10 +16,10 @@ export interface PaymentLeg {
   /** "instant" when settled directly, "claimable" when escrowed. */
   outcome: "instant" | "claimable";
   /** The settlement rail used for an instant leg. */
-  rail?: "hedera" | "arc" | "unlink";
+  rail?: "arc" | "unlink";
   /** EVM settlement tx hash for instant legs settled on an EVM rail (Arc). */
   txHash?: `0x${string}`;
-  /** Rail-native reference (Hedera tx id, Unlink note id, Arc settlement id). */
+  /** Rail-native reference (Unlink note id, Arc settlement id). */
   settlementRef?: string;
   /** Source chain detected by Pear Pay for chain-abstracted routing. */
   sourceChainId?: number;

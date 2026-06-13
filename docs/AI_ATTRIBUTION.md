@@ -9,7 +9,7 @@
 
 | Area | Scope |
 |------|-------|
-| Conversational payments | Parser, recipients, orchestration, escrow, Twilio, ENS, channels |
+| Conversational payments | Parser, recipients, orchestration, escrow, Twilio, channels |
 | Wallets and settlement | Dynamic wallet experience, Flow checkout lifecycle, Arc USDC settlement |
 | User experience | iMessage, claim flow, OG payment cards, FaceID approval |
 | Agent commerce | Server wallet flow, x402 paywall demo, autonomous action log |

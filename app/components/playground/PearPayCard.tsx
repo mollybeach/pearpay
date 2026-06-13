@@ -42,7 +42,7 @@ export function PearPayCard({ pay }: { pay: PayInfo }) {
       </p>
       <p className="text-[13px] text-cream/70">{toLine}</p>
       <div className="mt-2.5 flex flex-wrap gap-1.5">
-        <Tag className="bg-violet-500/20 text-violet-200">🟣 Hedera</Tag>
+        <Tag className="bg-sky-500/20 text-sky-200">🔵 Arc</Tag>
         {pay.outcome === "private" ? (
           <Tag className="bg-zinc-400/20 text-zinc-100">🕶️ Unlink</Tag>
         ) : (

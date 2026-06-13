@@ -25,7 +25,7 @@ interface Msg {
   pay?: PayInfo;
 }
 
-const QUICK = ["Send 50 USDC to @molly", "Pay @alex $40", "Send @dev.eth 100 USDC privately"];
+const QUICK = ["Send 50 USDC to @molly", "Pay @alex $40", "Send @dev 100 USDC privately"];
 
 const INITIAL: Msg[] = [
   {
@@ -275,7 +275,7 @@ function XMessage({
             <p className="mt-0.5 text-[12px] text-[#71767b]">
               {p.outcome === "claimable"
                 ? "They'll get a claim link · settles in USDC"
-                : "Routes via Hedera → Arc · settles in USDC"}
+                : "Routes via Arc · settles in USDC"}
             </p>
           </div>
           {active && phase === "review" ? (

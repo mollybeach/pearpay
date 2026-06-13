@@ -26,12 +26,10 @@ escrow()  → Escrowed
           └── cancel()        → Cancelled (before expiry, funds → sender)
 ```
 
-### ETHGlobal — Arc & Hedera Tracks
+### ETHGlobal — Arc Track
 
 This contract targets *Best Smart Contracts on Arc with Advanced Stablecoin
-Logic* (conditional flows, onchain automation, multi-step USDC/EURC settlement)
-**and** *Best Use of Hedera Smart Contracts* — the same bytecode deploys to
-Hedera's Smart Contract Service via the JSON-RPC relay.
+Logic* (conditional flows, onchain automation, multi-step USDC/EURC settlement).
 
 ## Foundry
 
@@ -52,18 +50,10 @@ Deploy with Foundry once the target RPC and deployer key are configured:
 ```bash
 PRIVATE_KEY=... forge script contracts/script/DeployPearPayEscrow.s.sol \
   --rpc-url "$ARC_RPC_URL" --broadcast
-
-PRIVATE_KEY=... forge script contracts/script/DeployPearPayEscrow.s.sol \
-  --rpc-url "https://testnet.hashio.io/api" --broadcast
 ```
 
 - **Arc / EVM** — deploy against an Arc RPC; the backend references the address
   via `ARC_ESCROW_CONTRACT_ADDRESS` or `ESCROW_CONTRACT_ADDRESS`.
-- **Hedera EVM** — deploy against the Hedera JSON-RPC relay
-  (`https://testnet.hashio.io/api`, chain id `296` testnet / `295` mainnet)
-  and set `HEDERA_ESCROW_CONTRACT_ADDRESS`.
 
 The `paymentId` used in `escrow()` matches the off-chain `payment.id`. Pear Pay
-routes non-private claimable payments through Arc as the USDC liquidity hub, and
-every escrow/claim is mirrored to a Hedera Consensus Service (HCS) topic for a
-tamper-proof audit trail.
+routes non-private claimable payments through Arc as the USDC liquidity hub.

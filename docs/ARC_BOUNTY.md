@@ -27,8 +27,6 @@ Cross-chain conditional transfer architecture:
 - Arc hub: non-private payments route to Arc Testnet chain `5042002`.
 - Destination side: Circle Gateway/Forwarder integration is represented in the
   settlement payload as `source-to-arc` until live Circle credentials are set.
-- Audit side: every settlement and escrow event is mirrored to Hedera HCS for a
-  durable receipt trail.
 
 ### Best Chain Abstracted USDC Apps Using Arc as a Liquidity Hub
 
@@ -47,14 +45,13 @@ Pear Pay keeps chain selection out of the user experience:
 flowchart TD
   User[User in iMessage, SMS, WhatsApp, web, or agent chat]
   NLP[Pear Pay NLP parser]
-  Resolve[Recipient resolver: ENS, phone, handle, Pear Pay user]
+  Resolve[Recipient resolver: wallet address, phone, handle, Pear Pay user]
   Route[Payment orchestrator]
   Arc[Arc USDC liquidity hub]
   Escrow[PearPayEscrow.sol on Arc]
   Circle[Circle Gateway / Forwarder]
   Wallet[Dynamic embedded wallet]
   Twilio[Twilio claim delivery]
-  HCS[Hedera HCS audit receipt]
   Recipient[Recipient]
 
   User --> NLP --> Resolve --> Route
@@ -66,8 +63,6 @@ flowchart TD
   Recipient -->|Claim| Wallet --> Escrow
   Escrow -->|Release USDC| Arc
   Escrow -->|Expired| User
-  Route --> HCS
-  Escrow --> HCS
 ```
 
 ## Circle Developer Tools
@@ -89,7 +84,7 @@ Arc RPC configuration, and deployed escrow contract addresses.
 
 1. Open Pear Pay and show the hero: one conversation, one payment, no chain
    selector.
-2. Use `/pay` or `POST /api/payments` with "Send molly.eth $12.50 for dinner".
+2. Use `/pay` or `POST /api/payments` with "Send +12065550100 $12.50 for dinner".
    Show the response: `rail: "arc"`, `route: "source-to-arc"`, Arc destination
    chain `5042002`, and Arc USDC token address.
 3. Send "Pay +12065550100 $8" to demonstrate a new recipient. Show Pear Pay

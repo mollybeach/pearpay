@@ -1,4 +1,3 @@
-import { resolveEns } from "@/integrations/ens";
 import { lookupPearPayUser } from "@/integrations/dynamic";
 import { logger } from "@/lib/logger";
 import type { RawRecipient, RecipientHint } from "@/core/nlp/types";
@@ -39,7 +38,7 @@ function channelForHint(
  *
  * Resolution order mirrors the README's Universal Recipient Resolution:
  *   1. Existing Pear Pay user  → instant settlement.
- *   2. Discoverable wallet/ENS → instant delivery to address.
+ *   2. Discoverable wallet → instant delivery to address.
  *   3. New user                → claimable escrow + notification.
  */
 export async function resolveRecipient(
@@ -48,6 +47,22 @@ export async function resolveRecipient(
 ): Promise<ResolvedRecipient> {
   const { raw, hint } = recipient;
 
+  // 0. A raw EVM address is a direct, instant on-chain recipient (Arc settles
+  //    straight to it — no claim flow).
+  if (hint === "address" || /^0x[a-fA-F0-9]{40}$/.test(raw)) {
+    const address = raw as `0x${string}`;
+    log.info("resolved raw address recipient", { address });
+    return {
+      raw,
+      hint: "address",
+      label: `${address.slice(0, 6)}…${address.slice(-4)}`,
+      address,
+      isPearPayUser: false,
+      deliveryMode: "instant",
+      notificationChannel: "none",
+    };
+  }
+
   // 1. Existing Pear Pay user (looked up across known identifiers).
   const pearPayUser = await lookupPearPayUser(raw);
   if (pearPayUser) {
@@ -55,32 +70,14 @@ export async function resolveRecipient(
     return {
       raw,
       hint,
-      label: pearPayUser.ens ?? pearPayUser.address,
+      label: pearPayUser.address,
       address: pearPayUser.address,
-      ens: pearPayUser.ens,
       isPearPayUser: true,
       deliveryMode: "instant",
       notificationChannel: "none",
     };
   }
 
-  // 2. Discoverable wallet via ENS.
-  if (hint === "ens" || /\.eth$/i.test(raw)) {
-    const ens = await resolveEns(raw);
-    if (ens?.address) {
-      log.info("resolved ens recipient", { raw, address: ens.address });
-      return {
-        raw,
-        hint: "ens",
-        label: ens.name,
-        address: ens.address,
-        ens: ens.name,
-        isPearPayUser: false,
-        deliveryMode: "instant",
-        notificationChannel: "none",
-      };
-    }
-  }
 
   // 3. New user — build a claimable target with the right notification channel.
   const contact =

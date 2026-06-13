@@ -39,6 +39,7 @@ const envSchema = z.object({
   DYNAMIC_FLOW_CHECKOUT_ID: z.string().optional(),
   DYNAMIC_FLOW_WEBHOOK_SECRET: z.string().optional(),
   DYNAMIC_WALLET_PASSWORD: z.string().optional(),
+  FLOW_STORE_PATH: z.string().optional(),
   AGENT_WALLET_ADDRESS: z.string().optional(),
   ARC_USDC_ADDRESS: z.string().optional(),
   ARC_EURC_ADDRESS: z.string().optional(),
@@ -55,29 +56,12 @@ const envSchema = z.object({
   DYNAMIC_ENV_ID: z.string().optional(),
   DYNAMIC_API_TOKEN: z.string().optional(),
 
-  // ENS resolution.
-  ENS_RPC_URL: z.string().url().optional(),
-
-  // Hedera — primary settlement rail (HTS token, HBAR gas, HCS audit log).
-  HEDERA_NETWORK: z.enum(["mainnet", "testnet"]).default("testnet"),
-  HEDERA_OPERATOR_ID: z.string().optional(),
-  HEDERA_OPERATOR_KEY: z.string().optional(),
-  HEDERA_USDC_TOKEN_ID: z.string().optional(),
-  HEDERA_HCS_TOPIC_ID: z.string().optional(),
-  HEDERA_MIRROR_NODE_URL: z
-    .string()
-    .url()
-    .default("https://hashscan.io/testnet"),
 
   // Arc settlement (Circle) — Circle-native USDC flows.
   ARC_RPC_URL: z.string().url().optional(),
   CIRCLE_API_KEY: z.string().optional(),
   ESCROW_CONTRACT_ADDRESS: z.string().regex(/^0x[a-fA-F0-9]{40}$/).optional(),
   ARC_ESCROW_CONTRACT_ADDRESS: z
-    .string()
-    .regex(/^0x[a-fA-F0-9]{40}$/)
-    .optional(),
-  HEDERA_ESCROW_CONTRACT_ADDRESS: z
     .string()
     .regex(/^0x[a-fA-F0-9]{40}$/)
     .optional(),
@@ -137,12 +121,6 @@ export function resetEnvCache(): void {
 
 const PRODUCTION_REQUIRED: Record<string, Array<keyof Env>> = {
   dynamic: ["DYNAMIC_ENV_ID", "DYNAMIC_API_TOKEN", "NEXT_PUBLIC_DYNAMIC_ENVIRONMENT_ID"],
-  hedera: [
-    "HEDERA_OPERATOR_ID",
-    "HEDERA_OPERATOR_KEY",
-    "HEDERA_USDC_TOKEN_ID",
-    "HEDERA_HCS_TOPIC_ID",
-  ],
   arc: ["CIRCLE_API_KEY", "ARC_RPC_URL"],
   unlink: ["UNLINK_API_KEY", "UNLINK_ENGINE_URL", "UNLINK_ACCOUNT_MNEMONIC"],
   twilio: [

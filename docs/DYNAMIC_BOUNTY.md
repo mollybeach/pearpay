@@ -17,18 +17,29 @@ PearPay is a unified Next.js app for conversational payments, biometric approval
 
 ## Required env vars
 
-See [`.env.example`](.env.example). Key vars:
+See [`docs/DYNAMIC_SETUP.md`](docs/DYNAMIC_SETUP.md) and [`.env.example`](.env.example). Key vars:
 
 ```bash
 NEXT_PUBLIC_DYNAMIC_ENVIRONMENT_ID=...
 DYNAMIC_ENV_ID=...
 DYNAMIC_API_TOKEN=dyn_...
-ARC_USDC_ADDRESS=0x...
-NEXT_PUBLIC_ARC_USDC_ADDRESS=0x...
-DYNAMIC_FLOW_CHECKOUT_ID=...          # optional
+DYNAMIC_WALLET_PASSWORD=...          # agent server wallet MPC signing
+DYNAMIC_FLOW_CHECKOUT_ID=...         # optional — auto-created if unset
 DYNAMIC_FLOW_WEBHOOK_SECRET=...
-AGENT_WALLET_ADDRESS=0x...            # optional
+ARC_USDC_ADDRESS=0x3600000000000000000000000000000000000000
 ```
+
+## Live vs local
+
+| Feature | Status after this branch |
+|---------|--------------------------|
+| Flow 8-step API | Wired with persistent sessions |
+| Pay page Flow UX | Wallet required when configured; no silent stub |
+| Flow webhooks | HMAC verify + persisted event log |
+| Agent server wallet | Dynamic Node SDK (`@dynamic-labs-wallet/node-evm`) |
+| x402 agent pay | Server-wallet signed `X-Payment` header |
+
+Run `node scripts/verify-dynamic.mjs` to check env + unit tests.
 
 ## Demo script for judges
 
