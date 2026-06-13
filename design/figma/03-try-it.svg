@@ -1,0 +1,56 @@
+<svg width="1440" height="1320" viewBox="0 0 1440 1320" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif">
+  <defs>
+    <radialGradient id="tglow" cx="50%" cy="0%" r="40%">
+      <stop offset="0%" stop-color="#74b327" stop-opacity="0.15"/>
+      <stop offset="100%" stop-color="#74b327" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1440" height="1320" fill="#0a1f12"/>
+  <rect width="1440" height="700" fill="url(#tglow)"/>
+
+  <!-- header bar -->
+  <rect width="1440" height="72" fill="#0a1f12" fill-opacity="0.8"/>
+  <line x1="0" y1="72" x2="1440" y2="72" stroke="#ffffff" stroke-opacity="0.06"/>
+  <g transform="translate(80,18)"><rect width="40" height="40" rx="12" fill="#f2fbe7"/><text x="20" y="29" font-size="22" text-anchor="middle">🍐</text><text x="52" y="29" fill="#eafff3" font-size="20" font-weight="800">Pear<tspan fill="#92cf3f">Pay</tspan></text></g>
+
+  <text x="720" y="190" fill="#eafff3" font-size="54" font-weight="800" text-anchor="middle">Send <tspan fill="#92cf3f">real</tspan> money</text>
+  <text x="720" y="234" fill="#eafff3" fill-opacity="0.7" font-size="18" text-anchor="middle">Connect your wallet and send real USDC on-chain — signed by you, broadcast for real.</text>
+  <text x="720" y="260" fill="#eafff3" fill-opacity="0.7" font-size="18" text-anchor="middle">Running on Base Sepolia testnet so it's free to try.</text>
+
+  <!-- Real payment card (connected state) -->
+  <g transform="translate(470,310)">
+    <rect width="500" height="520" rx="18" fill="#16301a" fill-opacity="0.6" stroke="#ffffff" stroke-opacity="0.1"/>
+    <!-- top row -->
+    <g transform="translate(24,24)"><rect width="160" height="30" rx="15" fill="#74b327" fill-opacity="0.15"/><text x="80" y="20" fill="#aade63" font-size="12" font-weight="700" text-anchor="middle">🔵 Live · Base Sepolia</text></g>
+    <text x="476" y="44" fill="#eafff3" fill-opacity="0.55" font-size="12" text-anchor="end">0x9aF3…21bD · Disconnect</text>
+
+    <!-- balance -->
+    <g transform="translate(24,72)"><rect width="452" height="48" rx="14" fill="#0a1f12" fill-opacity="0.6"/><text x="18" y="30" fill="#eafff3" fill-opacity="0.55" font-size="14">Your USDC balance</text><text x="434" y="30" fill="#eafff3" font-size="14" font-weight="700" text-anchor="end">42.50 USDC</text></g>
+
+    <!-- recipient -->
+    <text x="24" y="150" fill="#eafff3" fill-opacity="0.4" font-size="11" letter-spacing="1.5">RECIPIENT ADDRESS</text>
+    <g transform="translate(24,160)"><rect width="452" height="52" rx="14" fill="#0a1f12" stroke="#ffffff" stroke-opacity="0.1"/><text x="18" y="33" fill="#eafff3" font-size="14" font-family="ui-monospace, monospace">0x4E2B5C9a…b71F</text></g>
+
+    <!-- amount -->
+    <text x="24" y="244" fill="#eafff3" fill-opacity="0.4" font-size="11" letter-spacing="1.5">AMOUNT (USDC)</text>
+    <g transform="translate(24,254)"><rect width="452" height="52" rx="14" fill="#0a1f12" stroke="#ffffff" stroke-opacity="0.1"/><text x="18" y="33" fill="#eafff3" font-size="15">1</text></g>
+
+    <!-- send button -->
+    <g transform="translate(24,326)"><rect width="452" height="52" rx="14" fill="#74b327"/><text x="226" y="33" fill="#0a1f12" font-size="16" font-weight="700" text-anchor="middle">Send 1 USDC 🍐</text></g>
+
+    <!-- success state -->
+    <g transform="translate(24,392)"><rect width="452" height="70" rx="14" fill="#74b327" fill-opacity="0.1" stroke="#74b327" stroke-opacity="0.4"/><text x="18" y="28" fill="#aade63" font-size="14" font-weight="700">✅ Settled on-chain</text><text x="18" y="52" fill="#aade63" font-size="12" font-family="ui-monospace, monospace">0x7c1a…→ sepolia.basescan.org/tx/…</text></g>
+
+    <text x="250" y="488" fill="#eafff3" fill-opacity="0.4" font-size="12" text-anchor="middle">Need test USDC? Get free Base Sepolia USDC from the Circle faucet.</text>
+  </g>
+
+  <!-- divider + NLP demo -->
+  <line x1="470" y1="900" x2="970" y2="900" stroke="#ffffff" stroke-opacity="0.1"/>
+  <text x="720" y="960" fill="#eafff3" font-size="30" font-weight="700" text-anchor="middle">…or just say it like a <tspan fill="#92cf3f">text</tspan></text>
+  <g transform="translate(470,1000)">
+    <rect width="500" height="120" rx="18" fill="#16301a" fill-opacity="0.6" stroke="#ffffff" stroke-opacity="0.1"/>
+    <text x="20" y="34" fill="#eafff3" fill-opacity="0.4" font-size="11" letter-spacing="1.5">SAY IT LIKE A TEXT</text>
+    <g transform="translate(20,46)"><rect width="360" height="48" rx="14" fill="#0a1f12" stroke="#ffffff" stroke-opacity="0.1"/><text x="16" y="30" fill="#eafff3" font-size="15">Send Molly $20</text></g>
+    <g transform="translate(392,46)"><rect width="88" height="48" rx="14" fill="#74b327"/><text x="44" y="30" fill="#0a1f12" font-size="15" font-weight="700" text-anchor="middle">Pay 🍐</text></g>
+  </g>
+</svg>

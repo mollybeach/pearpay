@@ -1,0 +1,50 @@
+<svg width="1440" height="1200" viewBox="0 0 1440 1200" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif">
+  <rect width="1440" height="1200" fill="#0a1f12"/>
+
+  <!-- header -->
+  <rect width="1440" height="72" fill="#0a1f12" fill-opacity="0.8"/>
+  <line x1="0" y1="72" x2="1440" y2="72" stroke="#ffffff" stroke-opacity="0.06"/>
+  <g transform="translate(80,18)"><rect width="40" height="40" rx="12" fill="#f2fbe7"/><text x="20" y="29" font-size="22" text-anchor="middle">🍐</text><text x="52" y="29" fill="#eafff3" font-size="20" font-weight="800">Pear<tspan fill="#92cf3f">Pay</tspan></text></g>
+
+  <text x="720" y="170" fill="#eafff3" font-size="50" font-weight="800" text-anchor="middle">Prize <tspan fill="#92cf3f">tracks</tspan></text>
+  <text x="720" y="210" fill="#eafff3" fill-opacity="0.7" font-size="17" text-anchor="middle">How Pear Pay satisfies its ETHGlobal NYC 2026 sponsor tracks.</text>
+
+  <!-- tabs -->
+  <g transform="translate(540,250)">
+    <rect width="360" height="52" rx="16" fill="#16301a" fill-opacity="0.5" stroke="#ffffff" stroke-opacity="0.1"/>
+    <g transform="translate(6,6)"><rect width="100" height="40" rx="12" fill="#74b327"/><text x="50" y="26" fill="#0a1f12" font-size="14" font-weight="700" text-anchor="middle">🏆 Finalist</text></g>
+    <text x="125" y="32" fill="#eafff3" fill-opacity="0.7" font-size="14">🔵 Arc</text>
+    <text x="195" y="32" fill="#eafff3" fill-opacity="0.7" font-size="14">⚡ Dynamic</text>
+    <text x="295" y="32" fill="#eafff3" fill-opacity="0.7" font-size="14">🕶️ Unlink</text>
+  </g>
+
+  <!-- prize header -->
+  <g transform="translate(610,340)"><rect width="220" height="36" rx="18" fill="#74b327" fill-opacity="0.1" stroke="#74b327" stroke-opacity="0.3"/><text x="110" y="24" fill="#aade63" font-size="13" font-weight="700" text-anchor="middle">🔵 $15,000 Partner Prize</text></g>
+  <text x="720" y="420" fill="#eafff3" font-size="34" font-weight="800" text-anchor="middle">Arc — Best Stablecoin Apps</text>
+  <text x="720" y="456" fill="#eafff3" fill-opacity="0.7" font-size="16" text-anchor="middle">Arc is Pear Pay's USDC settlement and liquidity hub.</text>
+
+  <!-- "what the bounty asks" card -->
+  <g transform="translate(360,500)">
+    <rect width="720" height="150" rx="18" fill="#f59e0b" fill-opacity="0.06" stroke="#f59e0b" stroke-opacity="0.25"/>
+    <text x="24" y="40" fill="#eafff3" font-size="20" font-weight="700">🎯 What the bounty asks</text>
+    <text x="24" y="78" fill="#eafff3" fill-opacity="0.8" font-size="14">🧠  Advanced stablecoin logic — conditional / multi-step settlement in USDC</text>
+    <text x="24" y="104" fill="#eafff3" fill-opacity="0.8" font-size="14">🔗  Chain-abstracted USDC using Arc as a liquidity hub</text>
+    <text x="24" y="130" fill="#eafff3" fill-opacity="0.8" font-size="14">📦  Functional MVP — frontend + backend + diagram + repo</text>
+  </g>
+
+  <!-- "what we built" grid -->
+  <text x="360" y="710" fill="#eafff3" font-size="22" font-weight="700">✅ What we built</text>
+  <g>
+    <g transform="translate(360,740)"><rect width="350" height="120" rx="14" fill="#0a1f12" fill-opacity="0.5" stroke="#ffffff" stroke-opacity="0.1"/><text x="20" y="48" font-size="24">💵</text><text x="20" y="82" fill="#eafff3" font-size="16" font-weight="600">USDC Settlement Layer</text><text x="20" y="106" fill="#eafff3" fill-opacity="0.65" font-size="13">settleUsdc() routes + settles every payment.</text></g>
+    <g transform="translate(730,740)"><rect width="350" height="120" rx="14" fill="#0a1f12" fill-opacity="0.5" stroke="#ffffff" stroke-opacity="0.1"/><text x="20" y="48" font-size="24">⏳</text><text x="20" y="82" fill="#eafff3" font-size="16" font-weight="600">Conditional Escrow</text><text x="20" y="106" fill="#eafff3" fill-opacity="0.65" font-size="13">PearPayEscrow.sol — escrow → claim/refund.</text></g>
+    <g transform="translate(360,880)"><rect width="350" height="120" rx="14" fill="#0a1f12" fill-opacity="0.5" stroke="#ffffff" stroke-opacity="0.1"/><text x="20" y="48" font-size="24">🌍</text><text x="20" y="82" fill="#eafff3" font-size="16" font-weight="600">Chain Abstraction</text><text x="20" y="106" fill="#eafff3" fill-opacity="0.65" font-size="13">Users never choose a chain or token.</text></g>
+    <g transform="translate(730,880)"><rect width="350" height="120" rx="14" fill="#0a1f12" fill-opacity="0.5" stroke="#ffffff" stroke-opacity="0.1"/><text x="20" y="48" font-size="24">🤖</text><text x="20" y="82" fill="#eafff3" font-size="16" font-weight="600">Agentic USDC Payments</text><text x="20" y="106" fill="#eafff3" fill-opacity="0.65" font-size="13">x402 agents pay APIs, settle in USDC.</text></g>
+  </g>
+
+  <!-- metrics -->
+  <g transform="translate(360,1040)">
+    <g><rect width="226" height="90" rx="16" fill="#16301a" fill-opacity="0.4" stroke="#ffffff" stroke-opacity="0.1"/><text x="113" y="40" font-size="26" text-anchor="middle">💵</text><text x="113" y="66" fill="#eafff3" font-size="15" font-weight="700" text-anchor="middle">100% USDC</text></g>
+    <g transform="translate(247,0)"><rect width="226" height="90" rx="16" fill="#16301a" fill-opacity="0.4" stroke="#ffffff" stroke-opacity="0.1"/><text x="113" y="40" font-size="26" text-anchor="middle">⏳</text><text x="113" y="66" fill="#eafff3" font-size="15" font-weight="700" text-anchor="middle">Conditional Escrow</text></g>
+    <g transform="translate(494,0)"><rect width="226" height="90" rx="16" fill="#16301a" fill-opacity="0.4" stroke="#ffffff" stroke-opacity="0.1"/><text x="113" y="40" font-size="26" text-anchor="middle">🌍</text><text x="113" y="66" fill="#eafff3" font-size="15" font-weight="700" text-anchor="middle">Chain-Abstracted</text></g>
+  </g>
+</svg>

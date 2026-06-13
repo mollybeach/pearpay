@@ -1,64 +1,110 @@
 # Pear Pay — ETHGlobal Submission
 
-Answers for every field on the ETHGlobal project submission form. Copy each block into the matching field.
+Answers for every field on the ETHGlobal project submission form, in **the same order as the website sidebar**.
+
+> **Tip:** Click **Copy** on each field (works in browser preview), or select the code block below it. Reload this preview after edits so timestamps stay accurate.
+
+<script>
+function copyField(id, btn) {
+  const text = document.getElementById(id).innerText;
+  navigator.clipboard.writeText(text).then(function () {
+    const label = btn.textContent;
+    btn.textContent = "Copied!";
+    setTimeout(function () { btn.textContent = label; }, 2000);
+  });
+}
+</script>
+
+<style>
+.copy-row { margin: 0.75rem 0 1.25rem; }
+.copy-btn {
+  cursor: pointer;
+  font-size: 12px;
+  padding: 4px 12px;
+  margin-bottom: 8px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  background: #f3f4f6;
+}
+.copy-btn:hover { background: #e5e7eb; }
+.copy-target {
+  background: #f9fafb;
+  padding: 12px 14px;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  white-space: pre-wrap;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 13px;
+  line-height: 1.5;
+}
+.section-meta { color: #6b7280; font-size: 13px; margin-bottom: 1rem; }
+</style>
 
 ---
 
-## Project name
+## Table of contents
 
-```
-Pear Pay
-```
-
----
-
-## What category does your project belong to?
-
-```
-Wallet/Payments
-```
+1. [Project details](#1-project-details)
+2. [Images](#2-images)
+3. [Tech stack](#3-tech-stack)
+4. [Select prizes](#4-select-prizes)
+5. [Video](#5-video)
+6. [Future](#6-future)
+7. [Final](#7-final)
 
 ---
 
-## What emoji best represents your project?
+## 1. Project details
 
-```
-🍐
-```
+<p class="section-meta"><strong>Last updated:</strong> 2026-06-13 14:52 EDT</p>
 
----
+### Project name
 
-## If you have a demonstration, link to it here!
+<div class="copy-row">
+<button class="copy-btn" type="button" onclick="copyField('copy-project-name', this)">Copy</button>
+<pre id="copy-project-name" class="copy-target">Pear Pay</pre>
+</div>
 
-```
-https://pearpay.vercel.app/
-```
+### What category does your project belong to?
 
----
+<div class="copy-row">
+<button class="copy-btn" type="button" onclick="copyField('copy-category', this)">Copy</button>
+<pre id="copy-category" class="copy-target">Wallet/Payments</pre>
+</div>
 
-## Short description
-*(max 100 characters — fits in a tweet)*
+### What emoji best represents your project?
 
-```
-Send money in any chat. Pear Pay turns plain English into private, chain-abstracted USDC payments.
-```
+<div class="copy-row">
+<button class="copy-btn" type="button" onclick="copyField('copy-emoji', this)">Copy</button>
+<pre id="copy-emoji" class="copy-target">🍐</pre>
+</div>
 
-*(98 characters. Alternates if you want a different angle:)*
+### If you have a demonstration, link to it here!
 
-```
-The Apple Pay of Web3 — say "Send Molly $20" in any chat and it settles in USDC. No wallets, no chains.
-```
-```
-Turn conversations into transactions. Conversational USDC payments for humans and AI agents.
-```
+<div class="copy-row">
+<button class="copy-btn" type="button" onclick="copyField('copy-demo-link', this)">Copy</button>
+<pre id="copy-demo-link" class="copy-target">https://pearpay.vercel.app/</pre>
+</div>
 
----
+### Short description *(max 100 characters)*
 
-## Description
-*(min 280 characters — be clear and detailed)*
+<div class="copy-row">
+<button class="copy-btn" type="button" onclick="copyField('copy-short-desc', this)">Copy</button>
+<pre id="copy-short-desc" class="copy-target">The Apple Pay for Web3: send crypto in any messaging app using natural language.</pre>
+</div>
 
-```
-Pear Pay is a conversational payment protocol that lets you send money anywhere you communicate — iMessage, Telegram, WhatsApp, Discord, Slack, X, or even between AI agents. Instead of wallets, seed phrases, chains, bridges, swaps, and gas, you just express intent: "Send Molly $20," "Pay Alex back for dinner," or "Send Sarah 50 USDC privately."
+*(96 characters. Alternates:)*
+
+<div class="copy-row">
+<button class="copy-btn" type="button" onclick="copyField('copy-short-desc-alt1', this)">Copy alt 1</button>
+<pre id="copy-short-desc-alt1" class="copy-target">Send money in any chat. Pear Pay turns plain English into private, chain-abstracted USDC payments.</pre>
+</div>
+
+### Description *(min 280 characters)*
+
+<div class="copy-row">
+<button class="copy-btn" type="button" onclick="copyField('copy-description', this)">Copy</button>
+<pre id="copy-description" class="copy-target">Pear Pay is a conversational payment protocol that lets you send money anywhere you communicate — iMessage, Telegram, WhatsApp, Discord, Slack, X, or even between AI agents. Instead of wallets, seed phrases, chains, bridges, swaps, and gas, you just express intent: "Send Molly $20," "Pay Alex back for dinner," or "Send Sarah 50 USDC privately."
 
 Behind that single message, Pear Pay resolves the recipient (ENS name, phone, email, handle, or existing Pear Pay user), picks the optimal settlement rail, settles in USDC, and optionally shields the transfer so amounts and counterparties stay private. Every payment writes a tamper-proof audit receipt to the Hedera Consensus Service.
 
@@ -66,16 +112,14 @@ Crucially, payments never fail because the recipient hasn't onboarded. If they h
 
 Pear Pay also extends to the agentic economy: AI agents get their own ENS identity and Dynamic server wallet and can pay each other for APIs, compute, and data autonomously using HTTP 402 / x402 — the same infrastructure that powers human payments powering machine-to-machine commerce.
 
-You can try it live: a clickable, screen-recordable Simulator reproduces the in-chat payment experience across six platforms (iMessage, Telegram, Discord, WhatsApp, Slack, X), and a "Try it" page does a real on-chain USDC transfer from your own wallet on Base Sepolia testnet — a genuine, verifiable transaction, not a mock.
-```
+You can try it live: a clickable, screen-recordable Simulator reproduces the in-chat payment experience across six platforms (iMessage, Telegram, Discord, WhatsApp, Slack, X), and a "Try it" page does a real on-chain USDC transfer from your own wallet on Base Sepolia testnet — a genuine, verifiable transaction, not a mock.</pre>
+</div>
 
----
+### How it's made *(min 280 characters)*
 
-## How it's made
-*(min 280 characters — the nitty-gritty: technologies, how it's pieced together, partner tech, anything hacky)*
-
-```
-Pear Pay is one unified TypeScript app: a Next.js (App Router) frontend + API that orchestrates every integration, with a thin native Swift iMessage extension where Apple requires it.
+<div class="copy-row">
+<button class="copy-btn" type="button" onclick="copyField('copy-how-made', this)">Copy</button>
+<pre id="copy-how-made" class="copy-target">Pear Pay is one unified TypeScript app: a Next.js (App Router) frontend + API that orchestrates every integration, with a thin native Swift iMessage extension where Apple requires it.
 
 The brain is a dependency-free core in TypeScript so it behaves identically across every channel: an NLP parser turns "Send Molly $20 privately" into a structured PaymentIntent; a universal recipient resolver maps ENS / phone / email / handle / existing-user to a delivery mode; a programmable escrow handles claimable payments; and a settlement orchestrator selects the rail per payment and serializes a JSON-safe result for the UI. Blockchain access is via viem/wagmi.
 
@@ -86,7 +130,7 @@ Partner tech and how it helps:
 - ENS — human-readable identity and recipient discovery for both people and AI agents (forward/reverse resolution + ENSIP-26 text records for agent endpoints).
 - Hedera — primary settlement rail: USDC via the Hedera Token Service (HTS), and a tamper-proof, ordered audit receipt for every payment/escrow/claim via the Hedera Consensus Service (HCS). Sub-cent fees + 3–5s finality make conversational and nano payments viable.
 - Arc (Circle) — Circle-native USDC settlement and chain-abstracted liquidity for the Arc rail.
-- Unlink — private transfers via the real `@unlink-xyz/sdk` client (`createUnlink` + `unlinkAccount.fromMnemonic`, primitives deposit/transfer/withdraw) so balances, amounts, and counterparties stay hidden in "private mode." See `docs/unlink-integration.md`.
+- Unlink — private transfers via the real @unlink-xyz/sdk client (createUnlink + unlinkAccount.fromMnemonic, primitives deposit/transfer/withdraw) so balances, amounts, and counterparties stay hidden in "private mode."
 - Twilio — SMS/WhatsApp claim-link delivery + Verify; this is what reaches recipients who don't have a wallet yet and solves the cold-start problem.
 
 On-chain, PearPayEscrow.sol is a programmable USDC/EURC escrow (conditional release behind a keccak256 claim-secret, time-based auto-refund, sender cancellation) designed to deploy to both Arc and Hedera's EVM (Smart Contract Service) from the same bytecode.
@@ -100,422 +144,116 @@ Hacky / notable bits:
 - The "Try it" page is genuinely on-chain: wagmi + an injected browser wallet send a real Circle USDC transfer() on Base Sepolia (chain 84532) with a BaseScan receipt — judges can verify an actual transaction with zero sponsor credentials.
 - The Simulator is one reusable foundation: a shared PhoneFrame, a theme-aware on-screen IosKeyboard, and a shared PearPayCard, with each of the six channel components layering on its platform-native chrome and confirmation flow.
 
-The sponsor settlement rails (Hedera/Arc/Unlink) run in sandbox/testnet mode for the demo so the full flow is reproducible without funded mainnet keys, while the "Try it" page is live on Base Sepolia.
-```
+The sponsor settlement rails (Hedera/Arc/Unlink) run in sandbox/testnet mode for the demo so the full flow is reproducible without funded mainnet keys, while the "Try it" page is live on Base Sepolia.</pre>
+</div>
+
+### GitHub Repositories
+
+**Select:** `mollybeach/pearpay` · label **Primary** · **Monorepo**
+
+<div class="copy-row">
+<button class="copy-btn" type="button" onclick="copyField('copy-github', this)">Copy URL</button>
+<pre id="copy-github" class="copy-target">https://github.com/mollybeach/pearpay</pre>
+</div>
 
 ---
 
-## GitHub Repositories
+## 2. Images
 
-```
-https://github.com/mollybeach/pearpay
-```
+<p class="section-meta"><strong>Last updated:</strong> 2026-06-13 14:52 EDT</p>
 
----
+Upload these in the **Images** step of the form.
 
-## Project video
-*(2–4 min demo — see DYNAMIC_BOUNTY.md)*
+| Field | Requirement | Pear Pay asset |
+|-------|-------------|----------------|
+| **Logo** | Square ~512×512 | Pear Pay pear mascot + wordmark (upload from your design folder) |
+| **Cover image** | 16:9 (~640×360+) | Banner: "Turn Conversations into Web3 Transactions" + QR to demo |
+| **Screenshots** | Min 3 | Use: Simulator (iMessage), Try it (real USDC), Prizes/Arc page |
 
-```
-TODO: add the recorded demo link before final submission
-```
+**Suggested screenshot sources in repo:**
 
----
+- `design/figma/02-simulator.svg` — export PNG for Simulator
+- `design/figma/03-try-it.svg` — export PNG for Try it flow
+- `design/figma/01-home.svg` — export PNG for landing page
+- Live captures from https://pearpay.vercel.app/messages and `/pay`
 
-## Submission requirements checklist
-*(from the side panel of the form)*
+**Checklist before Save & Continue:**
 
-- [ ] **Public repo with commits** — repo is public at github.com/mollybeach/pearpay; ensure commit history shows your work.
-- [ ] **Demonstration link** — https://pearpay.vercel.app/ (deploy to production + set `NEXT_PUBLIC_SITE_URL`).
-- [ ] **Project video** — record and link a 2–4 min demo.
-- [ ] **Select GitHub account + repository** in the form's repo picker.
-- [ ] **Click Save changes.**
-
----
-
-## Partner prizes
-
-Select **Arc**, **Dynamic**, and **Unlink** on the form. Apply to the bounties below and name the track in your submission text / demo video.
+- [ ] Logo uploaded (square)
+- [ ] Cover uploaded (16:9)
+- [ ] At least 3 screenshots uploaded
 
 ---
 
-### Partner prize form *(copy-paste into ETHGlobal)*
+## 3. Tech stack
 
-Fill in each block below when the form asks **"How are you using this Protocol / API?"**
+<p class="section-meta"><strong>Last updated:</strong> 2026-06-13 14:52 EDT</p>
 
-#### Arc — $15,000
+Copy each multiselect block into the matching ETHGlobal dropdown.
 
-**Why you're applicable** *(1–2 sentences):*
+### Are you using any Ethereum developer tools?
 
-```
-Pear Pay uses Arc as its default USDC settlement and liquidity hub. Users never pick a chain — they send a message like "Pay Alex $20" and Pear Pay routes funds to Arc via PearPayEscrow.sol (conditional claim-secret release, expiry refund, sender cancel) and chain-abstracted settlement through our Arc integration. Claimable payments escrow USDC on Arc until the recipient onboards via Dynamic and claims.
-```
+**Select ONLY:** Foundry, Reown
 
-**Link to the line of code where the tech is used:**
-
-```
-https://github.com/mollybeach/pearpay/blob/main/contracts/PearPayEscrow.sol#L68-L74
-https://github.com/mollybeach/pearpay/blob/main/src/integrations/arc/index.ts#L67-L75
-https://github.com/mollybeach/pearpay/blob/main/src/core/payments/settlement.ts#L78-L90
-```
-
-**How easy is it to use the API / Protocol? (1–10):** `8`
-
-**Additional feedback for the Sponsor:**
-
-```
-Arc's USDC-native model maps cleanly to conversational payments — one settlement surface, no chain picker in UX. Foundry deploy + Arc testnet USDC address were straightforward. Circle Gateway/Forwarder for live source-to-Arc routing would benefit from a single end-to-end TypeScript example (detect source chain → quote → settle on Arc) in the docs; we scaffolded this in src/integrations/arc/ but had to infer request shapes from scattered Circle docs. A canonical "claimable escrow on Arc" reference repo would help hackathon teams ship faster.
-```
-
----
-
-#### Dynamic — $10,000
-
-**Why you're applicable** *(1–2 sentences):*
-
-```
-Pear Pay uses Dynamic for embedded wallet onboarding when recipients claim funds (no seed phrases), Fireblocks Flow for cross-chain checkout that settles USDC on Arc, and server wallets for autonomous agent payments (HTTP 402 / x402). Human path: NLP → WebAuthn Face ID → Flow checkout → Arc. Agent path: natural-language intent → Dynamic server wallet → pay gated API → retry on 402.
-```
-
-**Link to the line of code where the tech is used:**
-
-```
-https://github.com/mollybeach/pearpay/blob/main/src/components/Providers.tsx#L13-L21
-https://github.com/mollybeach/pearpay/blob/main/app/api/flow/payment/start/route.ts#L46-L50
-https://github.com/mollybeach/pearpay/blob/main/src/integrations/dynamic/index.ts#L86-L112
-https://github.com/mollybeach/pearpay/blob/main/src/integrations/dynamic/index.ts#L118-L133
-https://github.com/mollybeach/pearpay/blob/main/app/api/agent/run-intent/route.ts#L36-L42
-```
-
-**How easy is it to use the API / Protocol? (1–10):** `8`
-
-**Additional feedback for the Sponsor:**
-
-```
-Dynamic SDK integration for embedded wallets and auth was smooth — Providers + wallet button worked in under an hour. Flow's multi-step checkout (create → source → quote → prepare → broadcast → webhook) is powerful but dense; a single "happy path" sequence diagram with expected JSON payloads per step would reduce integration time. Server wallet REST API for agentic x402 flows is a strong differentiator — clearer docs on signing/submitting txs from server wallets (not just creating them) would unlock more agent builds.
-```
-
----
-
-#### Unlink — $5,000
-
-**Why you're applicable** *(1–2 sentences):*
-
-```
-Pear Pay adds an optional private payment mode: users say "Send Sarah 50 USDC privately" and the orchestrator routes through Unlink's deposit/transfer/withdraw primitives so balances, amounts, and counterparties stay hidden while Arc still settles the public leg when needed. Private rail selection is automatic when isPrivate is set — no separate UX for shielding.
-```
-
-**Link to the line of code where the tech is used:**
-
-```
-https://github.com/mollybeach/pearpay/blob/main/src/integrations/unlink/index.ts#L57-L74
-https://github.com/mollybeach/pearpay/blob/main/src/integrations/unlink/index.ts#L98-L126
-https://github.com/mollybeach/pearpay/blob/main/src/core/payments/settlement.ts#L27-L28
-https://github.com/mollybeach/pearpay/blob/main/src/core/payments/settlement.ts#L68-L76
-```
-
-**How easy is it to use the API / Protocol? (1–10):** `7`
-
-**Additional feedback for the Sponsor:**
-
-```
-Unlink's privacy primitives (deposit → private transfer → withdraw) fit naturally as a "private mode" toggle on top of conversational payments. Local stub mode made hackathon development fast. For production, clearer docs on how private balances interact with USDC on Arc (settlement timing, fee model, and error codes on failed shield/transfer) would help. A minimal Next.js example showing one private peer-to-peer transfer end-to-end would complement the SDK reference.
-```
-
----
-
-### Arc — $15,000 *(bounty tracks)*
-
-**Apply for:**
-
-| Bounty | Amount | Pear Pay angle |
-|--------|--------|----------------|
-| Best Smart Contracts on Arc with Advanced Stablecoin Logic | $3,500 (1st $2,250 / 2nd $1,250) | `PearPayEscrow.sol` — conditional USDC/EURC escrow, claim-secret release, time-based auto-refund, sender cancel |
-| Best Chain Abstracted USDC Apps Using Arc as a Liquidity Hub | $3,500 (1st $2,250 / 2nd $1,250) | Users never pick a chain; Flow settles to USDC on Arc from any source chain/token |
-
-**Submission blurb (paste into Arc partner notes if asked):**
-
-```
-Pear Pay settles conversational payments in USDC on Arc. PearPayEscrow.sol implements conditional escrow (claim secret, expiry refund, cancel). Dynamic Flow routes payer funds from any chain/token into USDC on Arc. Claimable payments + chain abstraction solve the cold-start problem without fragmenting UX.
-```
-
-**Arc qualification checklist:**
-
-- [ ] Working frontend + backend + architecture diagram (see README Updated Architecture)
-- [ ] Video demo showing escrow + Arc settlement
-- [ ] Public GitHub repo
-
----
-
-### Dynamic — $10,000 *(bounty tracks)*
-
-**Apply for:**
-
-| Bounty | Amount | Pear Pay angle |
-|--------|--------|----------------|
-| Best Use of Flow | $3,000 | Full Flow checkout: `/api/flow/payment/*` — create → source → quote → prepare → broadcast → webhook/poll |
-| Best Agentic Build | $2,000 | Dynamic server wallet + `/api/agent/run-intent` — autonomous x402 pay → API access |
-| Best Overall Use | $2,000 | Embedded wallets on claim, social auth, signing, onchain UX across the app |
-| Best Private Nanopayments App *(joint with Unlink + Arc)* | 1st $2,000 / 2nd $1,000 | Dynamic wallet + Unlink privacy + Arc settlement for private micropayments |
-
-**Submission blurb:**
-
-```
-Pear Pay uses Dynamic for embedded wallet onboarding on claim, Fireblocks Flow for cross-chain USDC settlement on Arc, and server wallets for autonomous agent payments (HTTP 402 / x402). Human path: NLP → Face ID → Flow → Arc. Agent path: intent → server wallet → pay → API.
-```
-
-**Dynamic qualification checklist:**
-
-- [x] Dynamic SDK integrated (`@dynamic-labs/sdk-react-core`, `@dynamic-labs/ethereum`)
-- [ ] App deployed and usable by judges — https://pearpay.vercel.app/
-- [ ] Flow implemented for Best Use of Flow (see DYNAMIC_BOUNTY.md demo script)
-- [ ] Server wallet + agent autonomy for Best Agentic Build
-
----
-
-### Unlink — $5,000 *(bounty tracks)*
-
-**Apply for:**
-
-| Bounty | Amount | Pear Pay angle |
-|--------|--------|----------------|
-| Best Private Nano Payment App *(joint with Dynamic + Arc)* | 1st $2,000 / 2nd $1,000 | Private claimable payments — amounts and counterparties hidden via Unlink `deposit()` / `transfer()` |
-| Best Unlink Integration into a Major Open-Source App | $2,500 | Privacy layer on conversational payments (`/api/privacy/shield`, Unlink SDK integration) |
-
-**Submission blurb:**
-
-```
-Pear Pay adds a private payment mode via Unlink: users say "Send Sarah 50 USDC privately" and balances, amounts, and counterparties stay hidden while Arc settles. Uses Unlink SDK primitives (deposit/transfer/withdraw) on top of Dynamic wallet creation.
-```
-
-**Unlink qualification checklist:**
-
-- [x] Unlink SDK integrated (`@unlink-xyz/sdk`) — real `createUnlink` client + deposit/transfer/withdraw
-- [ ] At least one private primitive demonstrated in demo (needs live UNLINK_API_KEY + engine URL)
-- [ ] Public repo + README explaining what is now private
-- [ ] For joint prize: also Dynamic SDK + Circle/Arc tools + MVP + diagram + video
-
----
-
-## Tech stack *(form multiselect fields)*
-
-Copy the selections below into each ETHGlobal dropdown. Use **Other** / free-text where the exact option is missing.
-
-### Are you using any Ethereum developer tools for your project?
-
-The ETHGlobal form uses a fixed multiselect dropdown. All options from the form:
-
-`1"` · `Alchemy` · `Alchemyweb3` · `Anon Aadhaar` · `ASI` · `Avail` · `Bandada` · `Brownie` · `cmtp` · `Create Eth App` · `Curvegrid` · `Dappsys` · `Embark` · `Epirus` · `Etherlime` · `ethers-rs` · `ethers.js` · `Fluence` · `Foundry` · `Hardhat` · `HQ20` · `Hyperlane` · `LayerZero` · `Ledger` · `light.js` · `Lighthouse` · `MACI` · `MUD` · `None` · `Ocean` · `OpenZeppelin SDK` · `Privy` · `Proof of Email` · `Remix` · `Reown` · `Saga` · `scaffold-eth` · `Self` · `Semaphore` · `Sindri` · `The Graph` · `Truffle` · `TypeChain` · `vlayer` · `Waffle` · `Walrus` · `web3-wrapper` · `web3.js` · `Web3j`
-
-**Select ONLY these for Pear Pay** (do not select the whole list):
-
-| Form option | Why |
-|-------------|-----|
-| **Foundry** | `foundry.toml`, `contracts/test/PearPayEscrow.t.sol`, `contracts/script/DeployPearPayEscrow.s.sol` — compile, test, and deploy `PearPayEscrow.sol` on Arc / Hedera EVM |
-| **Reown** | Wallet connectivity via wagmi / Dynamic (`@reown/appkit` in the dependency tree) |
-
-**Quick copy-paste checklist:**
-
-```
-Foundry
-Reown
-```
-
-**Do not select:** `None`, `Hardhat`, `Truffle`, `Brownie`, `Remix`, `ethers.js`, `web3.js`, `Alchemy`, `OpenZeppelin SDK`, `Privy`, `scaffold-eth`, `The Graph`, `LayerZero`, or anything else unless Pear Pay uses it directly.
-
-**Not in this dropdown — add under "Other specific technologies" below:**
-
-```
-viem
-wagmi
-ENS
-Dynamic SDK
-Circle Arc
-Unlink SDK
-Hedera SDK
-Twilio
-WebAuthn
-```
-
----
+<div class="copy-row">
+<button class="copy-btn" type="button" onclick="copyField('copy-eth-tools', this)">Copy</button>
+<pre id="copy-eth-tools" class="copy-target">Foundry
+Reown</pre>
+</div>
 
 ### Which blockchain networks will your project interact with?
 
-The ETHGlobal form uses a fixed multiselect dropdown. All options from the form:
-
-`0G` · `Aleo` · `Aptos` · `Arc` · `Arcology` · `Arbitrum` · `Base` · `Binance Smart Chain` · `Bitcoin` · `Cardano` · `Celo` · `Chiliz` · `Citrea` · `Cosmos` · `Ethereum` · `Etherlink` · `EVVM` · `Filecoin` · `Flare` · `Flow` · `Gnosis` · `Hedera` · `Integra` · `Internet Computer (ICP)` · `Intmax` · `Iron Fish` · `Kadena` · `Loopring` · `Mantle` · `Mina` · `Monad` · `None` · `Oasis` · `Optimism` · `Polkadot` · `Polygon` · `Polygon POS` · `Polygon zkEVM` · `Ripple` · `Ronin` · `Rootstock` · `Scroll` · `Starknet` · `Stellar` · `Sui` · `Tezos` · `Ton` · `Tron` · `Worldchain` · `xDai` · `XRP Ledger` · `Yellow` · `Zircuit` · `zkSync`
-
-**Select these for Pear Pay:**
-
-| Form option | Why |
-|-------------|-----|
-| **Arc** | Primary USDC settlement hub — `PearPayEscrow.sol`, Arc testnet (chain 5042002), Flow settles here |
-| **Hedera** | HTS USDC settlement, HCS audit receipts, Hedera EVM escrow deployment |
-| **Ethereum** | ENS name resolution, default sender chain (chain id 1) |
-| **Arbitrum** | Flow cross-chain funding source — USDC routing in `src/integrations/arc/index.ts` |
-| **Base** | Live "Try it" sends a real Circle USDC `transfer()` on Base Sepolia (chain 84532); also a Flow cross-chain funding source |
-| **Optimism** | Flow cross-chain funding source — USDC routing |
-| **Polygon** | Flow cross-chain funding source — USDC routing |
-
-**Quick copy-paste checklist:**
-
-```
-Arc
+<div class="copy-row">
+<button class="copy-btn" type="button" onclick="copyField('copy-networks', this)">Copy</button>
+<pre id="copy-networks" class="copy-target">Arc
 Hedera
 Ethereum
 Arbitrum
 Base
 Optimism
-Polygon
-```
+Polygon</pre>
+</div>
 
-**Do not select:**
+**Do not select:** `Flow` (Dapper blockchain — not Fireblocks Flow), `None`, or chains with no code integration.
 
-- **Flow** — that is the Flow blockchain (Dapper), not Dynamic Fireblocks Flow
-- **None** — Pear Pay settles on multiple chains
-- Chains with no code integration (Aptos, Sui, Bitcoin, Solana-adjacent, etc.)
+### Which programming languages are you using?
 
-*(If trimming for a minimal honest set, keep **Arc**, **Hedera**, **Ethereum**, and **Base** — the live "Try it" really transacts on Base Sepolia. Add the other L2s only if you demo Flow paying from them in the video.)*
-
----
-
-### Which programming languages are you using in your project?
-
-The ETHGlobal form uses a fixed multiselect dropdown. All options from the form:
-
-`APL` · `Assembly` · `Bash/Shell` · `C` · `C#` · `C++` · `Cadence` · `Cairo` · `Clojure` · `COBOL` · `Crystal` · `Dart` · `Delphi` · `Elixir` · `Erlang` · `F#` · `Fe` · `Go` · `Groovy` · `Haskell` · `HTML/CSS` · `Java` · `JavaScript` · `Julia` · `Kotlin` · `LISP` · `Matlab` · `Node.js` · `None` · `Objective-C` · `Perl` · `PHP` · `PowerShell` · `Python` · `R` · `Ruby` · `Rust` · `Scala` · `Solidity` · `SQL` · `Swift` · `TypeScript` · `VBA` · `Vyper`
-
-**Select these for Pear Pay:**
-
-| Form option | Why |
-|-------------|-----|
-| **TypeScript** | Primary language — Next.js app, API routes, payment orchestrator, integrations |
-| **JavaScript** | Config/tooling (`next.config.mjs`, ESLint, etc.) |
-| **Solidity** | `PearPayEscrow.sol` — claimable payment escrow on Arc / Hedera EVM |
-| **Swift** | Native iMessage extension (`ios/PearPayMessages/`) |
-| **Node.js** | Backend runtime for Next.js API routes and webhooks |
-
-**Quick copy-paste checklist:**
-
-```
-TypeScript
+<div class="copy-row">
+<button class="copy-btn" type="button" onclick="copyField('copy-languages', this)">Copy</button>
+<pre id="copy-languages" class="copy-target">TypeScript
 JavaScript
 Solidity
 Swift
-Node.js
-```
+Node.js</pre>
+</div>
 
-**Optional:** `HTML/CSS` if you want to count the Tailwind/Next.js UI layer (not required).
+### Are you using any web frameworks?
 
-**Do not select:** `None`, or languages with no project code (Python, Rust, Go, etc.).
+<div class="copy-row">
+<button class="copy-btn" type="button" onclick="copyField('copy-web-frameworks', this)">Copy</button>
+<pre id="copy-web-frameworks" class="copy-target">Next.js
+React.js</pre>
+</div>
 
----
+### Are you using any databases?
 
-### Are you using any web frameworks for your project?
+<div class="copy-row">
+<button class="copy-btn" type="button" onclick="copyField('copy-databases', this)">Copy</button>
+<pre id="copy-databases" class="copy-target">None</pre>
+</div>
 
-The ETHGlobal form uses a fixed multiselect dropdown. All options from the form:
+### Are you using any design tools?
 
-`Angular` · `Angular.js` · `ASP.NET` · `ASP.NET Core` · `Django` · `Drupal` · `Express` · `FastAPI` · `Flask` · `Gatsby` · `jQuery` · `Laravel` · `Next.js` · `None` · `React.js` · `Ruby on Rails` · `Spring` · `Svelte` · `Symfony` · `Vue.js`
+<div class="copy-row">
+<button class="copy-btn" type="button" onclick="copyField('copy-design-tools', this)">Copy</button>
+<pre id="copy-design-tools" class="copy-target">None</pre>
+</div>
 
-**Select these for Pear Pay:**
+### Other specific technologies *(free-text multiselect — one per line)*
 
-| Form option | Why |
-|-------------|-----|
-| **Next.js** | Full-stack app — App Router UI, API routes, claim pages, webhooks |
-| **React.js** | All client components (`PaymentDemo`, `PaymentFlow`, `AgentDemo`, etc.) — form label is `React.js`, not `React` |
-
-**Quick copy-paste checklist:**
-
-```
-Next.js
-React.js
-```
-
-**Do not select:** `None`, or frameworks Pear Pay does not use (Vue.js, Angular, Svelte, Express, Django, etc.).
-
-**Not in this dropdown — put in "Other specific technologies":** Tailwind CSS, npm, Vercel.
-
----
-
-### Are you using any databases for your project?
-
-The ETHGlobal form uses a fixed multiselect dropdown. All options from the form:
-
-`AvionDB` · `Cassandra` · `Couchbase` · `DynamoDB` · `Elasticsearch` · `Firebase` · `IBM DB2` · `IPDB` · `LevelDB` · `MariaDB` · `Microsoft SQL Server` · `MongoDB` · `MySQL` · `None` · `Oracle` · `OrbitDB` · `PostgreSQL` · `Redis` · `SQLite` · `Supabase`
-
-**Select this for Pear Pay:**
-
-| Form option | Why |
-|-------------|-----|
-| **None** | No external database in the demo — claimable payments use an in-memory `EscrowStore`; WebAuthn uses a local JSON file (`.webauthn-store.json`), not Postgres/Mongo/etc. |
-
-**Quick copy-paste checklist:**
-
-```
-None
-```
-
-**Do not select:** PostgreSQL, Redis, MongoDB, Supabase, etc. — Pear Pay does not wire any of these for the hackathon MVP.
-
-*(Production path is Postgres/KV for escrow persistence — only update this answer if you actually integrate a DB before submitting.)*
-
----
-
-### Are you using any design tools for your project?
-
-The ETHGlobal form uses a fixed multiselect dropdown. All options from the form:
-
-`Figma` · `Flutter` · `Illustrator` · `MS Paint` · `None` · `Photoshop` · `Sketch` · `Webflow` · `Zeppelin`
-
-**Select this for Pear Pay:**
-
-| Form option | Why |
-|-------------|-----|
-| **None** | UI was built directly in code — Next.js + Tailwind for the web app, HTML iMessage previews (`public/imessage-payment-ux.html`), and SwiftUI in Xcode for the iMessage extension. No Figma, Sketch, or Webflow files in the repo. |
-
-**Quick copy-paste checklist:**
-
-```
-None
-```
-
-**Do not select:** Figma, Sketch, Webflow, etc. unless your team actually used them for mockups.
-
-**Not in this dropdown — put in "Other specific technologies" or AI attribution:** Cursor (UI iteration / scaffolding during the hackathon).
-
----
-
-### Other specific technologies, libraries, frameworks, or tools
-
-*(Free-text multiselect — type each value and hit Enter to add it. Use this for everything that does not fit the categories above.)*
-
-**Add these for Pear Pay** (type one at a time, press Enter after each):
-
-| Value to type | Why |
-|---------------|-----|
-| `viem` | EVM reads, ENS resolution, Flow signing |
-| `wagmi` | Wallet hooks and chain context |
-| `ENS` | Human-readable recipient identity (`molly.eth`) |
-| `Dynamic SDK` | Embedded wallets, server/agent wallets, auth |
-| `Fireblocks Flow` | Cross-chain funding → USDC settlement on Arc |
-| `Circle Arc` | USDC liquidity hub and settlement |
-| `Unlink SDK` | Private balances and transfers |
-| `Hedera SDK` | HTS USDC settlement + HCS audit receipts |
-| `Twilio` | SMS/WhatsApp claim links + Verify |
-| `WebAuthn` | Face ID / passkey payment approval |
-| `HTTP 402` | Agent micropayments (x402 paywall demo) |
-| `Tailwind CSS` | UI styling |
-| `npm` | Package manager |
-| `Vercel` | Deploy web app + API |
-| `Xcode` | iMessage extension + Apple Pay (PassKit) |
-| `zod` | API request validation |
-| `vitest` | Unit/integration tests |
-| `Cursor` | AI-assisted scaffolding and docs (reviewed by team) |
-
-**Quick copy-paste list** (add each line separately in the form):
-
-```
-viem
+<div class="copy-row">
+<button class="copy-btn" type="button" onclick="copyField('copy-other-tech', this)">Copy</button>
+<pre id="copy-other-tech" class="copy-target">viem
 wagmi
 ENS
 Dynamic SDK
@@ -532,66 +270,239 @@ Vercel
 Xcode
 zod
 vitest
-Cursor
-```
+Cursor</pre>
+</div>
 
-**Optional** (add only if you demo them):
+### Describe how AI tools were used *(if applicable)*
 
-```
-OpenAI
-Twilio Voice
-```
-
-**Already covered in other form fields — do not duplicate here:** Next.js, React.js, Foundry/Reown (Ethereum dev tools), Arc/Hedera/Ethereum/Arbitrum/Base/Optimism/Polygon (networks), TypeScript/JavaScript/Solidity/Swift/Node.js (languages), None (databases), None (design tools).
-
----
-
-### Describe how AI tools were used in your project (if applicable)
-
-```
-Cursor — used throughout the hackathon for scaffolding, refactors, and documentation (README, Submission.md, contract comments). All payment-critical paths (escrow, Flow, signing, webhooks) were reviewed manually by the team before demo.
+<div class="copy-row">
+<button class="copy-btn" type="button" onclick="copyField('copy-ai', this)">Copy</button>
+<pre id="copy-ai" class="copy-target">Cursor — used throughout the hackathon for scaffolding, refactors, and documentation (README, Submission.md, contract comments). All payment-critical paths (escrow, Flow, signing, webhooks) were reviewed manually by the team before demo.
 
 OpenAI — optional Twilio Voice demo path interprets spoken payment intent ("Send Alex twenty dollars"); NLP parser is primarily rule-based TypeScript in src/core/nlp/ with AI assist for edge-case phrasing during development.
 
-No AI-generated code was submitted without human review. See AI_ATTRIBUTION.md in the repo for team scope and review notes.
-```
-
-*(Leave blank on the form only if your team prefers not to disclose — ETHGlobal allows blank.)*
+No AI-generated code was submitted without human review. See AI_ATTRIBUTION.md in the repo for team scope and review notes.</pre>
+</div>
 
 ---
 
-## Judging & prizes
+## 4. Select prizes
+
+<p class="section-meta"><strong>Last updated:</strong> 2026-06-13 14:52 EDT</p>
+
+### Continuity Mode
+
+**Select:** Building from Scratch
+
+<div class="copy-row">
+<button class="copy-btn" type="button" onclick="copyField('copy-continuity', this)">Copy</button>
+<pre id="copy-continuity" class="copy-target">Building from Scratch</pre>
+</div>
 
 ### Submission type
 
-```
-Top 10 Finalist & Partner Prizes
-```
+**Select:** Top 10 Finalist & Partner Prizes
 
-Select **Top 10 Finalist & Partner Prizes** — participate in main judging (Sunday live session) **and** partner judging for Arc, Dynamic, and Unlink.
+<div class="copy-row">
+<button class="copy-btn" type="button" onclick="copyField('copy-submission-type', this)">Copy</button>
+<pre id="copy-submission-type" class="copy-target">Top 10 Finalist & Partner Prizes</pre>
+</div>
 
-**Live judging:** Sunday, June 14, 2026 at **2:30 PM EDT** — present live to the panel.
+**Live judging:** Sunday, June 14, 2026 at **2:30 PM EDT**.
+
+### Which partner prizes are you applying for?
+
+**Check these three:** Arc ($15,000) · Dynamic ($10,000) · Unlink ($5,000)
+
+### Which other partners' technologies have you used?
+
+**Select:** Hedera *(not applying for Hedera prize — used for HTS + HCS)*
+
+<div class="copy-row">
+<button class="copy-btn" type="button" onclick="copyField('copy-other-partners', this)">Copy</button>
+<pre id="copy-other-partners" class="copy-target">Hedera</pre>
+</div>
 
 ---
 
-### Continuity Mode / track
+### Arc — $15,000
 
-```
-Building from Scratch
-```
+#### How are you using this Protocol / API? *(1–2 sentences)*
 
-Select **Building from Scratch** — Pear Pay is a new project built at ETHGlobal NYC 2026, not an extension of a pre-existing product.
+<div class="copy-row">
+<button class="copy-btn" type="button" onclick="copyField('copy-arc-usage', this)">Copy</button>
+<pre id="copy-arc-usage" class="copy-target">Pear Pay uses Arc as its default USDC settlement and liquidity hub. Users never pick a chain — they send a message like "Pay Alex $20" and Pear Pay routes funds to Arc via PearPayEscrow.sol (conditional claim-secret release, expiry refund, sender cancel) and chain-abstracted settlement through our Arc integration. Claimable payments escrow USDC on Arc until the recipient onboards via Dynamic and claims.</pre>
+</div>
 
-*(Do **not** select Continuity Track unless the whole team is on that track and you have a genuine pre-event base project.)*
+#### Link to the line of code where the tech is used
+
+<div class="copy-row">
+<button class="copy-btn" type="button" onclick="copyField('copy-arc-code', this)">Copy</button>
+<pre id="copy-arc-code" class="copy-target">https://github.com/mollybeach/pearpay/blob/main/contracts/PearPayEscrow.sol#L68-L74
+https://github.com/mollybeach/pearpay/blob/main/src/integrations/arc/index.ts#L67-L75
+https://github.com/mollybeach/pearpay/blob/main/src/core/payments/settlement.ts#L78-L90</pre>
+</div>
+
+#### How easy is it to use? *(1–10)*
+
+**Select:** `8`
+
+#### Additional feedback for the Sponsor
+
+<div class="copy-row">
+<button class="copy-btn" type="button" onclick="copyField('copy-arc-feedback', this)">Copy</button>
+<pre id="copy-arc-feedback" class="copy-target">Arc's USDC-native model maps cleanly to conversational payments — one settlement surface, no chain picker in UX. Foundry deploy + Arc testnet USDC address were straightforward. Circle Gateway/Forwarder for live source-to-Arc routing would benefit from a single end-to-end TypeScript example (detect source chain → quote → settle on Arc) in the docs; we scaffolded this in src/integrations/arc/ but had to infer request shapes from scattered Circle docs. A canonical "claimable escrow on Arc" reference repo would help hackathon teams ship faster.</pre>
+</div>
+
+**Bounty tracks to name in demo:** Best Smart Contracts on Arc with Advanced Stablecoin Logic · Best Chain Abstracted USDC Apps Using Arc as a Liquidity Hub
 
 ---
+
+### Dynamic — $10,000
+
+#### How are you using this Protocol / API? *(1–2 sentences)*
+
+<div class="copy-row">
+<button class="copy-btn" type="button" onclick="copyField('copy-dynamic-usage', this)">Copy</button>
+<pre id="copy-dynamic-usage" class="copy-target">Pear Pay uses Dynamic for embedded wallet onboarding when recipients claim funds (no seed phrases), Fireblocks Flow for cross-chain checkout that settles USDC on Arc, and server wallets for autonomous agent payments (HTTP 402 / x402). Human path: NLP → WebAuthn Face ID → Flow checkout → Arc. Agent path: natural-language intent → Dynamic server wallet → pay gated API → retry on 402.</pre>
+</div>
+
+#### Link to the line of code where the tech is used
+
+<div class="copy-row">
+<button class="copy-btn" type="button" onclick="copyField('copy-dynamic-code', this)">Copy</button>
+<pre id="copy-dynamic-code" class="copy-target">https://github.com/mollybeach/pearpay/blob/main/src/components/Providers.tsx#L13-L21
+https://github.com/mollybeach/pearpay/blob/main/app/api/flow/payment/start/route.ts#L46-L50
+https://github.com/mollybeach/pearpay/blob/main/src/integrations/dynamic/index.ts#L86-L112
+https://github.com/mollybeach/pearpay/blob/main/src/integrations/dynamic/index.ts#L118-L133
+https://github.com/mollybeach/pearpay/blob/main/app/api/agent/run-intent/route.ts#L36-L42</pre>
+</div>
+
+#### How easy is it to use? *(1–10)*
+
+**Select:** `9`
+
+#### Additional feedback for the Sponsor
+
+<div class="copy-row">
+<button class="copy-btn" type="button" onclick="copyField('copy-dynamic-feedback', this)">Copy</button>
+<pre id="copy-dynamic-feedback" class="copy-target">Dynamic SDK integration for embedded wallets and auth was smooth — Providers + wallet button worked in under an hour. Flow's multi-step checkout (create → source → quote → prepare → broadcast → webhook) is powerful but dense; a single "happy path" sequence diagram with expected JSON payloads per step would reduce integration time. Server wallet REST API for agentic x402 flows is a strong differentiator — clearer docs on signing/submitting txs from server wallets (not just creating them) would unlock more agent builds.</pre>
+</div>
+
+**Bounty tracks to name in demo:** Best Use of Flow · Best Agentic Build · Best Overall Use · Best Private Nanopayments App *(joint with Unlink + Arc)*
+
+---
+
+### Unlink — $5,000
+
+#### How are you using this Protocol / API? *(1–2 sentences)*
+
+<div class="copy-row">
+<button class="copy-btn" type="button" onclick="copyField('copy-unlink-usage', this)">Copy</button>
+<pre id="copy-unlink-usage" class="copy-target">Pear Pay adds an optional private payment mode: users say "Send Sarah 50 USDC privately" and the orchestrator routes through Unlink's deposit/transfer/withdraw primitives so balances, amounts, and counterparties stay hidden while Arc still settles the public leg when needed. Private rail selection is automatic when isPrivate is set — no separate UX for shielding.</pre>
+</div>
+
+#### Link to the line of code where the tech is used
+
+<div class="copy-row">
+<button class="copy-btn" type="button" onclick="copyField('copy-unlink-code', this)">Copy</button>
+<pre id="copy-unlink-code" class="copy-target">https://github.com/mollybeach/pearpay/blob/main/src/integrations/unlink/index.ts#L57-L74
+https://github.com/mollybeach/pearpay/blob/main/src/integrations/unlink/index.ts#L98-L126
+https://github.com/mollybeach/pearpay/blob/main/src/core/payments/settlement.ts#L27-L28
+https://github.com/mollybeach/pearpay/blob/main/src/core/payments/settlement.ts#L68-L76</pre>
+</div>
+
+#### How easy is it to use? *(1–10)*
+
+**Select:** `9`
+
+#### Additional feedback for the Sponsor
+
+<div class="copy-row">
+<button class="copy-btn" type="button" onclick="copyField('copy-unlink-feedback', this)">Copy</button>
+<pre id="copy-unlink-feedback" class="copy-target">Unlink's privacy primitives (deposit → private transfer → withdraw) fit naturally as a "private mode" toggle on top of conversational payments. Local stub mode made hackathon development fast. For production, clearer docs on how private balances interact with USDC on Arc (settlement timing, fee model, and error codes on failed shield/transfer) would help. A minimal Next.js example showing one private peer-to-peer transfer end-to-end would complement the SDK reference.</pre>
+</div>
+
+**Bounty tracks to name in demo:** Best Private Nano Payment App *(joint)* · Best Unlink Integration into a Major Open-Source App
+
+---
+
+## 5. Video
+
+<p class="section-meta"><strong>Last updated:</strong> 2026-06-13 14:52 EDT</p>
+
+### Demo video requirements
+
+- Format: `.mp4` or `.mov`
+- Length: **2–4 minutes**
+- Resolution: minimum **720p**
+- Audio: required; **no background music**
+- No speed-ups (per project rules)
+
+### Demo video link *(paste when uploaded)*
+
+<div class="copy-row">
+<button class="copy-btn" type="button" onclick="copyField('copy-video', this)">Copy</button>
+<pre id="copy-video" class="copy-target">TODO: add the recorded demo link before final submission</pre>
+</div>
+
+**Suggested demo script:** see `docs/DYNAMIC_BOUNTY.md` and `docs/ARC_BOUNTY.md`.
+
+**Cover in the video:**
+
+1. Simulator — "Send Molly $20" across a messaging app
+2. Try it — real Base Sepolia USDC transfer + BaseScan link
+3. Arc escrow lifecycle + Flow checkout (if credentialed)
+4. Private mode mention (Unlink) + agent x402 path (Dynamic server wallet)
+
+---
+
+## 6. Future
+
+<p class="section-meta"><strong>Last updated:</strong> 2026-06-13 14:52 EDT</p>
+
+*(Use this if the form asks about future plans / what happens after the hackathon.)*
+
+<div class="copy-row">
+<button class="copy-btn" type="button" onclick="copyField('copy-future', this)">Copy</button>
+<pre id="copy-future" class="copy-target">After ETHGlobal NYC, Pear Pay will ship production escrow persistence (Postgres/KV), live Circle Gateway settlement on Arc, and Twilio claim delivery at scale. The iMessage extension moves from preview to TestFlight. Agent payments expand beyond the x402 demo to a marketplace where ENS-named agents discover and pay each other for APIs, compute, and data — all through the same conversational interface humans use. Private mode via Unlink becomes a one-tap default for sensitive transfers.</pre>
+</div>
+
+---
+
+## 7. Final
+
+<p class="section-meta"><strong>Last updated:</strong> 2026-06-13 14:52 EDT</p>
+
+### Submission checklist *(before you hit Submit)*
+
+- [ ] **Public repo with commits** — github.com/mollybeach/pearpay
+- [ ] **Demonstration link** — https://pearpay.vercel.app/
+- [ ] **Project video** — 2–4 min uploaded
+- [ ] **Logo, cover, 3+ screenshots** uploaded
+- [ ] **Tech stack** multiselects filled (section 3)
+- [ ] **Partner prizes** — Arc, Dynamic, Unlink selected + form fields filled (section 4)
+- [ ] **GitHub repo** selected in form picker (Primary · Monorepo)
+- [ ] **Continuity:** Building from Scratch
+- [ ] **Submission type:** Top 10 Finalist & Partner Prizes
 
 ### Partner judging reminders
 
-- Name the bounty explicitly in your submission and demo (e.g. "Submitting for Arc — Best Smart Contracts with Advanced Stablecoin Logic").
+- Name the bounty explicitly in your demo (e.g. "Arc — Best Smart Contracts with Advanced Stablecoin Logic").
 - Arc + joint Unlink prize require: **MVP + architecture diagram + video + public repo**.
 - Dynamic requires: **deployed app judges can use** + SDK integration visible in demo.
 - Unlink requires: **working private flow demo** + README explaining what is private.
-- Keep `DYNAMIC_BOUNTY.md` open during the Dynamic booth / video — it has the judge demo script.
+- Keep `docs/DYNAMIC_BOUNTY.md` open during the Dynamic booth / video.
+
+### Reference docs in repo
+
+| Doc | Purpose |
+|-----|---------|
+| `docs/ARC_BOUNTY.md` | Arc demo script + architecture |
+| `docs/DYNAMIC_BOUNTY.md` | Flow + agentic demo script |
+| `docs/AI_ATTRIBUTION.md` | AI tool disclosure |
+| `README.md` | Architecture diagram + quick start |
 
 ---
+
+*Document generated for ETHGlobal New York 2026 · Pear Pay 🍐*

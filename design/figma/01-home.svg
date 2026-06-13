@@ -1,0 +1,67 @@
+<svg width="1440" height="1700" viewBox="0 0 1440 1700" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif">
+  <defs>
+    <radialGradient id="hglow" cx="50%" cy="2%" r="45%">
+      <stop offset="0%" stop-color="#74b327" stop-opacity="0.18"/>
+      <stop offset="100%" stop-color="#74b327" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1440" height="1700" fill="#0a1f12"/>
+  <rect width="1440" height="900" fill="url(#hglow)"/>
+
+  <!-- HEADER -->
+  <rect width="1440" height="72" fill="#0a1f12" fill-opacity="0.8"/>
+  <line x1="0" y1="72" x2="1440" y2="72" stroke="#ffffff" stroke-opacity="0.06"/>
+  <g transform="translate(80,18)">
+    <rect width="40" height="40" rx="12" fill="#f2fbe7"/>
+    <text x="20" y="29" font-size="22" text-anchor="middle">🍐</text>
+    <text x="52" y="29" fill="#eafff3" font-size="20" font-weight="800">Pear<tspan fill="#92cf3f">Pay</tspan></text>
+  </g>
+  <g fill="#eafff3" fill-opacity="0.8" font-size="15">
+    <text x="930" y="42">Home</text>
+    <text x="1005" y="42">Try it</text>
+    <text x="1080" y="42">Simulator</text>
+    <text x="1185" y="42">Prizes</text>
+    <text x="1255" y="42">About</text>
+  </g>
+  <g transform="translate(1320,18)"><rect width="80" height="38" rx="10" fill="#74b327"/><text x="40" y="25" fill="#0a1f12" font-size="13" font-weight="700" text-anchor="middle">Join</text></g>
+
+  <!-- HERO -->
+  <g transform="translate(630,150)"><rect width="180" height="180" rx="40" fill="#f2fbe7"/><text x="90" y="124" font-size="92" text-anchor="middle">🍐</text></g>
+  <text x="720" y="420" fill="#eafff3" font-size="64" font-weight="800" text-anchor="middle">Turn Conversations</text>
+  <text x="720" y="490" fill="#eafff3" font-size="64" font-weight="800" text-anchor="middle">Into <tspan fill="#92cf3f">Transactions</tspan></text>
+  <text x="720" y="545" fill="#eafff3" fill-opacity="0.75" font-size="20" text-anchor="middle">The Apple Pay of Web3. Send money anywhere you communicate —</text>
+  <text x="720" y="573" fill="#eafff3" fill-opacity="0.75" font-size="20" text-anchor="middle">from messaging apps to AI agents. One conversation. One payment.</text>
+
+  <g transform="translate(560,620)"><rect width="150" height="52" rx="14" fill="#74b327"/><text x="75" y="33" fill="#0a1f12" font-size="16" font-weight="700" text-anchor="middle">Try the demo</text></g>
+  <g transform="translate(730,620)"><rect width="150" height="52" rx="14" fill="none" stroke="#ffffff" stroke-opacity="0.12"/><text x="75" y="33" fill="#eafff3" font-size="16" font-weight="600" text-anchor="middle">Learn more</text></g>
+
+  <!-- demo bubble -->
+  <g transform="translate(525,720)">
+    <rect width="390" height="180" rx="20" fill="#16301a" fill-opacity="0.6" stroke="#ffffff" stroke-opacity="0.1"/>
+    <text x="20" y="34" fill="#eafff3" fill-opacity="0.4" font-size="11" letter-spacing="1.5">YOU</text>
+    <g transform="translate(20,44)"><rect width="160" height="36" rx="12" fill="#74b327" fill-opacity="0.15"/><text x="16" y="24" fill="#eafff3" font-size="14" font-weight="500">“Send Molly $20”</text></g>
+    <text x="20" y="112" fill="#eafff3" fill-opacity="0.4" font-size="11" letter-spacing="1.5">PEAR PAY 🍐</text>
+    <g transform="translate(20,122)"><rect width="340" height="40" rx="12" fill="#ffffff" fill-opacity="0.05"/><text x="16" y="26" fill="#eafff3" fill-opacity="0.9" font-size="14">Sent $20 to molly.eth. Settled in USDC ✅</text></g>
+  </g>
+
+  <!-- FEATURES -->
+  <text x="720" y="1010" fill="#eafff3" font-size="40" font-weight="700" text-anchor="middle">Pay people, not wallets</text>
+  <g font-family="-apple-system, BlinkMacSystemFont, sans-serif">
+    <g transform="translate(120,1070)"><rect width="380" height="170" rx="18" fill="#16301a" fill-opacity="0.4" stroke="#ffffff" stroke-opacity="0.1"/><text x="24" y="60" font-size="30">💬</text><text x="24" y="100" fill="#eafff3" font-size="18" font-weight="600">Natural Language Payments</text><text x="24" y="132" fill="#eafff3" fill-opacity="0.65" font-size="14">Just say what you want — “Send Molly</text><text x="24" y="152" fill="#eafff3" fill-opacity="0.65" font-size="14">$20.” No addresses, no chains.</text></g>
+    <g transform="translate(530,1070)"><rect width="380" height="170" rx="18" fill="#16301a" fill-opacity="0.4" stroke="#ffffff" stroke-opacity="0.1"/><text x="24" y="60" font-size="30">🔗</text><text x="24" y="100" fill="#eafff3" font-size="18" font-weight="600">Chain Abstraction</text><text x="24" y="132" fill="#eafff3" fill-opacity="0.65" font-size="14">Never pick a chain or token again.</text><text x="24" y="152" fill="#eafff3" fill-opacity="0.65" font-size="14">Pear Pay routes the optimal rail.</text></g>
+    <g transform="translate(940,1070)"><rect width="380" height="170" rx="18" fill="#16301a" fill-opacity="0.4" stroke="#ffffff" stroke-opacity="0.1"/><text x="24" y="60" font-size="30">💵</text><text x="24" y="100" fill="#eafff3" font-size="18" font-weight="600">USDC Settlement</text><text x="24" y="132" fill="#eafff3" fill-opacity="0.65" font-size="14">Every payment settles in USDC for</text><text x="24" y="152" fill="#eafff3" fill-opacity="0.65" font-size="14">stable value and fast finality.</text></g>
+    <g transform="translate(120,1260)"><rect width="380" height="170" rx="18" fill="#16301a" fill-opacity="0.4" stroke="#ffffff" stroke-opacity="0.1"/><text x="24" y="60" font-size="30">🕶️</text><text x="24" y="100" fill="#eafff3" font-size="18" font-weight="600">Private Transfers</text><text x="24" y="132" fill="#eafff3" fill-opacity="0.65" font-size="14">Hide balances, amounts, and</text><text x="24" y="152" fill="#eafff3" fill-opacity="0.65" font-size="14">counterparties via Unlink.</text></g>
+    <g transform="translate(530,1260)"><rect width="380" height="170" rx="18" fill="#16301a" fill-opacity="0.4" stroke="#ffffff" stroke-opacity="0.1"/><text x="24" y="60" font-size="30">🪪</text><text x="24" y="100" fill="#eafff3" font-size="18" font-weight="600">Human-Readable Identity</text><text x="24" y="132" fill="#eafff3" fill-opacity="0.65" font-size="14">Pay molly.eth instead of 0x4E2B…</text><text x="24" y="152" fill="#eafff3" fill-opacity="0.65" font-size="14">ENS for people and AI agents.</text></g>
+    <g transform="translate(940,1260)"><rect width="380" height="170" rx="18" fill="#16301a" fill-opacity="0.4" stroke="#ffffff" stroke-opacity="0.1"/><text x="24" y="60" font-size="30">🤖</text><text x="24" y="100" fill="#eafff3" font-size="18" font-weight="600">AI Agent Commerce</text><text x="24" y="132" fill="#eafff3" fill-opacity="0.65" font-size="14">Agents pay for APIs, compute, and</text><text x="24" y="152" fill="#eafff3" fill-opacity="0.65" font-size="14">each other — autonomous M2M.</text></g>
+  </g>
+
+  <!-- CHANNELS -->
+  <text x="720" y="1530" fill="#eafff3" font-size="26" font-weight="700" text-anchor="middle">If you can send a message, you can send money</text>
+  <g transform="translate(360,1570)" fill="#eafff3" font-size="14" font-weight="500">
+    <g><rect width="130" height="44" rx="22" fill="#16301a" fill-opacity="0.5" stroke="#ffffff" stroke-opacity="0.1"/><text x="65" y="28" text-anchor="middle">💬 iMessage</text></g>
+    <g transform="translate(146,0)"><rect width="130" height="44" rx="22" fill="#16301a" fill-opacity="0.5" stroke="#ffffff" stroke-opacity="0.1"/><text x="65" y="28" text-anchor="middle">✈️ Telegram</text></g>
+    <g transform="translate(292,0)"><rect width="140" height="44" rx="22" fill="#16301a" fill-opacity="0.5" stroke="#ffffff" stroke-opacity="0.1"/><text x="70" y="28" text-anchor="middle">🟢 WhatsApp</text></g>
+    <g transform="translate(448,0)"><rect width="120" height="44" rx="22" fill="#16301a" fill-opacity="0.5" stroke="#ffffff" stroke-opacity="0.1"/><text x="60" y="28" text-anchor="middle">🎮 Discord</text></g>
+    <g transform="translate(584,0)"><rect width="100" height="44" rx="22" fill="#16301a" fill-opacity="0.5" stroke="#ffffff" stroke-opacity="0.1"/><text x="50" y="28" text-anchor="middle">💼 Slack</text></g>
+  </g>
+</svg>
