@@ -860,8 +860,6 @@ Configure all live integration secrets in the deployment environment:
   number, and inbound webhook URL.
 * WebAuthn: production RP id `pearpay.app`, RP name, origin, and a durable
   credential store path or database-backed implementation.
-* Hedera: operator id/key, HTS USDC token id, HCS topic id, mirror-node URL, and
-  deployed escrow address after contract deployment.
 * Arc/Circle: Circle API key, Arc RPC URL, USDC token address, explorer URL, and
   deployed escrow address.
 * Persistence: `ESCROW_DATABASE_URL` for durable claimable-payment storage.
@@ -870,7 +868,7 @@ Configure all live integration secrets in the deployment environment:
 After secrets are set, run a smoke test for each live path: Dynamic user lookup
 and wallet creation, Twilio SMS/WhatsApp delivery plus Verify, signed Twilio and
 Dynamic webhooks, WebAuthn registration/authentication on the live domain,
-Hedera HTS settlement plus HCS receipt, Arc/Circle transfer with explorer link,
+Arc/Circle transfer with explorer link,
 Unlink private transfer, and social-share preview rendering for `/pay/[data]`.
 
 ---

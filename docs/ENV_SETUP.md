@@ -18,13 +18,12 @@ cp .env.example .env.local
 4. [Arc / Circle (settlement + escrow)](#3-arc--circle-settlement--escrow)
 5. [WebAuthn / Face ID](#4-webauthn--face-id)
 6. [x402 (agent micropayments)](#5-x402-agent-micropayments)
-7. [Hedera (HTS + HCS audit)](#6-hedera-hts--hcs-audit)
-8. [Unlink (private payments)](#7-unlink-private-payments)
-9. [Twilio (SMS / WhatsApp / Verify)](#8-twilio-sms--whatsapp--verify)
-10. [ENS / Ethereum RPC](#9-ens--ethereum-rpc)
-11. [Persistence (Supabase)](#10-persistence-supabase)
-12. [Production on pearpay.app](#production-on-pearpayapp)
-13. [Security checklist](#security-checklist)
+7. [Unlink (private payments)](#6-unlink-private-payments)
+8. [Twilio (SMS / WhatsApp / Verify)](#7-twilio-sms--whatsapp--verify)
+9. [Ethereum RPC](#8-ethereum-rpc)
+10. [Persistence (Supabase)](#9-persistence-supabase)
+11. [Production on pearpay.app](#production-on-pearpayapp)
+12. [Security checklist](#security-checklist)
 
 ---
 
@@ -36,7 +35,6 @@ cp .env.example .env.local
 | **Simulator + Try it (Base Sepolia)** | No server keys — browser wallet only on `/pay` |
 | **Live Arc escrow deploy** | `PRIVATE_KEY`, `ARC_RPC_URL`, funded testnet USDC |
 | **Live Dynamic + Flow** | `DYNAMIC_*`, `NEXT_PUBLIC_DYNAMIC_ENVIRONMENT_ID` |
-| **Live Hedera settlement + HCS** | `HEDERA_OPERATOR_*`, `HEDERA_USDC_TOKEN_ID`, `HEDERA_HCS_TOPIC_ID` |
 | **Live Unlink private mode** | `UNLINK_API_KEY`, `UNLINK_ENGINE_URL`, `UNLINK_ACCOUNT_MNEMONIC` |
 | **Live Twilio claims** | All `TWILIO_*` vars + public webhook URL |
 | **Production** | All of the above + `ESCROW_DATABASE_URL` + domain URLs |
@@ -99,7 +97,7 @@ Docs: [Deploy on Arc](https://docs.arc.network/integrate/deploy-on-arc) · [Circ
 | `ARC_USDC_ADDRESS` / `NEXT_PUBLIC_ARC_USDC_ADDRESS` | `0x3600000000000000000000000000000000000000` |
 | `ARC_EURC_ADDRESS` / `NEXT_PUBLIC_ARC_EURC_ADDRESS` | `0x89B50855Aa3bE2F677cD6303Cec089B5F319D72a` |
 
-> **Note:** `CHAIN_ID=1` at the bottom of `.env.example` is for **Ethereum ENS**, not Arc. Arc always uses chain ID **5042002** via `NEXT_PUBLIC_ARC_CHAIN_ID`.
+> **Note:** `CHAIN_ID=1` at the bottom of `.env.example` is for **Ethereum mainnet**, not Arc. Arc always uses chain ID **5042002** via `NEXT_PUBLIC_ARC_CHAIN_ID`.
 
 ### Wallet private keys
 
@@ -177,32 +175,7 @@ Check status: `GET /api/x402/status` returns whether funder + RPC are configured
 
 ---
 
-## 6. Hedera (HTS + HCS audit)
-
-Docs: [Hedera Portal](https://portal.hedera.com/) · [HTS](https://docs.hedera.com/hedera/sdks-and-apis/sdks/token-service) · [HCS](https://docs.hedera.com/hedera/sdks-and-apis/sdks/consensus-service)
-
-| Variable | How to obtain |
-|----------|---------------|
-| `HEDERA_NETWORK` | `testnet` for hackathon (default) or `mainnet` |
-| `HEDERA_OPERATOR_ID` | [Hedera Portal](https://portal.hedera.com/) → create testnet account → Account ID (`0.0.xxxxx`) |
-| `HEDERA_OPERATOR_KEY` | Portal → download/export **DER private key** or hex key for the operator account |
-| `HEDERA_USDC_TOKEN_ID` | Testnet USDC token ID — Pear Pay defaults in code: `0.0.429274` (verify on [HashScan testnet](https://hashscan.io/testnet)) |
-| `HEDERA_HCS_TOPIC_ID` | Create a **Consensus Topic** in Portal or via SDK → paste topic ID (`0.0.xxxxx`) |
-| `HEDERA_MIRROR_NODE_URL` | `https://hashscan.io/testnet` (default) |
-| `HEDERA_ESCROW_CONTRACT_ADDRESS` | Deploy `PearPayEscrow.sol` via Foundry against Hedera JSON-RPC relay: `https://testnet.hashio.io/api` |
-
-**Steps:**
-
-1. Register at [portal.hedera.com](https://portal.hedera.com/) → get testnet HBAR (free).
-2. Note your **Account ID** and **private key** → operator vars.
-3. Create an **HCS topic** for audit receipts → `HEDERA_HCS_TOPIC_ID`.
-4. Use the known testnet USDC token ID or create/fund your own HTS USDC token.
-
-Without Hedera vars, settlement stubs still work; HCS receipts are skipped or faked locally.
-
----
-
-## 7. Unlink (private payments)
+## 6. Unlink (private payments)
 
 Docs: [Unlink docs](https://docs.unlink.xyz) · [Partner guide (Dynamic × Unlink × Arc)](https://docs.unlink.xyz/partner-integrations)
 
@@ -220,14 +193,14 @@ Verify:
 ```bash
 curl -s -X POST http://localhost:3000/api/privacy/shield \
   -H 'content-type: application/json' \
-  -d '{"amount":50,"recipient":"molly.eth","intent_id":"test-1"}'
+  -d '{"amount":50,"recipient":"+15555550123","intent_id":"test-1"}'
 ```
 
 See [`docs/unlink-integration.md`](./unlink-integration.md) for the full privacy flow.
 
 ---
 
-## 8. Twilio (SMS / WhatsApp / Verify)
+## 7. Twilio (SMS / WhatsApp / Verify)
 
 Docs: [Twilio Console](https://console.twilio.com/) · [Messaging Services](https://www.twilio.com/docs/messaging/services)
 
@@ -252,21 +225,20 @@ Trial accounts can only message verified numbers until upgraded.
 
 ---
 
-## 9. ENS / Ethereum RPC
+## 8. Ethereum RPC
 
-Used to resolve names like `molly.eth` to addresses.
+General-purpose Ethereum RPC for viem reads.
 
 | Variable | How to obtain |
 |----------|---------------|
-| `ENS_RPC_URL` | Ethereum mainnet JSON-RPC URL — [Alchemy](https://www.alchemy.com/), [Infura](https://infura.io/), [QuickNode](https://www.quicknode.com/), etc. |
-| `RPC_URL` | General-purpose Ethereum RPC (fallback for viem reads) — can be same as `ENS_RPC_URL` |
-| `CHAIN_ID` | `1` for Ethereum mainnet (ENS lives on mainnet) — **not** Arc's `5042002` |
+| `RPC_URL` | Ethereum JSON-RPC URL — [Alchemy](https://www.alchemy.com/), [Infura](https://infura.io/), [QuickNode](https://www.quicknode.com/), etc. |
+| `CHAIN_ID` | `1` for Ethereum mainnet — **not** Arc's `5042002` |
 
-Optional for demos if recipients are phone numbers or raw `0x` addresses. Required for ENS name resolution in production.
+Optional for demos. Recipients are resolved by phone, email, @handle, or raw `0x` address.
 
 ---
 
-## 10. Persistence (Supabase)
+## 9. Persistence (Supabase)
 
 | Variable | How to obtain |
 |----------|---------------|
