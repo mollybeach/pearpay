@@ -6,6 +6,9 @@ const nextConfig = {
     serverComponentsExternalPackages: [
       "twilio",
       "@unlink-xyz/sdk",
+      "@dynamic-labs-wallet/node-evm",
+      "@dynamic-labs-wallet/node",
+      "@dynamic-labs-wallet/core",
     ],
   },
 };

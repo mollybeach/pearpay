@@ -1,13 +1,15 @@
 "use client";
 
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
+import { useDynamicContext } from "@dynamic-labs/sdk-react-core";
+import { isEthereumWallet } from "@dynamic-labs/ethereum";
 import { PaymentCard } from "./PaymentCard";
 import { DynamicWalletButton } from "./DynamicWalletButton";
 import { useFlowPayment } from "@/hooks/useFlowPayment";
 import { usePayment } from "@/hooks/usePayment";
 import { useWebAuthn } from "@/hooks/useWebAuthn";
 import type { PaymentPayload } from "@/lib/payload";
-import { DYNAMIC_ENVIRONMENT_ID } from "@/lib/constants";
+import { DYNAMIC_ENVIRONMENT_ID, FLOW_SOURCE_TOKENS } from "@/lib/constants";
 
 interface PaymentFlowProps {
   payload: PaymentPayload;
@@ -20,6 +22,7 @@ function StepIndicator({
   step: string;
   quote?: {
     from_amount?: string;
+    to_amount?: string;
     fees_usd?: string;
     estimated_time_sec?: number;
   } | null;
@@ -29,7 +32,6 @@ function StepIndicator({
     routing: "Routing cross-chain via Flow…",
     quoting: "Getting swap quote…",
     signing: "Sign with your wallet…",
-    shielding: "Shielding transaction…",
     settling: "Settling USDC on Arc…",
     success: "Payment complete",
     error: "Payment failed",
@@ -53,7 +55,8 @@ function StepIndicator({
       </p>
       {quote && ["quoting", "signing", "settling"].includes(step) && (
         <p className="text-center text-xs text-zinc-500">
-          Flow: send {quote.from_amount} · fees ${quote.fees_usd}
+          Flow: send {quote.from_amount} → settle {quote.to_amount} USDC on Arc
+          {quote.fees_usd ? ` · fees $${quote.fees_usd}` : ""}
         </p>
       )}
     </div>
@@ -61,12 +64,20 @@ function StepIndicator({
 }
 
 function PaymentFlowInner({ payload }: PaymentFlowProps) {
-  const { step, error, result, quote, executePayment } = useFlowPayment();
+  const { primaryWallet } = useDynamicContext();
+  const [sourceToken, setSourceToken] = useState<string>(
+    FLOW_SOURCE_TOKENS.native.address,
+  );
+  const { step, error, result, quote, executePayment } =
+    useFlowPayment(sourceToken);
   const {
     authenticate,
     status: webauthnStatus,
     error: webauthnError,
   } = useWebAuthn();
+
+  const walletConnected =
+    primaryWallet != null && isEthereumWallet(primaryWallet);
 
   const handlePay = useCallback(async () => {
     await executePayment(payload, authenticate);
@@ -77,7 +88,6 @@ function PaymentFlowInner({ payload }: PaymentFlowProps) {
     "routing",
     "quoting",
     "signing",
-    "shielding",
     "settling",
   ];
 
@@ -90,11 +100,30 @@ function PaymentFlowInner({ payload }: PaymentFlowProps) {
 
       {!isDone && !isProcessing && (
         <div className="space-y-3">
-          {DYNAMIC_ENVIRONMENT_ID && <DynamicWalletButton />}
+          <DynamicWalletButton />
+          {!walletConnected && (
+            <p className="text-center text-xs text-amber-600">
+              Connect a funded wallet to pay via Flow
+            </p>
+          )}
+          <label className="block text-xs text-zinc-500">
+            Pay with
+            <select
+              value={sourceToken}
+              onChange={(e) => setSourceToken(e.target.value)}
+              className="mt-1 w-full rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-800"
+            >
+              {Object.values(FLOW_SOURCE_TOKENS).map((token) => (
+                <option key={token.address} value={token.address}>
+                  {token.label}
+                </option>
+              ))}
+            </select>
+          </label>
           <button
             type="button"
             onClick={handlePay}
-            disabled={webauthnStatus === "authenticating"}
+            disabled={webauthnStatus === "authenticating" || !walletConnected}
             className="w-full rounded-2xl bg-black py-4 text-lg font-semibold text-white shadow-lg transition hover:bg-zinc-800 active:scale-[0.98] disabled:opacity-50"
           >
             {webauthnStatus === "authenticating"
@@ -130,12 +159,6 @@ function PaymentFlowInner({ payload }: PaymentFlowProps) {
       {result?.mode === "flow" && step === "success" && (
         <p className="text-center text-xs text-emerald-600">
           Settled via Fireblocks Flow on Arc
-        </p>
-      )}
-
-      {result?.mode === "stub" && step === "success" && (
-        <p className="text-center text-xs text-amber-600">
-          Demo mode — set Dynamic + Flow keys for live settlement
         </p>
       )}
     </div>
@@ -192,6 +215,9 @@ function PaymentFlowStubOnly({ payload }: PaymentFlowProps) {
           View on Arc Explorer →
         </a>
       )}
+      <p className="text-center text-xs text-amber-600">
+        Demo mode — set NEXT_PUBLIC_DYNAMIC_ENVIRONMENT_ID for live Flow
+      </p>
     </div>
   );
 }

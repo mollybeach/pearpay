@@ -1,9 +1,26 @@
 import { createHmac, timingSafeEqual } from "crypto";
+import { existsSync, readFileSync, writeFileSync } from "fs";
+import path from "path";
 import { NextResponse } from "next/server";
 import { getEnv } from "@/lib/env";
 import { getFlowClient } from "@/integrations/flow/client";
 
-const settlementLog: Array<Record<string, unknown>> = [];
+const WEBHOOK_LOG = path.join(process.cwd(), ".flow-webhook-log.json");
+
+function loadWebhookLog(): Array<Record<string, unknown>> {
+  if (!existsSync(WEBHOOK_LOG)) return [];
+  try {
+    return JSON.parse(readFileSync(WEBHOOK_LOG, "utf8")) as Array<
+      Record<string, unknown>
+    >;
+  } catch {
+    return [];
+  }
+}
+
+function saveWebhookLog(events: Array<Record<string, unknown>>): void {
+  writeFileSync(WEBHOOK_LOG, JSON.stringify(events.slice(-50), null, 2));
+}
 
 function verifyHmac(
   payload: Buffer,
@@ -27,11 +44,13 @@ export async function POST(request: Request) {
   const env = getEnv();
   const signature = request.headers.get("x-dynamic-signature");
 
-  if (
-    env.DYNAMIC_FLOW_WEBHOOK_SECRET &&
-    !verifyHmac(body, signature, env.DYNAMIC_FLOW_WEBHOOK_SECRET)
-  ) {
-    return NextResponse.json({ detail: "Invalid webhook signature" }, { status: 401 });
+  if (env.DYNAMIC_FLOW_WEBHOOK_SECRET) {
+    if (!verifyHmac(body, signature, env.DYNAMIC_FLOW_WEBHOOK_SECRET)) {
+      return NextResponse.json(
+        { detail: "Invalid webhook signature" },
+        { status: 401 },
+      );
+    }
   }
 
   const data = JSON.parse(body.toString()) as {
@@ -45,20 +64,25 @@ export async function POST(request: Request) {
     event: eventName,
     transaction_id: txId,
     payload: data.data ?? {},
+    received_at: new Date().toISOString(),
   };
-  settlementLog.push(record);
 
-  if (eventName === "settlement.state.completed" && txId) {
+  const log = loadWebhookLog();
+  log.push(record);
+  saveWebhookLog(log);
+
+  if (
+    (eventName === "settlement.state.completed" ||
+      eventName === "execution.state.settled") &&
+    txId
+  ) {
     const flow = getFlowClient();
-    const session = flow.getSessionByTx(txId);
-    if (session) {
-      flow.markSettled(txId, (data.data ?? {}) as Record<string, unknown>);
-    }
+    flow.markSettled(txId, (data.data ?? {}) as Record<string, unknown>);
   }
 
   return NextResponse.json({ received: true, event: eventName });
 }
 
 export async function GET() {
-  return NextResponse.json({ events: settlementLog.slice(-20) });
+  return NextResponse.json({ events: loadWebhookLog().slice(-20) });
 }

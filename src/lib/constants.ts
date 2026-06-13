@@ -33,3 +33,19 @@ export const ARC_USDC_ADDRESS =
 
 export const ARC_EURC_ADDRESS =
   process.env.NEXT_PUBLIC_ARC_EURC_ADDRESS ?? ARC_TESTNET_EURC_ADDRESS;
+
+/** Common Flow source tokens for cross-chain demo. */
+export const FLOW_SOURCE_TOKENS = {
+  native: {
+    label: "Native (ETH)",
+    address: "0x0000000000000000000000000000000000000000" as const,
+  },
+  baseUsdc: {
+    label: "USDC on Base",
+    address: "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913" as const,
+  },
+  ethUsdc: {
+    label: "USDC on Ethereum",
+    address: "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48" as const,
+  },
+} as const;

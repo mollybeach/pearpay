@@ -112,6 +112,9 @@ fastlane/test_output
 .cursor/
 .cursor
 .webauthn-store.json
+.flow-store.json
+.dynamic-agent-wallet.json
+.flow-webhook-log.json
 
 # ---------- Misc ----------
 tmp/
