@@ -2,7 +2,6 @@ import { getEnv } from "@/lib/env";
 import { newClaimToken, newPaymentId } from "@/lib/ids";
 import { logger } from "@/lib/logger";
 import { createEmbeddedWallet } from "@/integrations/dynamic";
-import { logToConsensus } from "@/integrations/hedera";
 import { ARC_TESTNET_CHAIN_ID } from "@/integrations/arc";
 import {
   cancelOnChain,
@@ -12,7 +11,6 @@ import {
   refundOnChain,
 } from "@/integrations/arc/escrow";
 import { selectRail, settleOnRail } from "@/core/payments/settlement";
-import { formatUsdcDisplay } from "@/lib/money";
 import { getEscrowStore } from "./store";
 import type { ClaimablePayment, CreateEscrowParams } from "./types";
 
@@ -75,14 +73,6 @@ export async function createClaimablePayment(
   }
 
   await getEscrowStore().save(payment);
-
-  await logToConsensus({
-    kind: "escrow",
-    from: payment.senderLabel,
-    to: payment.recipientLabel,
-    amount: payment.private ? "private" : formatUsdcDisplay(payment.amount),
-    memo: payment.memo,
-  });
 
   log.info("claimable payment escrowed", {
     id: payment.id,

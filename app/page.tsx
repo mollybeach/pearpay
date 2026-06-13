@@ -26,9 +26,9 @@ const FEATURES = [
     body: "Optionally hide balances, amounts, and counterparties. Privacy is built in, not a premium.",
   },
   {
-    icon: "🪪",
-    title: "Human-Readable Identity",
-    body: "Pay molly.eth instead of 0x4E2B5C… ENS identities for people and AI agents alike.",
+    icon: "👛",
+    title: "Pay Any Wallet",
+    body: "Send straight to a wallet address, phone, email, or @handle — no chains, no copy-pasting.",
   },
   {
     icon: "🤖",
@@ -131,7 +131,7 @@ export default function HomePage() {
               Pear Pay 🍐
             </p>
             <p className="mt-1 rounded-xl bg-white/5 px-4 py-2 text-cream/90">
-              Sent $20 to molly.eth. Settled in USDC ✅
+              Sent $20 to Molly. Settled in USDC ✅
             </p>
           </div>
         </div>

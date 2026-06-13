@@ -5,8 +5,10 @@ const nextConfig = {
     // Sponsor SDKs are server-only; keep them out of the client bundle.
     serverComponentsExternalPackages: [
       "twilio",
-      "@hashgraph/sdk",
       "@unlink-xyz/sdk",
+      "@dynamic-labs-wallet/node-evm",
+      "@dynamic-labs-wallet/node",
+      "@dynamic-labs-wallet/core",
     ],
   },
 };

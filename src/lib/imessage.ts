@@ -15,9 +15,9 @@ export interface PayInfo {
   /** Positive decimal amount (already comma-stripped). */
   amount: number;
   token: PaymentToken;
-  /** Recipient as typed, e.g. "Molly", "alex.eth", "+1". */
+  /** Recipient as typed, e.g. "Molly", "@maya", "+1". */
   recipientName: string;
-  /** Display label, e.g. "molly.eth". */
+  /** Display label, e.g. "Molly". */
   recipientLabel: string;
   outcome: PaymentOutcome;
 }
@@ -27,16 +27,9 @@ export const CONTACT = { name: "Molly", avatar: "🙂" } as const;
 
 /**
  * Recipients already on Pear Pay → instant settlement. Anyone else is treated
- * as a new user and gets a claimable escrow link. Any *.eth name is assumed to
- * be an existing on-chain identity.
+ * as a new user and gets a claimable escrow link.
  */
-export const KNOWN_RECIPIENTS = new Set([
-  "molly",
-  "molly.eth",
-  "sarah",
-  "sarah.eth",
-  "alex.eth",
-]);
+export const KNOWN_RECIPIENTS = new Set(["molly", "sarah"]);
 
 export const QUICK_PHRASES = [
   "Send Molly $20",
@@ -54,20 +47,16 @@ export function formatAmount(pay: Pick<PayInfo, "amount" | "token">): string {
 }
 
 function labelFor(name: string): string {
-  const lower = name.toLowerCase();
-  if (lower === "molly") return "molly.eth";
-  if (lower === "sarah") return "sarah.eth";
   return name;
 }
 
 function isKnown(name: string): boolean {
-  const lower = name.toLowerCase();
-  return lower.endsWith(".eth") || KNOWN_RECIPIENTS.has(lower);
+  return KNOWN_RECIPIENTS.has(name.toLowerCase());
 }
 
 /**
  * Parse a natural-language money request into a {@link PayInfo}, or `null` when
- * the text isn't a payment. Handles intent verbs, ENS/name/phone recipients,
+ * the text isn't a payment. Handles intent verbs, address/name/phone recipients,
  * USDC vs USD, privacy, and comma-grouped amounts ("$1,000").
  *
  * `defaultRecipient` is the chat partner used when no recipient is named (and

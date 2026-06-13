@@ -23,7 +23,7 @@ const PRIVATE_MARKERS = ["privately", "private", "anonymously", "anonymous"];
 
 const AMOUNT_RE =
   /\$?\b(\d+(?:\.\d{1,6})?)\b\s*(usdc|usd|dollars?|bucks?)?/i;
-const ENS_RE = /\b([a-z0-9-]+\.eth)\b/i;
+const ADDRESS_RE = /\b(0x[a-fA-F0-9]{40})\b/;
 const PHONE_RE = /(\+?\d[\d\s().-]{7,}\d)/;
 const EMAIL_RE = /\b([a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,})\b/i;
 const HANDLE_RE = /@([a-z0-9_.]+)/i;
@@ -80,7 +80,7 @@ function extractAmount(text: string): bigint | undefined {
 }
 
 function hintFor(token: string): RecipientHint {
-  if (ENS_RE.test(token)) return "ens";
+  if (ADDRESS_RE.test(token)) return "address";
   if (EMAIL_RE.test(token)) return "email";
   if (PHONE_RE.test(token)) return "phone";
   if (token.startsWith("@")) return "handle";
@@ -95,7 +95,7 @@ function extractRecipients(text: string): RawRecipient[] {
     if (!found.has(key)) found.set(key, { raw, hint: hintFor(raw) });
   };
 
-  for (const re of [ENS_RE, EMAIL_RE, PHONE_RE, HANDLE_RE]) {
+  for (const re of [ADDRESS_RE, EMAIL_RE, PHONE_RE, HANDLE_RE]) {
     const m = text.match(re);
     if (m) add(m[0]!);
   }
@@ -105,7 +105,6 @@ function extractRecipients(text: string): RawRecipient[] {
   const nameRe = new RegExp(`\\b(?:${verbs})\\s+([A-Z][a-z]+)`, "gi");
   for (const m of text.matchAll(nameRe)) {
     const end = (m.index ?? 0) + m[0]!.length;
-    if (text.slice(end, end + 4).toLowerCase() === ".eth") continue;
     add(m[1]!);
   }
 

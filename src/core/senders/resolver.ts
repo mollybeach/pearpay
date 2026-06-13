@@ -45,7 +45,7 @@ export async function resolveSenderWallet(
   }
 
   return {
-    label: identity.label ?? user.ens ?? lookupValue,
+    label: identity.label ?? lookupValue,
     address: user.address,
     verified: true,
     userId: user.userId,

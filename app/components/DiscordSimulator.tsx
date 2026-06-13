@@ -24,7 +24,7 @@ interface Msg {
 }
 
 const DEFAULT_RECIPIENT = "molly";
-const QUICK = ["/pay @molly 20", "/pay dev.eth 100 USDC", "/tip newuser 5"];
+const QUICK = ["/pay @molly 20", "/pay @dev 100 USDC", "/tip newuser 5"];
 
 const INITIAL: Msg[] = [
   {
@@ -297,7 +297,7 @@ function DcMessage({
               label={p.outcome === "claimable" ? "To (new user)" : "To"}
               value={`@${p.recipientName}`}
             />
-            <Field label="Network" value="Hedera → Arc" />
+            <Field label="Network" value="Arc" />
             <Field
               label="Status"
               value={

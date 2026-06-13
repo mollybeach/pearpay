@@ -5,14 +5,14 @@ export type IntentType = "send" | "split" | "request" | "unknown";
 
 /** A raw, unresolved reference to a recipient as it appeared in a message. */
 export interface RawRecipient {
-  /** The literal token, e.g. "Molly", "@molly", "molly.eth", "+12069476991". */
+  /** The literal token, e.g. "Molly", "@molly", "0x4E2B…", "+12069476991". */
   raw: string;
   /** A best-effort guess at the reference kind, refined later by the resolver. */
   hint: RecipientHint;
 }
 
 export type RecipientHint =
-  | "ens"
+  | "address"
   | "phone"
   | "email"
   | "handle"

@@ -314,7 +314,7 @@ function SlackMessage({
             {done ? (
               <p className="mt-2 rounded bg-black/30 px-2 py-1 text-[12px] text-[#a8d672]">
                 ✅ Settled ${(s.per * s.members.length).toFixed(2)} in USDC ·
-                Hedera → Arc
+                Arc
               </p>
             ) : null}
           </div>
@@ -357,7 +357,7 @@ function SlackMessage({
               <b>@{p.recipientName}</b> {done ? "✅" : "?"}
             </p>
             {done ? (
-              <p className="mt-1 text-[12px] text-[#a8d672]">Settled in USDC · Hedera → Arc</p>
+              <p className="mt-1 text-[12px] text-[#a8d672]">Settled in USDC · Arc</p>
             ) : null}
           </div>
           {active && phase === "review" ? (

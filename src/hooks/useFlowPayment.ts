@@ -5,7 +5,6 @@ import { isEthereumWallet } from "@dynamic-labs/ethereum";
 import { useCallback, useState } from "react";
 import type { PaymentPayload } from "@/lib/payload";
 import { ARC_EXPLORER_URL } from "@/lib/constants";
-import { shieldPayment } from "@/lib/unlink";
 import {
   flowAttachSource,
   flowBroadcast,
@@ -14,7 +13,6 @@ import {
   flowQuote,
   flowStart,
   getFlowStatus,
-  NATIVE_TOKEN,
   signAndBroadcastEvm,
   type FlowQuote,
 } from "@/lib/flow";
@@ -25,7 +23,6 @@ export type PaymentStep =
   | "routing"
   | "quoting"
   | "signing"
-  | "shielding"
   | "settling"
   | "success"
   | "error";
@@ -36,9 +33,10 @@ export interface PaymentResult {
   mode: "flow" | "dynamic" | "stub";
   quote?: FlowQuote;
   flowTransactionId?: string;
+  settlementCompleted?: boolean;
 }
 
-export function useFlowPayment() {
+export function useFlowPayment(fromTokenAddress: string) {
   const { primaryWallet } = useDynamicContext();
   const [step, setStep] = useState<PaymentStep>("idle");
   const [error, setError] = useState<string | null>(null);
@@ -66,11 +64,13 @@ export function useFlowPayment() {
           configured: false,
         }));
 
-        if (
-          flowStatus.configured &&
-          primaryWallet &&
-          isEthereumWallet(primaryWallet)
-        ) {
+        if (flowStatus.configured) {
+          if (!primaryWallet || !isEthereumWallet(primaryWallet)) {
+            setStep("error");
+            setError("Connect your Dynamic wallet before paying");
+            return null;
+          }
+
           setStep("routing");
 
           const address = primaryWallet.address;
@@ -88,7 +88,10 @@ export function useFlowPayment() {
           await flowAttachSource(payload.intent_id, address, chainId);
 
           setStep("quoting");
-          const quoteResult = await flowQuote(payload.intent_id, NATIVE_TOKEN);
+          const quoteResult = await flowQuote(
+            payload.intent_id,
+            fromTokenAddress,
+          );
           setQuote(quoteResult);
 
           setStep("signing");
@@ -101,18 +104,25 @@ export function useFlowPayment() {
 
           await flowBroadcast(payload.intent_id, txHash);
 
-          setStep("shielding");
-          await shieldPayment(payload);
-
           setStep("settling");
           let completed = false;
-          for (let i = 0; i < 30; i += 1) {
+          for (let i = 0; i < 40; i += 1) {
             const status = await flowPollStatus(payload.intent_id);
             if (status.completed) {
               completed = true;
               break;
             }
+            if (
+              status.settlement_state === "failed" ||
+              status.execution_state === "failed"
+            ) {
+              throw new Error("Flow settlement failed");
+            }
             await new Promise((r) => setTimeout(r, 3000));
+          }
+
+          if (!completed) {
+            throw new Error("Flow settlement timed out — check webhook status");
           }
 
           const paymentResult: PaymentResult = {
@@ -121,33 +131,25 @@ export function useFlowPayment() {
             mode: "flow",
             quote: quoteResult,
             flowTransactionId: started.transaction_id,
+            settlementCompleted: true,
           };
-          setStep(completed ? "success" : "success");
+          setStep("success");
           setResult(paymentResult);
           return paymentResult;
         }
 
-        setStep("shielding");
-        await shieldPayment(payload);
-        await new Promise((r) => setTimeout(r, 1200));
-        setStep("settling");
-
-        const stubHash = `0x${payload.intent_id.replace(/-/g, "").slice(0, 64)}`;
-        const stub: PaymentResult = {
-          txHash: stubHash,
-          explorerUrl: `${ARC_EXPLORER_URL}/tx/${stubHash}`,
-          mode: "stub",
-        };
-        setStep("success");
-        setResult(stub);
-        return stub;
+        setStep("error");
+        setError(
+          "Flow is not configured. Set DYNAMIC_ENV_ID and DYNAMIC_API_TOKEN.",
+        );
+        return null;
       } catch (err) {
         setStep("error");
         setError(err instanceof Error ? err.message : "Payment failed");
         return null;
       }
     },
-    [primaryWallet],
+    [primaryWallet, fromTokenAddress],
   );
 
   return { step, error, result, quote, executePayment };

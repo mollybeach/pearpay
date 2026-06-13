@@ -1,5 +1,9 @@
 import { assertConfiguredForProduction, getEnv } from "@/lib/env";
 import { logger } from "@/lib/logger";
+import {
+  getOrCreateAgentServerWallet,
+  isServerWalletConfigured,
+} from "./server-wallet";
 
 const log = logger.scoped("dynamic");
 
@@ -15,7 +19,6 @@ const log = logger.scoped("dynamic");
 export interface PearPayUser {
   userId: string;
   address: `0x${string}`;
-  ens?: string;
 }
 
 export interface WalletHandle {
@@ -45,7 +48,7 @@ function requireConfigured() {
 }
 
 /**
- * Look up whether a given identifier (handle, email, phone, ENS, address) maps
+ * Look up whether a given identifier (handle, email, phone, address) maps
  * to an existing Pear Pay user with a Dynamic wallet.
  */
 export async function lookupPearPayUser(
@@ -70,9 +73,8 @@ export async function lookupPearPayUser(
     const data = (await res.json()) as {
       id: string;
       walletAddress: `0x${string}`;
-      ens?: string;
     };
-    return { userId: data.id, address: data.walletAddress, ens: data.ens };
+    return { userId: data.id, address: data.walletAddress };
   } catch (err) {
     log.warn("dynamic user lookup error", { err: String(err) });
     return null;
@@ -118,6 +120,17 @@ export async function createEmbeddedWallet(
 export async function createAgentWallet(
   agentId: string,
 ): Promise<WalletHandle> {
+  if (isServerWalletConfigured()) {
+    const record = await getOrCreateAgentServerWallet();
+    if (record) {
+      return {
+        walletId: record.walletMetadata.walletId,
+        address: record.walletMetadata.accountAddress as `0x${string}`,
+        kind: "server",
+      };
+    }
+  }
+
   if (!requireConfigured()) {
     const stub = `0xa6e0${Buffer.from(agentId).toString("hex").padEnd(36, "0").slice(0, 36)}` as `0x${string}`;
     return { walletId: `agent_${agentId}`, address: stub, kind: "server" };
@@ -141,3 +154,5 @@ export async function createAgentWallet(
   };
   return { walletId: data.walletId, address: data.address, kind: "server" };
 }
+
+export { isServerWalletConfigured, getOrCreateAgentServerWallet };

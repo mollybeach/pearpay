@@ -21,7 +21,11 @@ jobs:
           cache: npm
 
       - name: Install dependencies
-        run: npm ci
+        # `npm install` (not `npm ci`) tolerates platform-specific optional-dep
+        # gaps in the lockfile (e.g. Linux/WASM @emnapi deps that a macOS-
+        # generated lock omits), which otherwise hard-fail `npm ci` on the
+        # ubuntu runner.
+        run: npm install --no-audit --no-fund
 
       - name: Lint
         run: npm run lint

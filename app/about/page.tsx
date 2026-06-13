@@ -10,8 +10,6 @@ export const metadata: Metadata = {
 
 const STACK = [
   { name: "Dynamic", role: "Embedded, server & agent wallets" },
-  { name: "ENS", role: "Human-readable identity & agent discovery" },
-  { name: "Hedera", role: "Primary settlement rail — HTS, HBAR & HCS audit" },
   { name: "Arc", role: "Circle-native USDC settlement & liquidity" },
   { name: "Unlink", role: "Private balances, transfers & claims" },
   { name: "Twilio", role: "SMS / WhatsApp claim links, Verify & Voice" },

@@ -8,11 +8,6 @@ export const ARC_TESTNET_EURC_ADDRESS =
 export const ARC_TESTNET_RPC_URL = "https://rpc.testnet.arc.network";
 export const ARC_TESTNET_EXPLORER_URL = "https://testnet.arcscan.app";
 
-export const HEDERA_USDC_TOKEN_IDS = {
-  mainnet: "0.0.456858",
-  testnet: "0.0.429274",
-} as const;
-
 export type ArcStablecoinSymbol = "USDC" | "EURC";
 
 export interface ArcNetworkConfig {

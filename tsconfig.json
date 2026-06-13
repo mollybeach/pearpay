@@ -17,6 +17,7 @@
     "allowJs": false,
     "noEmit": true,
     "plugins": [{ "name": "next" }],
+    "types": ["node"],
     "baseUrl": ".",
     "paths": {
       "@/core/*": ["src/core/*"],

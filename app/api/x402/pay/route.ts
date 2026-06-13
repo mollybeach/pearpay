@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { getEnv } from "@/lib/env";
+import { createSignedX402Payment } from "@/core/agents/wallet";
 
 const bodySchema = z.object({
   url: z.string().url(),
@@ -8,7 +8,6 @@ const bodySchema = z.object({
 });
 
 export async function POST(request: Request) {
-  const env = getEnv();
   let json: unknown;
   try {
     json = await request.json();
@@ -21,21 +20,14 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "invalid_request" }, { status: 400 });
   }
 
-  if (!env.FUNDER_PRIVATE_KEY) {
-    return NextResponse.json(
-      {
-        detail:
-          "x402 not configured. Set FUNDER_PRIVATE_KEY and deploy Gateway deposit.",
-      },
-      { status: 503 },
-    );
+  const result = await createSignedX402Payment(
+    parsed.data.url,
+    parsed.data.amount,
+  );
+
+  if (result.mode === "stub" || result.status === "unconfigured") {
+    return NextResponse.json(result, { status: 503 });
   }
 
-  return NextResponse.json({
-    status: "authorized",
-    url: parsed.data.url,
-    amount: parsed.data.amount,
-    mode: "stub",
-    message: "Wire GatewayClient from @circle-fin/x402-batching",
-  });
+  return NextResponse.json(result);
 }

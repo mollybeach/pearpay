@@ -16,13 +16,13 @@ vi.mock("@/core/payments", async (importOriginal) => {
       }
       return {
         ok: true,
-        summary: "Sent $1 to molly.eth.",
+        summary: "Sent $1 to Molly.",
         legs: [
           {
             recipient: {
-              raw: "molly.eth",
-              hint: "ens",
-              label: "molly.eth",
+              raw: "0x2222222222222222222222222222222222222222",
+              hint: "address",
+              label: "0x2222…2222",
               address: "0x2222222222222222222222222222222222222222",
               isPearPayUser: true,
               deliveryMode: "instant",
