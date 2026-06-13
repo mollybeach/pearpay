@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { AgentDemo } from "@/components/AgentDemo";
 
 const FEATURES = [
   {
@@ -184,6 +185,20 @@ export default function HomePage() {
               </p>
             </div>
           ))}
+        </div>
+      </section>
+
+      {/* Agent demo */}
+      <section className="mx-auto max-w-4xl px-5 py-16">
+        <h2 className="text-center text-3xl font-bold sm:text-4xl">
+          Agentic economy
+        </h2>
+        <p className="mx-auto mt-3 max-w-xl text-center text-cream/65">
+          Humans approve with Face ID. Agents pay APIs autonomously via Dynamic
+          server wallets and x402.
+        </p>
+        <div className="mt-8 flex justify-center">
+          <AgentDemo />
         </div>
       </section>
 

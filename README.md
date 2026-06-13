@@ -142,7 +142,7 @@ Pear Pay is designed to operate wherever people communicate.
 
 * ChatGPT Agents
 * Claude Agents
-* Cursor Agents
+* IDE and coding agents
 * AutoGPT
 * Custom Autonomous Agents
 

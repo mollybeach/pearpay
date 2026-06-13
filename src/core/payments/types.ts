@@ -23,6 +23,8 @@ export interface PaymentLeg {
   settlementRef?: string;
   /** Claim URL for claimable legs. */
   claimUrl?: string;
+  /** Interactive Flow pay link for instant legs (FaceID + OG unfurl). */
+  payUrl?: string;
   /** Whether a Twilio notification was dispatched. */
   notified: boolean;
   private: boolean;
@@ -34,6 +36,8 @@ export interface PaymentResult {
   /** Human-readable summary suitable for replying in any channel. */
   summary: string;
   legs: PaymentLeg[];
+  /** Shareable pay link for Flow + FaceID demo (first instant leg). */
+  payUrl?: string;
   /** Populated when the message could not be turned into a payment. */
   error?: string;
 }
