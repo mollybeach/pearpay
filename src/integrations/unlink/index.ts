@@ -1,15 +1,24 @@
+import type { UnlinkClient } from "@unlink-xyz/sdk";
 import { assertConfiguredForProduction, getEnv } from "@/lib/env";
 import { logger } from "@/lib/logger";
 import { formatUsdc, type UsdcAmount } from "@/lib/money";
+import { usdcAddress } from "@/integrations/arc";
 
 const log = logger.scoped("unlink");
 
 /**
- * Unlink integration — embedded privacy SDK (@unlink-xyz/sdk).
+ * Unlink integration — the embedded privacy SDK (`@unlink-xyz/sdk`).
  *
- * When a user requests a private transfer, funds are routed through Unlink's
- * private primitives so balances, amounts, and counterparties stay hidden.
- * Core primitives: deposit(), transfer(), withdraw(), execute().
+ * When a user adds "privately" to a payment, funds are routed through Unlink's
+ * shielded pool so the **amount, balances, and counterparties stay hidden**
+ * on-chain. We use the backend client (`createUnlink`) with an account derived
+ * from a server mnemonic and the four private primitives:
+ *   - deposit()  → shield public USDC into a private balance
+ *   - transfer() → move USDC privately (amount + recipient unlinkable)
+ *   - withdraw() → exit to a fresh public EOA (breaks the funding link)
+ *
+ * Without `UNLINK_API_KEY` / engine URL / account it runs in a deterministic
+ * stub so local demos and tests work offline; production fails fast.
  */
 
 export interface PrivateTransferRequest {
@@ -26,7 +35,10 @@ export interface PrivateTransferReceipt {
 }
 
 function isConfigured(): boolean {
-  return Boolean(getEnv().UNLINK_API_KEY);
+  const env = getEnv();
+  return Boolean(
+    env.UNLINK_API_KEY && env.UNLINK_ENGINE_URL && env.UNLINK_ACCOUNT_MNEMONIC,
+  );
 }
 
 function requireConfigured() {
@@ -35,14 +47,33 @@ function requireConfigured() {
   return configured;
 }
 
-function headers(): Record<string, string> {
-  return {
-    "Content-Type": "application/json",
-    Authorization: `Bearer ${getEnv().UNLINK_API_KEY ?? ""}`,
-  };
+// Cache the registered client across calls within a server instance.
+let clientPromise: Promise<UnlinkClient> | null = null;
+
+/** Lazily construct (and register) the real Unlink backend client. */
+async function getClient(): Promise<UnlinkClient> {
+  if (clientPromise) return clientPromise;
+  clientPromise = (async () => {
+    const env = getEnv();
+    // Dynamic import keeps the ZK-crypto SDK out of any client bundle and out
+    // of the stub path entirely.
+    const { createUnlink, unlinkAccount } = await import("@unlink-xyz/sdk");
+    const account = unlinkAccount.fromMnemonic({
+      mnemonic: env.UNLINK_ACCOUNT_MNEMONIC!,
+    });
+    const client = createUnlink({
+      engineUrl: env.UNLINK_ENGINE_URL!,
+      apiKey: env.UNLINK_API_KEY!,
+      account,
+    });
+    await client.ensureRegistered();
+    log.info("unlink client registered", { engine: env.UNLINK_ENGINE_URL });
+    return client;
+  })();
+  return clientPromise;
 }
 
-/** Shield funds into a private balance (Unlink `deposit()`). */
+/** Shield public USDC into a private balance (Unlink `deposit()`). */
 export async function deposit(
   fromAddress: `0x${string}`,
   amount: UsdcAmount,
@@ -51,28 +82,24 @@ export async function deposit(
   if (!requireConfigured()) {
     return { noteId: `note_${fromAddress.slice(2, 10)}_${amount}` };
   }
-  const res = await fetch("https://api.unlink.xyz/v1/deposit", {
-    method: "POST",
-    headers: headers(),
-    body: JSON.stringify({
-      address: fromAddress,
-      amount: formatUsdc(amount),
-      chainId,
-    }),
+  const client = await getClient();
+  const res = await client.deposit({
+    token: usdcAddress(chainId),
+    amount: formatUsdc(amount),
   });
-  if (!res.ok) throw new Error(`Unlink deposit failed: ${res.status}`);
-  return (await res.json()) as { noteId: string };
+  return { noteId: res.txId };
 }
 
 /**
- * Privately transfer USDC between accounts (Unlink `transfer()`). Amounts and
- * counterparties are confidential.
+ * Privately transfer USDC between accounts (Unlink `transfer()`). The amount
+ * and counterparty are confidential — this is the primitive used by the
+ * "send X privately" rail.
  */
 export async function privateTransfer(
   req: PrivateTransferRequest,
 ): Promise<PrivateTransferReceipt> {
   if (!requireConfigured()) {
-    log.debug("unlink local private transfer", {
+    log.debug("unlink stub private transfer", {
       amount: formatUsdc(req.amount),
     });
     return {
@@ -81,41 +108,43 @@ export async function privateTransfer(
     };
   }
 
-  const res = await fetch("https://api.unlink.xyz/v1/transfer", {
-    method: "POST",
-    headers: headers(),
-    body: JSON.stringify({
-      from: req.fromAddress,
-      to: req.toAddress,
-      amount: formatUsdc(req.amount),
-      chainId: req.chainId,
-    }),
+  const client = await getClient();
+  const res = await client.transfer({
+    token: usdcAddress(req.chainId),
+    amount: formatUsdc(req.amount),
+    recipientAddress: req.toAddress,
   });
-  if (!res.ok) throw new Error(`Unlink transfer failed: ${res.status}`);
-
-  const data = (await res.json()) as { noteId: string; status: string };
-  log.info("unlink private transfer complete", { noteId: data.noteId });
+  log.info("unlink private transfer complete", { txId: res.txId });
   return {
-    noteId: data.noteId,
-    status: data.status === "settled" ? "settled" : "shielded",
+    noteId: res.txId,
+    status: res.status === "settled" ? "settled" : "shielded",
   };
 }
 
-/** Withdraw a private balance back to a public address (Unlink `withdraw()`). */
+/**
+ * Withdraw a private balance to a public EOA (Unlink `withdraw()`). Used to exit
+ * the shielded pool via an address unlinkable from the original funder.
+ */
 export async function withdraw(
-  noteId: string,
   toAddress: `0x${string}`,
-): Promise<{ txHash: `0x${string}` }> {
+  amount: UsdcAmount,
+  chainId: number,
+): Promise<{ txId: string }> {
   if (!requireConfigured()) {
     return {
-      txHash: `0x${Buffer.from(noteId).toString("hex").padEnd(64, "0").slice(0, 64)}` as `0x${string}`,
+      txId: `0x${Buffer.from(`${toAddress}${amount}`).toString("hex").padEnd(64, "0").slice(0, 64)}`,
     };
   }
-  const res = await fetch("https://api.unlink.xyz/v1/withdraw", {
-    method: "POST",
-    headers: headers(),
-    body: JSON.stringify({ noteId, to: toAddress }),
+  const client = await getClient();
+  const res = await client.withdraw({
+    recipientEvmAddress: toAddress,
+    token: usdcAddress(chainId),
+    amount: formatUsdc(amount),
   });
-  if (!res.ok) throw new Error(`Unlink withdraw failed: ${res.status}`);
-  return (await res.json()) as { txHash: `0x${string}` };
+  return { txId: res.txId };
+}
+
+/** Test/HMR helper: drop the cached client so config changes take effect. */
+export function resetUnlinkClient(): void {
+  clientPromise = null;
 }
