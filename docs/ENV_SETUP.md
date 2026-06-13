@@ -1,9 +1,9 @@
 # Environment Variables — How to Obtain Every Value
 
-Pear Pay reads configuration from `.env.local` (local dev) or your deployment host (Vercel, etc.). Copy [`.env.example`](../.env.example) to get started:
+Pear Pay reads configuration from `.env` (local dev) or your deployment host (Vercel, etc.). Copy [`.env.example`](../.env.example) to get started:
 
 ```bash
-cp .env.example .env.local
+cp .env.example .env
 ```
 
 **Last updated:** 2026-06-13
@@ -132,7 +132,7 @@ Optional for local dev — without it, Arc settlement returns deterministic stub
 ### Deploy escrow contract
 
 ```bash
-# Load PRIVATE_KEY and ARC_RPC_URL from .env.local first
+# Load PRIVATE_KEY and ARC_RPC_URL from .env first
 forge script contracts/script/DeployPearPayEscrow.s.sol \
   --rpc-url "$ARC_RPC_URL" \
   --broadcast
@@ -269,7 +269,7 @@ Run production readiness check in code: `getProductionReadiness()` in `src/lib/e
 
 ## Security checklist
 
-- **Never commit** `.env`, `.env.local`, or real private keys — they are in [`.gitignore`](../.gitignore).
+- **Never commit** `.env` or real private keys — they are in [`.gitignore`](../.gitignore).
 - Use **separate wallets** for deploy (`PRIVATE_KEY`) vs treasury in production.
 - Rotate any key that appears in chat, screenshots, or git history.
 - `UNLINK_ACCOUNT_MNEMONIC` and `FUNDER_PRIVATE_KEY` are **hot wallet secrets** — scope access to deployment env only.

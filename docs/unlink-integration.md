@@ -120,7 +120,7 @@ private micropayments for AI inference and pay-per-request APIs.
 
 ## 4. Flip it on
 
-Set these in `.env.local` (all already scaffolded), then restart:
+Set these in `.env` (all already scaffolded), then restart:
 
 ```bash
 UNLINK_API_KEY=          # from https://docs.unlink.xyz quickstart
