@@ -28,7 +28,7 @@
     "@simplewebauthn/browser": "^13.1.0",
     "@simplewebauthn/server": "^13.1.0",
     "@tanstack/react-query": "^5.101.0",
-    "@unlink-xyz/sdk": "file:unlink-xyz-sdk-0.3.0-canary.621.tgz",
+    "@unlink-xyz/sdk": "0.3.0-canary.621",
     "next": "^14.2.35",
     "react": "^18.3.0",
     "react-dom": "^18.3.0",
