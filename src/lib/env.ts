@@ -39,6 +39,7 @@ const envSchema = z.object({
   DYNAMIC_FLOW_CHECKOUT_ID: z.string().optional(),
   DYNAMIC_FLOW_WEBHOOK_SECRET: z.string().optional(),
   DYNAMIC_WALLET_PASSWORD: z.string().optional(),
+  FLOW_STORE_PATH: z.string().optional(),
   AGENT_WALLET_ADDRESS: z.string().optional(),
   ARC_USDC_ADDRESS: z.string().optional(),
   ARC_EURC_ADDRESS: z.string().optional(),

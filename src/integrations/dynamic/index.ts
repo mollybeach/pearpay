@@ -1,5 +1,9 @@
 import { assertConfiguredForProduction, getEnv } from "@/lib/env";
 import { logger } from "@/lib/logger";
+import {
+  getOrCreateAgentServerWallet,
+  isServerWalletConfigured,
+} from "./server-wallet";
 
 const log = logger.scoped("dynamic");
 
@@ -116,6 +120,17 @@ export async function createEmbeddedWallet(
 export async function createAgentWallet(
   agentId: string,
 ): Promise<WalletHandle> {
+  if (isServerWalletConfigured()) {
+    const record = await getOrCreateAgentServerWallet();
+    if (record) {
+      return {
+        walletId: record.walletMetadata.walletId,
+        address: record.walletMetadata.accountAddress as `0x${string}`,
+        kind: "server",
+      };
+    }
+  }
+
   if (!requireConfigured()) {
     const stub = `0xa6e0${Buffer.from(agentId).toString("hex").padEnd(36, "0").slice(0, 36)}` as `0x${string}`;
     return { walletId: `agent_${agentId}`, address: stub, kind: "server" };
@@ -139,3 +154,5 @@ export async function createAgentWallet(
   };
   return { walletId: data.walletId, address: data.address, kind: "server" };
 }
+
+export { isServerWalletConfigured, getOrCreateAgentServerWallet };
