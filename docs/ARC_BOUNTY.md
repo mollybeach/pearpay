@@ -5,6 +5,8 @@ as "Pay Alex $20"; Pear Pay resolves the recipient, hides chain choice, routes
 USDC through Arc as the liquidity hub, and either settles instantly or creates a
 claimable escrow for recipients who are not onboarded yet.
 
+**Live app:** [https://pearpay.app/](https://pearpay.app/)
+
 ## Target Bounties
 
 ### Best Smart Contracts on Arc with Advanced Stablecoin Logic

@@ -5,11 +5,15 @@
 ### The Universal Payment Layer for Messaging, Social Apps, and AI Agents
 
 ### EthGlobal NYC 2026
+
+**Live demo:** [https://pearpay.app/](https://pearpay.app/)
+
 ---
 
 # Table of Contents
 
 * [Executive Summary](#executive-summary)
+* [Live Demo](#live-demo)
 * [The Problem](#the-problem)
 * [The Solution](#the-solution)
 * [Supported Platforms](#supported-platforms)
@@ -54,6 +58,19 @@ Pear Pay automatically handles everything else.
 Behind the scenes, the platform resolves identities, creates wallets, routes transactions across chains, settles in USDC, and optionally protects transaction privacy.
 
 Our vision is to become the payment infrastructure layer for both human communication and the emerging Agentic Economy.
+
+---
+
+# Live Demo
+
+Pear Pay is deployed at **[https://pearpay.app/](https://pearpay.app/)**.
+
+| Page | URL |
+|------|-----|
+| Home | https://pearpay.app/ |
+| Try it (real Base Sepolia USDC) | https://pearpay.app/pay |
+| Simulator (six messaging apps) | https://pearpay.app/messages |
+| Prizes / bounty evidence | https://pearpay.app/prizes |
 
 ---
 
@@ -957,7 +974,7 @@ Resources: [Unlink docs](https://docs.unlink.xyz) · [Dynamic x Unlink x Arc int
 # Production Deploy Checklist
 
 Before switching the app to `NODE_ENV=production`, attach `pearpay.app` to the
-deployment and set `APP_URL`, `NEXT_PUBLIC_APP_URL`, `NEXT_PUBLIC_SITE_URL`,
+Vercel deployment and set `APP_URL`, `NEXT_PUBLIC_APP_URL`, `NEXT_PUBLIC_SITE_URL`,
 `WEBAUTHN_ORIGIN`, and `TWILIO_WEBHOOK_URL` to `https://pearpay.app`.
 
 Configure all live integration secrets in the deployment environment:

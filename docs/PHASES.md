@@ -22,7 +22,7 @@ npm run dev
 - [x] `generateMetadata()` on `/pay/[data]`
 - [x] Dynamic `opengraph-image.tsx` (1200×630)
 - [x] Orchestrator returns `payUrl` on instant legs
-- [ ] Deploy to Vercel — set `NEXT_PUBLIC_APP_URL`
+- [ ] Deploy to Vercel — custom domain https://pearpay.app/ · set `NEXT_PUBLIC_APP_URL`
 - [ ] Test unfurl in iMessage on iPhone
 
 ---

@@ -83,7 +83,7 @@ function copyField(id, btn) {
 
 <div class="copy-row">
 <button class="copy-btn" type="button" onclick="copyField('copy-demo-link', this)">Copy</button>
-<pre id="copy-demo-link" class="copy-target">https://pearpay.vercel.app/</pre>
+<pre id="copy-demo-link" class="copy-target">https://pearpay.app/</pre>
 </div>
 
 ### Short description *(max 100 characters)*
@@ -112,7 +112,7 @@ Crucially, payments never fail because the recipient hasn't onboarded. If they h
 
 Pear Pay also extends to the agentic economy: AI agents get their own ENS identity and Dynamic server wallet and can pay each other for APIs, compute, and data autonomously using HTTP 402 / x402 — the same infrastructure that powers human payments powering machine-to-machine commerce.
 
-You can try it live: a clickable, screen-recordable Simulator reproduces the in-chat payment experience across six platforms (iMessage, Telegram, Discord, WhatsApp, Slack, X), and a "Try it" page does a real on-chain USDC transfer from your own wallet on Base Sepolia testnet — a genuine, verifiable transaction, not a mock.</pre>
+You can try it live at https://pearpay.app/: a clickable, screen-recordable Simulator reproduces the in-chat payment experience across six platforms (iMessage, Telegram, Discord, WhatsApp, Slack, X), and a "Try it" page does a real on-chain USDC transfer from your own wallet on Base Sepolia testnet — a genuine, verifiable transaction, not a mock.</pre>
 </div>
 
 ### How it's made *(min 280 characters)*
@@ -167,7 +167,7 @@ Upload these in the **Images** step of the form.
 | Field | Requirement | Pear Pay asset |
 |-------|-------------|----------------|
 | **Logo** | Square ~512×512 | Pear Pay pear mascot + wordmark (upload from your design folder) |
-| **Cover image** | 16:9 (~640×360+) | Banner: "Turn Conversations into Web3 Transactions" + QR to demo |
+| **Cover image** | 16:9 (~640×360+) | Banner: "Turn Conversations into Web3 Transactions" + QR to https://pearpay.app/ |
 | **Screenshots** | Min 3 | Use: Simulator (iMessage), Try it (real USDC), Prizes/Arc page |
 
 **Suggested screenshot sources in repo:**
@@ -175,7 +175,7 @@ Upload these in the **Images** step of the form.
 - `design/figma/02-simulator.svg` — export PNG for Simulator
 - `design/figma/03-try-it.svg` — export PNG for Try it flow
 - `design/figma/01-home.svg` — export PNG for landing page
-- Live captures from https://pearpay.vercel.app/messages and `/pay`
+- Live captures from https://pearpay.app/messages and https://pearpay.app/pay
 
 **Checklist before Save & Continue:**
 
@@ -477,7 +477,7 @@ https://github.com/mollybeach/pearpay/blob/main/src/core/payments/settlement.ts#
 ### Submission checklist *(before you hit Submit)*
 
 - [ ] **Public repo with commits** — github.com/mollybeach/pearpay
-- [ ] **Demonstration link** — https://pearpay.vercel.app/
+- [ ] **Demonstration link** — https://pearpay.app/
 - [ ] **Project video** — 2–4 min uploaded
 - [ ] **Logo, cover, 3+ screenshots** uploaded
 - [ ] **Tech stack** multiselects filled (section 3)
@@ -490,7 +490,7 @@ https://github.com/mollybeach/pearpay/blob/main/src/core/payments/settlement.ts#
 
 - Name the bounty explicitly in your demo (e.g. "Arc — Best Smart Contracts with Advanced Stablecoin Logic").
 - Arc + joint Unlink prize require: **MVP + architecture diagram + video + public repo**.
-- Dynamic requires: **deployed app judges can use** + SDK integration visible in demo.
+- Dynamic requires: **deployed app judges can use** — https://pearpay.app/ — + SDK integration visible in demo.
 - Unlink requires: **working private flow demo** + README explaining what is private.
 - Keep `docs/DYNAMIC_BOUNTY.md` open during the Dynamic booth / video.
 

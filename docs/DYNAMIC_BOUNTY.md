@@ -2,6 +2,8 @@
 
 PearPay is a unified Next.js app for conversational payments, biometric approval, cross-chain Flow settlement, and autonomous agent payments.
 
+**Live app:** [https://pearpay.app/](https://pearpay.app/)
+
 ## Judging narrative (say this in demo video)
 
 > "A user types *Pay the security agent $45* in chat. PearPay's NLP engine **proposes** the payment — it never holds keys. The user taps the Apple Pay card, **FaceID** fires via WebAuthn, then **Fireblocks Flow** routes funds from whatever chain and token they hold — ETH on Arbitrum, USDC on Base — and **settles USDC on Arc** to the agent wallet. Meanwhile, the **security agent** uses a **Dynamic server wallet** to autonomously pay x402-gated APIs without human approval per call."
