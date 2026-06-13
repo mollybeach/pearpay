@@ -15,15 +15,16 @@ import {
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { erc20Abi, formatUnits, isAddress, parseUnits } from "viem";
 import {
-  BASE_SEPOLIA_ID,
+  ARC_TESTNET_CHAIN_ID,
   EXPLORER_TX,
-  USDC_BASE_SEPOLIA,
+  USDC_ARC_TESTNET,
+  USDC_DECIMALS,
   USDC_FAUCET,
   demoWagmiConfig,
 } from "@/lib/wagmi-demo";
 
 /**
- * Live "Try it" payment — a REAL on-chain USDC transfer on Base Sepolia.
+ * Live "Try it" payment — a REAL on-chain USDC transfer on Arc Testnet.
  *
  * Connect a browser wallet, then send Circle testnet USDC to any address; the
  * transaction is signed by the user's wallet and broadcast for real, returning
@@ -58,13 +59,19 @@ function RealPaymentInner() {
   const { disconnect } = useDisconnect();
   const { switchChain, isPending: switching } = useSwitchChain();
 
-  const wrongChain = isConnected && chainId !== BASE_SEPOLIA_ID;
+  const wrongChain = isConnected && chainId !== ARC_TESTNET_CHAIN_ID;
 
-  const { data: balance } = useReadContract({
-    address: USDC_BASE_SEPOLIA,
+  const {
+    data: balance,
+    isLoading: balanceLoading,
+    isError: balanceError,
+    refetch: refetchBalance,
+  } = useReadContract({
+    address: USDC_ARC_TESTNET,
     abi: erc20Abi,
     functionName: "balanceOf",
     args: address ? [address] : undefined,
+    chainId: ARC_TESTNET_CHAIN_ID,
     query: { enabled: Boolean(address) && !wrongChain, refetchInterval: 8000 },
   });
 
@@ -94,10 +101,11 @@ function RealPaymentInner() {
       return;
     }
     writeContract({
-      address: USDC_BASE_SEPOLIA,
+      chainId: ARC_TESTNET_CHAIN_ID,
+      address: USDC_ARC_TESTNET,
       abi: erc20Abi,
       functionName: "transfer",
-      args: [to as `0x${string}`, parseUnits(amount, 6)],
+      args: [to as `0x${string}`, parseUnits(amount, USDC_DECIMALS)],
     });
   }
 
@@ -109,14 +117,19 @@ function RealPaymentInner() {
   }
 
   const injected = connectors[0];
-  const balanceText =
-    balance !== undefined ? `${formatUnits(balance, 6)} USDC` : "—";
+  const balanceText = balanceLoading
+    ? "Loading…"
+    : balanceError
+      ? "Could not load"
+      : balance !== undefined
+        ? `${formatUnits(balance, USDC_DECIMALS)} USDC`
+        : "—";
 
   return (
     <div className="mx-auto w-full max-w-xl rounded-2xl border border-white/10 bg-pear-900/60 p-5 shadow-glow">
       <div className="flex items-center justify-between">
         <span className="inline-flex items-center gap-2 rounded-full bg-pear-500/15 px-3 py-1 text-xs font-semibold text-pear-300">
-          🔵 Live · Base Sepolia
+          🔵 Live · Arc Testnet
         </span>
         {isConnected ? (
           <button
@@ -164,22 +177,51 @@ function RealPaymentInner() {
       ) : wrongChain ? (
         /* 2. Wrong network */
         <div className="mt-4 text-center">
-          <p className="text-cream/75">Switch your wallet to Base Sepolia.</p>
+          <p className="text-cream/75">
+            Switch your wallet to <b>Arc Testnet</b> (chain{" "}
+            {ARC_TESTNET_CHAIN_ID}). Mainnet USDC on Base or Ethereum will not
+            show here.
+          </p>
           <button
             type="button"
             disabled={switching}
-            onClick={() => switchChain({ chainId: BASE_SEPOLIA_ID })}
+            onClick={() => switchChain({ chainId: ARC_TESTNET_CHAIN_ID })}
             className="mt-4 w-full rounded-xl bg-pear-500 px-6 py-3 font-semibold text-pear-950 transition hover:bg-pear-400 disabled:opacity-60"
           >
-            {switching ? "Switching…" : "Switch to Base Sepolia"}
+            {switching ? "Switching…" : "Switch to Arc Testnet"}
           </button>
         </div>
       ) : (
         /* 3. Send */
         <div className="mt-4 space-y-3">
-          <div className="flex items-center justify-between rounded-xl bg-pear-950/60 px-4 py-2.5 text-sm">
-            <span className="text-cream/55">Your USDC balance</span>
-            <span className="font-semibold text-cream">{balanceText}</span>
+          <div className="rounded-xl bg-pear-950/60 px-4 py-2.5 text-sm">
+            <div className="flex items-center justify-between">
+              <span className="text-cream/55">Your USDC balance</span>
+              <span className="font-semibold text-cream">{balanceText}</span>
+            </div>
+            <p className="mt-1 text-xs text-cream/40">
+              Arc Testnet · chain {ARC_TESTNET_CHAIN_ID} ·{" "}
+              {short(USDC_ARC_TESTNET)}
+            </p>
+            {balanceError ? (
+              <button
+                type="button"
+                onClick={() => refetchBalance()}
+                className="mt-2 text-xs text-pear-300 underline"
+              >
+                Retry balance
+              </button>
+            ) : null}
+            {!balanceLoading &&
+            !balanceError &&
+            balance !== undefined &&
+            balance === 0n ? (
+              <p className="mt-2 text-xs text-amber-300/90">
+                0 on Arc Testnet — fund this wallet from the Circle faucet
+                (select Arc Testnet). Balances on Base mainnet or other networks
+                are separate.
+              </p>
+            ) : null}
           </div>
 
           <div>
@@ -266,7 +308,7 @@ function RealPaymentInner() {
           ) : null}
 
           <p className="text-center text-xs text-cream/40">
-            Need test USDC? Get free Base Sepolia USDC from the{" "}
+            Need test USDC? Get free Arc Testnet USDC from the{" "}
             <a
               href={USDC_FAUCET}
               target="_blank"

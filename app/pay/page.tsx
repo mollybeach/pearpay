@@ -5,7 +5,7 @@ import { PaymentDemo } from "../components/PaymentDemo";
 export const metadata: Metadata = {
   title: "Try Pear Pay — Send real USDC on-chain",
   description:
-    "Connect a wallet and send real testnet USDC on Base Sepolia, or type a payment in plain English and watch Pear Pay resolve, route, and settle.",
+    "Connect a wallet and send real testnet USDC on Arc Testnet, or type a payment in plain English and watch Pear Pay resolve, route, and settle.",
 };
 
 export default function PayPage() {
@@ -17,8 +17,8 @@ export default function PayPage() {
         </h1>
         <p className="mx-auto mt-4 max-w-xl text-cream/70">
           Connect your wallet and send real USDC on-chain — signed by you,
-          broadcast for real, with a verifiable explorer link. Running on Base
-          Sepolia testnet so it&apos;s free to try.
+          broadcast for real, with a verifiable explorer link. Running on Arc
+          Testnet so it&apos;s free to try.
         </p>
       </div>
 

@@ -1,24 +1,32 @@
 import { http, createConfig } from "wagmi";
-import { baseSepolia } from "wagmi/chains";
 import { injected } from "wagmi/connectors";
+import { arcTestnet } from "@/integrations/arc/chain";
+import {
+  ARC_CHAIN_ID,
+  ARC_EXPLORER_URL,
+  ARC_RPC_URL,
+  ARC_USDC_ADDRESS,
+} from "@/lib/constants";
 
 /**
- * Standalone config for the Base Sepolia "Try it" widget (browser wallet only).
+ * Standalone config for the Arc Testnet "Try it" widget (browser wallet only).
  */
 export const demoWagmiConfig = createConfig({
-  chains: [baseSepolia],
+  chains: [arcTestnet],
   connectors: [injected()],
   transports: {
-    [baseSepolia.id]: http(),
+    [arcTestnet.id]: http(ARC_RPC_URL),
   },
   ssr: false,
 });
 
-/** Circle's official USDC on Base Sepolia (6 decimals). */
-export const USDC_BASE_SEPOLIA =
-  "0x036CbD53842c5426634e7929541eC2318f3dCF7e" as const;
+/** Circle's official USDC on Arc Testnet (6 decimals). */
+export const USDC_ARC_TESTNET = ARC_USDC_ADDRESS as `0x${string}`;
 
-export const BASE_SEPOLIA_ID = baseSepolia.id; // 84532
-export const EXPLORER_TX = "https://sepolia.basescan.org/tx";
-/** Circle's USDC faucet (select "Base Sepolia"). */
+export const ARC_TESTNET_CHAIN_ID = ARC_CHAIN_ID;
+export const EXPLORER_TX = `${ARC_EXPLORER_URL.replace(/\/$/, "")}/tx`;
+/** Circle faucet — select Arc Testnet. */
 export const USDC_FAUCET = "https://faucet.circle.com";
+
+/** ERC-20 USDC uses 6 decimals on Arc (not the chain native 18-decimal gas unit). */
+export const USDC_DECIMALS = 6;
