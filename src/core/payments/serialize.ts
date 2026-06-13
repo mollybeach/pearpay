@@ -5,6 +5,8 @@ export interface SerializedPaymentLeg {
   recipient: {
     raw: string;
     label: string;
+    hint: PaymentLeg["recipient"]["hint"];
+    isPearPayUser: boolean;
     address?: `0x${string}`;
     contact?: string;
     deliveryMode: PaymentLeg["recipient"]["deliveryMode"];
@@ -42,6 +44,8 @@ export function serializePaymentLeg(leg: PaymentLeg): SerializedPaymentLeg {
     recipient: {
       raw: leg.recipient.raw,
       label: leg.recipient.label,
+      hint: leg.recipient.hint,
+      isPearPayUser: leg.recipient.isPearPayUser,
       address: leg.recipient.address,
       contact: leg.recipient.contact,
       deliveryMode: leg.recipient.deliveryMode,

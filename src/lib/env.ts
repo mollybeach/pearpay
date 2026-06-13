@@ -83,8 +83,11 @@ const envSchema = z.object({
     .optional(),
   ESCROW_DATABASE_URL: z.string().url().optional(),
 
-  // Unlink privacy SDK.
+  // Unlink privacy SDK (private balances + transfers).
   UNLINK_API_KEY: z.string().optional(),
+  UNLINK_ENGINE_URL: z.string().url().optional(),
+  UNLINK_ENVIRONMENT: z.string().default("arc-testnet"),
+  UNLINK_ACCOUNT_MNEMONIC: z.string().optional(),
 
   // Twilio notification + delivery.
   TWILIO_ACCOUNT_SID: z.string().optional(),
@@ -106,7 +109,16 @@ let cached: Env | null = null;
 export function getEnv(): Env {
   if (cached) return cached;
 
-  const parsed = envSchema.safeParse(process.env);
+  // Treat blank env vars as unset. Scaffolded `.env` files commonly leave keys
+  // present but empty (e.g. `RPC_URL=`); an empty string would otherwise fail
+  // strict `.url()` / address validation, whereas omitting the key passes via
+  // `.optional()`. Normalizing here makes both behave identically.
+  const source: Record<string, string | undefined> = {};
+  for (const [key, value] of Object.entries(process.env)) {
+    source[key] = value === "" ? undefined : value;
+  }
+
+  const parsed = envSchema.safeParse(source);
   if (!parsed.success) {
     const issues = parsed.error.issues
       .map((i) => `  - ${i.path.join(".")}: ${i.message}`)
@@ -132,7 +144,7 @@ const PRODUCTION_REQUIRED: Record<string, Array<keyof Env>> = {
     "HEDERA_HCS_TOPIC_ID",
   ],
   arc: ["CIRCLE_API_KEY", "ARC_RPC_URL"],
-  unlink: ["UNLINK_API_KEY"],
+  unlink: ["UNLINK_API_KEY", "UNLINK_ENGINE_URL", "UNLINK_ACCOUNT_MNEMONIC"],
   twilio: [
     "TWILIO_ACCOUNT_SID",
     "TWILIO_AUTH_TOKEN",

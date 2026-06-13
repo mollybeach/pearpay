@@ -7,13 +7,15 @@ export function Footer() {
     <footer className="border-t border-white/5 bg-pear-950">
       <div className="mx-auto flex max-w-6xl flex-col items-center gap-6 px-5 py-12 sm:flex-row sm:justify-between">
         <div className="flex items-center gap-3">
-          <Image
-            src="/PearPayLogo.png"
-            alt="Pear Pay"
-            width={36}
-            height={36}
-            className="h-9 w-9 object-contain"
-          />
+          <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-b from-white to-pear-50 p-1 ring-1 ring-black/5">
+            <Image
+              src="/PearPayLogo.png"
+              alt="Pear Pay"
+              width={36}
+              height={36}
+              className="h-8 w-8 object-contain"
+            />
+          </span>
           <div>
             <p className="font-bold leading-tight">
               Pear<span className="text-pear-400">Pay</span>

@@ -14,6 +14,7 @@ export function ClaimButton({ token }: { token: string }) {
 
   async function claim() {
     setStatus("claiming");
+    setMessage("");
     try {
       const res = await fetch(`/api/claim/${token}`, {
         method: "POST",
@@ -34,9 +35,12 @@ export function ClaimButton({ token }: { token: string }) {
 
   if (status === "done") {
     return (
-      <p style={{ color: "#7ee8b0", fontSize: 18 }}>
-        ✅ Claimed — funds are on the way.
-      </p>
+      <div>
+        <p className="text-2xl">✅</p>
+        <p className="mt-2 font-semibold text-pear-200">
+          Claimed — funds are on the way
+        </p>
+      </div>
     );
   }
 
@@ -45,24 +49,12 @@ export function ClaimButton({ token }: { token: string }) {
       <button
         onClick={claim}
         disabled={status === "claiming"}
-        style={{
-          background: "#1fbf6f",
-          color: "#06160e",
-          border: "none",
-          borderRadius: 12,
-          padding: "14px 28px",
-          fontSize: 18,
-          fontWeight: 700,
-          cursor: status === "claiming" ? "default" : "pointer",
-          opacity: status === "claiming" ? 0.7 : 1,
-        }}
+        className="w-full rounded-xl bg-pear-500 px-7 py-4 text-lg font-bold text-pear-950 shadow-glow transition hover:bg-pear-400 disabled:cursor-default disabled:opacity-70"
       >
         {status === "claiming" ? "Claiming…" : "Claim your funds"}
       </button>
       {status === "error" ? (
-        <p style={{ color: "#ff9d9d", marginTop: 12, fontSize: 14 }}>
-          {message}
-        </p>
+        <p className="mt-3 text-sm text-red-300">{message}</p>
       ) : null}
     </div>
   );

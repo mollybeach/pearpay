@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { AgentDemo } from "@/components/AgentDemo";
+import { WaitlistForm } from "./components/WaitlistForm";
 import { ARC_CHAIN_ID, ARC_EURC_ADDRESS, ARC_USDC_ADDRESS } from "@/lib/constants";
 
 const FEATURES = [
@@ -75,15 +76,22 @@ export default function HomePage() {
     <main>
       {/* Hero */}
       <section className="relative overflow-hidden">
-        <div className="mx-auto flex max-w-4xl flex-col items-center px-5 pb-20 pt-16 text-center sm:pt-24">
-          <Image
-            src="/PearPayLogo.png"
-            alt="Pear Pay logo"
-            width={180}
-            height={180}
-            priority
-            className="h-36 w-36 object-contain drop-shadow-[0_0_40px_rgba(116,179,39,0.35)] sm:h-44 sm:w-44"
-          />
+        {/* Soft light glow behind the hero logo */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute left-1/2 top-10 h-72 w-72 -translate-x-1/2 rounded-full bg-pear-300/25 blur-3xl"
+        />
+        <div className="relative mx-auto flex max-w-4xl flex-col items-center px-5 pb-20 pt-16 text-center sm:pt-24">
+          <div className="rounded-[2rem] bg-gradient-to-b from-white to-pear-50 p-5 shadow-glow ring-1 ring-white/40 sm:p-6">
+            <Image
+              src="/PearPayLogo.png"
+              alt="Pear Pay logo"
+              width={180}
+              height={180}
+              priority
+              className="h-32 w-32 object-contain sm:h-40 sm:w-40"
+            />
+          </div>
 
           <h1 className="mt-6 text-4xl font-extrabold tracking-tight sm:text-6xl">
             Turn Conversations
@@ -97,12 +105,12 @@ export default function HomePage() {
           </p>
 
           <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row">
-            <a
-              href="#waitlist"
+            <Link
+              href="/pay"
               className="rounded-xl bg-pear-500 px-6 py-3 font-semibold text-pear-950 shadow-glow transition hover:bg-pear-400"
             >
-              Join the waitlist
-            </a>
+              Try the demo
+            </Link>
             <Link
               href="/about"
               className="rounded-xl border border-white/10 px-6 py-3 font-semibold text-cream transition hover:bg-white/5"
@@ -250,33 +258,21 @@ export default function HomePage() {
       {/* Waitlist CTA */}
       <section id="waitlist" className="mx-auto max-w-4xl px-5 py-20">
         <div className="rounded-3xl border border-pear-500/30 bg-gradient-to-b from-pear-900/80 to-pear-950 p-10 text-center shadow-glow">
-          <Image
-            src="/PearPayLogo.png"
-            alt="Pear Pay"
-            width={64}
-            height={64}
-            className="mx-auto h-16 w-16 object-contain"
-          />
+          <span className="mx-auto inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-b from-white to-pear-50 p-2 ring-1 ring-white/40">
+            <Image
+              src="/PearPayLogo.png"
+              alt="Pear Pay"
+              width={64}
+              height={64}
+              className="h-12 w-12 object-contain"
+            />
+          </span>
           <h2 className="mt-4 text-3xl font-bold">Send money like a text</h2>
           <p className="mx-auto mt-3 max-w-xl text-cream/70">
             Be first to turn your conversations into transactions. Join the
             waitlist and we’ll reach out when Pear Pay is ready.
           </p>
-          <div className="mx-auto mt-8 flex max-w-md flex-col gap-3 sm:flex-row">
-            <input
-              type="email"
-              inputMode="email"
-              placeholder="you@example.com"
-              aria-label="Email address"
-              className="w-full rounded-xl border border-white/10 bg-pear-950 px-4 py-3 text-cream placeholder:text-cream/40 focus:border-pear-500 focus:outline-none"
-            />
-            <a
-              href="mailto:hello@pearpay.app?subject=Join%20the%20Pear%20Pay%20waitlist"
-              className="rounded-xl bg-pear-500 px-6 py-3 text-center font-semibold text-pear-950 transition hover:bg-pear-400"
-            >
-              Join
-            </a>
-          </div>
+          <WaitlistForm />
         </div>
       </section>
     </main>

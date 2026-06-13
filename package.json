@@ -20,6 +20,7 @@
     "@hashgraph/sdk": "^2.62.0",
     "@simplewebauthn/browser": "^13.1.0",
     "@simplewebauthn/server": "^13.1.0",
+    "@unlink-xyz/sdk": "0.0.2-canary.0",
     "next": "^14.2.0",
     "react": "^18.3.0",
     "react-dom": "^18.3.0",
