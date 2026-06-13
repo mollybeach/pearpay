@@ -9,25 +9,25 @@ describe("parsePayment", () => {
       amount: 20,
       token: "USD",
       recipientName: "Molly",
-      recipientLabel: "molly.eth",
+      recipientLabel: "Molly",
       outcome: "settled",
     });
   });
 
-  it("parses USDC and an ENS recipient after 'to'", () => {
-    const pay = parsePayment("Send 50 USDC to molly.eth");
+  it("parses USDC and a named recipient after 'to'", () => {
+    const pay = parsePayment("Send 50 USDC to Molly");
     expect(pay).toMatchObject({
       amount: 50,
       token: "USDC",
-      recipientLabel: "molly.eth",
+      recipientLabel: "Molly",
       outcome: "settled",
     });
   });
 
   it("flags private transfers regardless of recipient", () => {
-    expect(parsePayment("Pay alex.eth 50 USDC privately")).toMatchObject({
+    expect(parsePayment("Pay @alex 50 USDC privately")).toMatchObject({
       token: "USDC",
-      recipientLabel: "alex.eth",
+      recipientLabel: "alex",
       outcome: "private",
     });
     // private wins even when the recipient is a known/instant user
@@ -42,10 +42,10 @@ describe("parsePayment", () => {
     });
   });
 
-  it("resolves *.eth and known names to instant settlement", () => {
+  it("resolves known names to instant settlement", () => {
     expect(parsePayment("transfer 100 to sarah")).toMatchObject({
       amount: 100,
-      recipientLabel: "sarah.eth",
+      recipientLabel: "sarah",
       outcome: "settled",
     });
   });
@@ -104,10 +104,10 @@ describe("parsePayment", () => {
         recipientName: "newuser",
         outcome: "claimable",
       });
-      expect(parsePayment("/pay dev.eth 100 USDC", "Maya")).toMatchObject({
+      expect(parsePayment("/pay molly 100 USDC", "Maya")).toMatchObject({
         amount: 100,
         token: "USDC",
-        recipientLabel: "dev.eth",
+        recipientLabel: "molly",
         outcome: "settled",
       });
     });

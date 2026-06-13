@@ -27,7 +27,7 @@ interface Msg {
 }
 
 const CONTACT = "Molly";
-const QUICK = ["Send Molly $20", "Pay molly.eth 15 USDC", "Send Jordan $40"];
+const QUICK = ["Send Molly $20", "Pay Sarah 15 USDC", "Send Jordan $40"];
 
 const INITIAL: Msg[] = [
   {
@@ -83,7 +83,7 @@ export function TelegramSimulator() {
         push({
           from: "bot",
           kind: "text",
-          text: "I can send money for you 💸 Try “Send Molly $20” or “Pay molly.eth 15 USDC”.",
+          text: "I can send money for you 💸 Try “Send Molly $20” or “Pay Sarah 15 USDC”.",
         });
       }, 450);
     }
@@ -306,7 +306,7 @@ function TgMessage({
             <p className="mt-0.5 text-[12px] text-black/45">
               {p.outcome === "claimable"
                 ? "They'll get a claim link · settles in USDC"
-                : "Routes via Hedera → Arc · settles in USDC"}
+                : "Routes via Arc · settles in USDC"}
             </p>
           </div>
           {showButtons && phase === "review" ? (
@@ -378,7 +378,7 @@ function TelegramSheet({
       </div>
 
       <TgRow label="Pay to" value={pay.recipientLabel} />
-      <TgRow label="Network" value="Hedera → Arc" />
+      <TgRow label="Network" value="Arc" />
       <TgRow
         label="Total"
         value={pay.outcome === "private" ? "private amount" : formatAmount(pay)}

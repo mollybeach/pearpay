@@ -1,4 +1,3 @@
-import { resolveEns } from "@/integrations/ens";
 import { lookupPearPayUser } from "@/integrations/dynamic";
 import { logger } from "@/lib/logger";
 import type { RawRecipient, RecipientHint } from "@/core/nlp/types";
@@ -71,32 +70,14 @@ export async function resolveRecipient(
     return {
       raw,
       hint,
-      label: pearPayUser.ens ?? pearPayUser.address,
+      label: pearPayUser.address,
       address: pearPayUser.address,
-      ens: pearPayUser.ens,
       isPearPayUser: true,
       deliveryMode: "instant",
       notificationChannel: "none",
     };
   }
 
-  // 2. Discoverable wallet via ENS.
-  if (hint === "ens" || /\.eth$/i.test(raw)) {
-    const ens = await resolveEns(raw);
-    if (ens?.address) {
-      log.info("resolved ens recipient", { raw, address: ens.address });
-      return {
-        raw,
-        hint: "ens",
-        label: ens.name,
-        address: ens.address,
-        ens: ens.name,
-        isPearPayUser: false,
-        deliveryMode: "instant",
-        notificationChannel: "none",
-      };
-    }
-  }
 
   // 3. New user — build a claimable target with the right notification channel.
   const contact =

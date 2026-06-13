@@ -18,8 +18,8 @@ const DEMO_SENDER = {
 
 const PROMPTS = [
   "Send Molly $20",
-  "Send 50 USDC to molly.eth",
-  "Pay alex.eth 50 USDC privately",
+  "Send 50 USDC to @molly",
+  "Pay @alex 50 USDC privately",
   "Send $25 to +1 (206) 947-6991 for dinner",
 ];
 
@@ -27,11 +27,6 @@ const RAIL: Record<
   NonNullable<SerializedPaymentLeg["rail"]>,
   { label: string; icon: string; className: string }
 > = {
-  hedera: {
-    label: "Hedera",
-    icon: "🟣",
-    className: "bg-purple-500/15 text-purple-200",
-  },
   arc: { label: "Arc", icon: "🔵", className: "bg-sky-500/15 text-sky-200" },
   unlink: {
     label: "Private · Unlink",
@@ -197,8 +192,8 @@ function PaymentCard({ leg }: { leg: SerializedPaymentLeg }) {
       <div className="flex items-center justify-between border-b border-white/5 px-5 py-3">
         <div className="flex items-center gap-2">
           <span className="flex h-8 w-8 items-center justify-center rounded-full bg-pear-500/20 text-sm">
-            {recipient.hint === "ens"
-              ? "🪪"
+            {recipient.hint === "address"
+              ? "👛"
               : recipient.hint === "phone"
                 ? "📱"
                 : recipient.hint === "email"

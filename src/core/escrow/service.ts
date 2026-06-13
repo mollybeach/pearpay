@@ -2,10 +2,8 @@ import { getEnv } from "@/lib/env";
 import { newClaimToken, newPaymentId } from "@/lib/ids";
 import { logger } from "@/lib/logger";
 import { createEmbeddedWallet } from "@/integrations/dynamic";
-import { logToConsensus } from "@/integrations/hedera";
 import { ARC_TESTNET_CHAIN_ID } from "@/integrations/arc";
 import { selectRail, settleOnRail } from "@/core/payments/settlement";
-import { formatUsdcDisplay } from "@/lib/money";
 import { getEscrowStore } from "./store";
 import type { ClaimablePayment, CreateEscrowParams } from "./types";
 
@@ -51,15 +49,6 @@ export async function createClaimablePayment(
 
   await getEscrowStore().save(payment);
 
-  // Record the escrow on the Hedera Consensus Service for a tamper-proof trail.
-  await logToConsensus({
-    kind: "escrow",
-    from: payment.senderLabel,
-    to: payment.recipientLabel,
-    amount: payment.private ? "private" : formatUsdcDisplay(payment.amount),
-    memo: payment.memo,
-  });
-
   log.info("claimable payment escrowed", {
     id: payment.id,
     token: payment.claimToken,
@@ -92,7 +81,7 @@ export async function claimPayment(
   // Provision the recipient's wallet on the fly (no prior onboarding needed).
   const wallet = await createEmbeddedWallet(recipientIdentifier);
 
-  // Release funds on the optimal rail (Hedera by default) and audit on HCS.
+  // Release funds on the optimal rail (Arc by default, Unlink for private).
   const rail = selectRail({ amount: payment.amount, isPrivate: payment.private });
   await settleOnRail(rail, {
     fromAddress: payment.senderAddress,

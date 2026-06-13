@@ -5,7 +5,6 @@ const nextConfig = {
     // Sponsor SDKs are server-only; keep them out of the client bundle.
     serverComponentsExternalPackages: [
       "twilio",
-      "@hashgraph/sdk",
       "@unlink-xyz/sdk",
     ],
   },

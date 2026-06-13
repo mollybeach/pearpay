@@ -225,19 +225,11 @@ Privacy becomes a built-in feature rather than a premium service.
 
 ---
 
-## Human Readable Identity
+## Pay Any Recipient
 
-Instead of using wallet addresses:
-
-0x4E2B5C...
-
-Users transact with recognizable identities:
-
-* molly.eth
-* alex.eth
-* pearpay-agent.eth
-
-This dramatically improves trust and usability.
+You never copy a wallet address. Pay people by the identifier you already know
+— a phone number, email, @handle, or saved contact — or paste a raw 0x address.
+Pear Pay resolves it and settles in USDC.
 
 ---
 
@@ -275,7 +267,7 @@ Examples:
 * Discord username
 * Phone number
 * Email address
-* ENS name
+* Wallet address
 * Social handle
 * AI agent identity
 
@@ -301,7 +293,7 @@ If the recipient already has a Pear Pay wallet:
 
 If the recipient has a discoverable wallet:
 
-* ENS resolution occurs automatically
+* The recipient address is resolved automatically
 * Funds are delivered directly
 
 ## New User
@@ -393,7 +385,7 @@ Pear Pay automatically:
 2. Checks for an existing wallet
 3. Creates a claimable payment if needed
 4. Routes USDC through Arc as the liquidity hub
-5. Settles funds in USDC and writes an HCS audit receipt
+5. Settles funds in USDC
 6. Protects transaction privacy through Unlink
 7. Sends Alex a claim notification
 
@@ -417,33 +409,6 @@ Dynamic provides:
 * Server wallets
 
 Users can begin using Pear Pay without managing seed phrases.
-
----
-
-## ENS
-
-ENS provides:
-
-* Human-readable identities
-* Agent identities
-* Recipient discovery
-* Address resolution
-
----
-
-## Hedera
-
-Hedera is Pear Pay's primary settlement rail.
-
-Capabilities include:
-
-* HTS — settle in USDC issued natively on Hedera, with HBAR for fees
-* HCS — tamper-proof, ordered audit receipts for every payment and claim
-* Smart Contract Service — PearPayEscrow.sol runs on Hedera's EVM
-* Sub-cent fees and 3-5s finality, ideal for conversational and nano payments
-
-Complex blockchain operations become a single user action settled on the
-optimal rail.
 
 ---
 
@@ -511,15 +476,12 @@ flowchart TD
   Escrow[PearPayEscrow.sol]
   Circle[Circle Gateway / Forwarder]
   Claim[Claim link + Dynamic wallet]
-  HCS[Hedera HCS audit]
 
   Message --> Parser --> Resolver --> Orchestrator
   Orchestrator -->|Existing wallet| ArcHub --> Circle
   Orchestrator -->|New recipient| Escrow --> Claim
   Claim --> Escrow --> ArcHub
   Escrow -->|Expired| Message
-  Orchestrator --> HCS
-  Escrow --> HCS
 ```
 
 See `ARC_BOUNTY.md` for the full architecture diagram, Circle developer tools,
@@ -613,7 +575,7 @@ Pear Pay NLP
   ▼
 Recipient Resolution
   │
-  ├── ENS
+  ├── Wallet Address
   ├── Phone Number
   ├── Email
   ├── Telegram Handle
@@ -630,10 +592,7 @@ Claim Link
 Dynamic Wallet Creation
   │
   ▼
-Settlement Rail (Hedera / Arc)
-  │
-  ▼
-HCS Audit Receipt
+Settlement Rail (Arc)
   │
   ▼
 Unlink Privacy
@@ -683,8 +642,6 @@ The Swift extension stays intentionally thin. It captures intent, authenticates,
 ## Integrations
 
 * Dynamic — embedded, server, and agent wallets; social authentication
-* ENS — human-readable identity and recipient resolution (viem / ensjs)
-* Hedera — primary settlement rail: HTS USDC token, HBAR gas, and HCS tamper-proof audit log (@hashgraph/sdk)
 * Arc — Circle-native USDC settlement and chain-abstracted liquidity
 * Unlink — private balances, transfers, and claims
 * Twilio — SMS claim links, WhatsApp, Verify, and Voice (twilio Node SDK)
@@ -846,89 +803,6 @@ Qualification checklist (Dynamic):
 * For the joint prize: also uses the Unlink SDK and Circle's tools, with an MVP, diagram, video, and repo
 
 Resources: [Flow docs](https://www.dynamic.xyz/docs/overview/fireblocks-flow) · [Agents overview](https://www.dynamic.xyz/docs/overview/agents/overview) · [Agent payments](https://www.dynamic.xyz/docs/overview/agents/agent-payments) · [Node SDK](https://www.dynamic.xyz/docs/node/quickstart)
-
----
-
-## ENS — $20,000
-
-> ENS turns wallet addresses into human-readable names like yourname.eth — a portable, onchain profile across every app, chain, and wallet, and the identity layer for AI agents.
-
-### Target: Best ENS Integration for AI Agents — $5,000
-
-> 1st: $2,500 · 2nd: $1,500 · 3rd: $1,000
-
-Use ENS to name agents, resolve their addresses, store agent metadata in text records, or let agents register and discover each other onchain.
-
-How Pear Pay qualifies:
-
-* Every AI agent gets a persistent ENS identity (e.g. `pearpay-agent.eth`)
-* Agents resolve and discover each other by ENS name before transacting
-* Agent metadata and payment endpoints stored in ENS text records
-
-### Target: Most Creative Use of ENS — $5,000
-
-> 1st: $2,500 · 2nd: $1,500 · 3rd: $1,000
-
-Go beyond name → address lookups: verifiable credentials, privacy features, subnames as access tokens.
-
-How Pear Pay qualifies:
-
-* Claimable payments resolve recipients by ENS name, phone, email, or social handle
-* Subnames issued per user (e.g. `molly.pearpay.eth`) as payment identities
-* Auto-rotating addresses per resolution can power private claims
-
-### Target: Integrate ENS — $6,000 (split evenly)
-
-Any meaningful ENS integration qualifies for this pooled prize.
-
-How Pear Pay qualifies:
-
-* Custom ENS resolution code drives recipient discovery (not just RainbowKit)
-* Human-readable identity replaces raw addresses throughout the app
-
-Qualification checklist (ENS):
-
-* Write code specifically for ENS; functional demo with no hard-coded values
-* Open-source repo plus a video or live demo
-* Present at the ENS booth in person on Sunday morning
-
-Resources: [ENS docs](https://docs.ens.domains) · [Agent name verification (ENSIP-25)](https://docs.ens.domains/ensip/25/) · [Agent text records (ENSIP-26)](https://docs.ens.domains/ensip/26/) · [Building with AI](https://docs.ens.domains/building-with-ai)
-
----
-
-## Hedera
-
-> A fast, low-cost, EVM-compatible public ledger. Hedera Token Service (HTS) issues and transfers tokens natively, Hedera Consensus Service (HCS) provides a tamper-proof ordered log, and the Smart Contract Service runs EVM bytecode.
-
-Pear Pay uses Hedera as its primary settlement rail across all three services, which is what the Hedera team called out as strengthening the submission.
-
-### Target: Best Use of Hedera Token Service (HTS)
-
-How Pear Pay qualifies:
-
-* Every payment settles in USDC issued natively on Hedera as an HTS token, with HBAR for fees
-* HTS gives sub-cent fees and 3-5s finality, ideal for conversational and nano payments
-
-### Target: Best Use of Hedera Consensus Service (HCS)
-
-How Pear Pay qualifies:
-
-* Every payment, escrow, and claim writes a tamper-proof, ordered receipt to an HCS topic
-* Produces an immutable audit trail for human and agent-to-agent transactions
-
-### Target: Best Use of Hedera Smart Contracts (EVM)
-
-How Pear Pay qualifies:
-
-* PearPayEscrow.sol deploys to Hedera's Smart Contract Service via the JSON-RPC relay
-* The same claimable-escrow logic runs on Hedera and other EVM chains
-
-Qualification checklist (Hedera):
-
-* Use a Hedera-native service (HTS, HCS, or Smart Contracts) via @hashgraph/sdk
-* Functional demo on Hedera testnet with a public repo and short video
-
-Resources: [Hedera docs](https://docs.hedera.com) · [HTS](https://docs.hedera.com/hedera/sdks-and-apis/sdks/token-service) · [HCS](https://docs.hedera.com/hedera/sdks-and-apis/sdks/consensus-service) · [JSON-RPC relay](https://docs.hedera.com/hedera/core-concepts/smart-contracts/json-rpc-relay)
 
 ---
 

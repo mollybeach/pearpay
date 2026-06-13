@@ -148,14 +148,28 @@ Copy each multiselect block into the matching ETHGlobal dropdown.
 
 ### Are you using any Ethereum developer tools?
 
-**Select ONLY:** Foundry, Reown
+**All form options:**
+
+`1"` · `Alchemy` · `Alchemyweb3` · `Anon Aadhaar` · `ASI` · `Avail` · `Bandada` · `Brownie` · `cmtp` · `Create Eth App` · `Curvegrid` · `Dappsys` · `Embark` · `Epirus` · `Etherlime` · `ethers-rs` · `ethers.js` · `Fluence` · `Foundry` · `Hardhat` · `HQ20` · `Hyperlane` · `LayerZero` · `Ledger` · `light.js` · `Lighthouse` · `MACI` · `MUD` · `None` · `Ocean` · `OpenZeppelin SDK` · `Privy` · `Proof of Email` · `Remix` · `Reown` · `Saga` · `scaffold-eth` · `Self` · `Semaphore` · `Sindri` · `The Graph` · `Truffle` · `TypeChain` · `vlayer` · `Waffle` · `Walrus` · `web3-wrapper` · `web3.js` · `Web3j`
+
+**Select ONLY for Pear Pay:**
 
 ```
 Foundry
 Reown
 ```
 
+**Do not select:** `None`, `Hardhat`, `Truffle`, `Brownie`, `Remix`, `ethers.js`, `web3.js`, `Alchemy`, `OpenZeppelin SDK`, `Privy`, `scaffold-eth`, `The Graph`, `LayerZero`, or anything else unless Pear Pay uses it directly.
+
+---
+
 ### Which blockchain networks will your project interact with?
+
+**All form options:**
+
+`0G` · `Aleo` · `Aptos` · `Arc` · `Arcology` · `Arbitrum` · `Base` · `Binance Smart Chain` · `Bitcoin` · `Cardano` · `Celo` · `Chiliz` · `Citrea` · `Cosmos` · `Ethereum` · `Etherlink` · `EVVM` · `Filecoin` · `Flare` · `Flow` · `Gnosis` · `Hedera` · `Integra` · `Internet Computer (ICP)` · `Intmax` · `Iron Fish` · `Kadena` · `Loopring` · `Mantle` · `Mina` · `Monad` · `None` · `Oasis` · `Optimism` · `Polkadot` · `Polygon` · `Polygon POS` · `Polygon zkEVM` · `Ripple` · `Ronin` · `Rootstock` · `Scroll` · `Starknet` · `Stellar` · `Sui` · `Tezos` · `Ton` · `Tron` · `Worldchain` · `xDai` · `XRP Ledger` · `Yellow` · `Zircuit` · `zkSync`
+
+**Select for Pear Pay:**
 
 ```
 Arc
@@ -169,7 +183,15 @@ Polygon
 
 **Do not select:** `Flow` (Dapper blockchain — not Fireblocks Flow), `None`, or chains with no code integration.
 
+---
+
 ### Which programming languages are you using?
+
+**All form options:**
+
+`APL` · `Assembly` · `Bash/Shell` · `C` · `C#` · `C++` · `Cadence` · `Cairo` · `Clojure` · `COBOL` · `Crystal` · `Dart` · `Delphi` · `Elixir` · `Erlang` · `F#` · `Fe` · `Go` · `Groovy` · `Haskell` · `HTML/CSS` · `Java` · `JavaScript` · `Julia` · `Kotlin` · `LISP` · `Matlab` · `Node.js` · `None` · `Objective-C` · `Perl` · `PHP` · `PowerShell` · `Python` · `R` · `Ruby` · `Rust` · `Scala` · `Solidity` · `SQL` · `Swift` · `TypeScript` · `VBA` · `Vyper`
+
+**Select for Pear Pay:**
 
 ```
 TypeScript
@@ -179,16 +201,34 @@ Swift
 Node.js
 ```
 
+**Do not select:** `None`, or languages with no project code (Python, Rust, Go, etc.).
+
+---
+
 ### Are you using any web frameworks?
+
+**All form options:**
+
+`Angular` · `Angular.js` · `ASP.NET` · `ASP.NET Core` · `Django` · `Drupal` · `Express` · `FastAPI` · `Flask` · `Gatsby` · `jQuery` · `Laravel` · `Next.js` · `None` · `React.js` · `Ruby on Rails` · `Spring` · `Svelte` · `Symfony` · `Vue.js`
+
+**Select for Pear Pay:**
 
 ```
 Next.js
 React.js
 ```
 
+**Do not select:** `None`, or frameworks Pear Pay does not use (Vue.js, Angular, Svelte, Express, Django, etc.).
+
+---
+
 ### Are you using any databases?
 
-**Select:** Supabase
+**All form options:**
+
+`AvionDB` · `Cassandra` · `Couchbase` · `DynamoDB` · `Elasticsearch` · `Firebase` · `IBM DB2` · `IPDB` · `LevelDB` · `MariaDB` · `Microsoft SQL Server` · `MongoDB` · `MySQL` · `None` · `Oracle` · `OrbitDB` · `PostgreSQL` · `Redis` · `SQLite` · `Supabase`
+
+**Select for Pear Pay:**
 
 ```
 Supabase
@@ -196,9 +236,15 @@ Supabase
 
 *(Production path for durable escrow + claimable-payment storage; hackathon MVP also uses in-memory `EscrowStore` for local demos.)*
 
+---
+
 ### Are you using any design tools?
 
-**Select:** Figma
+**All form options:**
+
+`Figma` · `Flutter` · `Illustrator` · `MS Paint` · `None` · `Photoshop` · `Sketch` · `Webflow` · `Zeppelin`
+
+**Select for Pear Pay:**
 
 ```
 Figma
@@ -206,7 +252,11 @@ Figma
 
 *(UI mockups and screen flows in `design/figma/` — exported SVG frames imported back into Figma for the Simulator, Try it, home, and claim screens.)*
 
+---
+
 ### Other specific technologies *(free-text multiselect — one per line)*
+
+*No fixed dropdown — type each value and press Enter. Suggested list for Pear Pay:*
 
 ```
 viem
@@ -228,6 +278,17 @@ zod
 vitest
 Cursor
 ```
+
+**Optional** (add only if you demo them):
+
+```
+OpenAI
+Twilio Voice
+```
+
+**Already covered in other form fields — do not duplicate:** Next.js, React.js, Foundry/Reown (Ethereum dev tools), Arc/Hedera/Ethereum/Arbitrum/Base/Optimism/Polygon (networks), TypeScript/JavaScript/Solidity/Swift/Node.js (languages), Supabase (databases), Figma (design tools).
+
+---
 
 ### Describe how AI tools were used *(if applicable)*
 

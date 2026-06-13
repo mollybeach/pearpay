@@ -15,7 +15,6 @@ const log = logger.scoped("dynamic");
 export interface PearPayUser {
   userId: string;
   address: `0x${string}`;
-  ens?: string;
 }
 
 export interface WalletHandle {
@@ -70,9 +69,8 @@ export async function lookupPearPayUser(
     const data = (await res.json()) as {
       id: string;
       walletAddress: `0x${string}`;
-      ens?: string;
     };
-    return { userId: data.id, address: data.walletAddress, ens: data.ens };
+    return { userId: data.id, address: data.walletAddress };
   } catch (err) {
     log.warn("dynamic user lookup error", { err: String(err) });
     return null;

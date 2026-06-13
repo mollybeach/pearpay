@@ -1,21 +1,16 @@
-import { formatUsdcDisplay, type UsdcAmount } from "@/lib/money";
+import type { UsdcAmount } from "@/lib/money";
 import { ARC_TESTNET_CHAIN_ID } from "@/integrations/arc";
 import { settleUsdc } from "@/integrations/arc";
 import { privateTransfer } from "@/integrations/unlink";
-import { logToConsensus, settleUsdcOnHedera } from "@/integrations/hedera";
 
 /**
  * Settlement rail selection.
  *
- * Pear Pay no longer routes through a cross-chain aggregator; instead it picks
- * the optimal settlement rail per payment and records a tamper-proof receipt on
- * the Hedera Consensus Service (HCS) regardless of which rail settled funds.
- *
+ * Pear Pay picks the optimal settlement rail per payment:
  *   - arc     → default: chain-abstracted Circle-native USDC hub.
- *   - hedera  → optional low-cost USDC rail plus HCS audit receipts.
  *   - unlink  → private transfers (amounts and counterparties hidden).
  */
-export type Rail = "hedera" | "arc" | "unlink";
+export type Rail = "arc" | "unlink";
 
 export interface RailSelectionInput {
   amount: UsdcAmount;
@@ -46,7 +41,7 @@ export interface RailSettlement {
   rail: Rail;
   /** EVM tx hash when the rail is EVM-based (Arc). */
   txHash?: `0x${string}`;
-  /** Rail-native reference (Hedera tx id, Unlink note id, Arc settlement id). */
+  /** Rail-native reference (Unlink note id, Arc settlement id). */
   ref: string;
   status: string;
   sourceChainId?: number;
@@ -55,68 +50,37 @@ export interface RailSettlement {
   route?: "arc-native" | "source-to-arc";
 }
 
-/**
- * Settle a single leg on the chosen rail and write an HCS audit receipt.
- */
+/** Settle a single leg on the chosen rail. */
 export async function settleOnRail(
   rail: Rail,
   params: RailSettlementParams,
 ): Promise<RailSettlement> {
-  let settlement: RailSettlement;
-
-  switch (rail) {
-    case "unlink": {
-      const r = await privateTransfer({
-        fromAddress: params.fromAddress,
-        toAddress: params.toAddress,
-        amount: params.amount,
-        chainId: params.chainId ?? params.sourceChainId ?? ARC_TESTNET_CHAIN_ID,
-      });
-      settlement = { rail, ref: r.noteId, status: r.status };
-      break;
-    }
-    case "arc": {
-      const r = await settleUsdc({
-        fromAddress: params.fromAddress,
-        toAddress: params.toAddress,
-        amount: params.amount,
-        sourceChainId: params.sourceChainId,
-        chainId: params.chainId,
-        idempotencyKey: params.idempotencyKey,
-      });
-      settlement = {
-        rail,
-        txHash: r.txHash,
-        ref: r.settlementId,
-        status: r.status,
-        sourceChainId: r.sourceChainId,
-        destinationChainId: r.destinationChainId,
-        tokenAddress: r.tokenAddress,
-        route: r.route,
-      };
-      break;
-    }
-    case "hedera":
-    default: {
-      const r = await settleUsdcOnHedera({
-        from: params.fromAddress,
-        to: params.toAddress,
-        amount: params.amount,
-      });
-      settlement = { rail: "hedera", ref: r.transactionId, status: r.status };
-      break;
-    }
+  if (rail === "unlink") {
+    const r = await privateTransfer({
+      fromAddress: params.fromAddress,
+      toAddress: params.toAddress,
+      amount: params.amount,
+      chainId: params.chainId ?? params.sourceChainId ?? ARC_TESTNET_CHAIN_ID,
+    });
+    return { rail, ref: r.noteId, status: r.status };
   }
 
-  // Immutable, ordered audit trail for every settlement (HCS).
-  await logToConsensus({
-    kind: "settlement",
-    from: params.fromAddress,
-    to: params.toAddress,
-    amount: formatUsdcDisplay(params.amount),
-    memo: params.memo,
-    rail: settlement.rail,
+  const r = await settleUsdc({
+    fromAddress: params.fromAddress,
+    toAddress: params.toAddress,
+    amount: params.amount,
+    sourceChainId: params.sourceChainId,
+    chainId: params.chainId,
+    idempotencyKey: params.idempotencyKey,
   });
-
-  return settlement;
+  return {
+    rail: "arc",
+    txHash: r.txHash,
+    ref: r.settlementId,
+    status: r.status,
+    sourceChainId: r.sourceChainId,
+    destinationChainId: r.destinationChainId,
+    tokenAddress: r.tokenAddress,
+    route: r.route,
+  };
 }

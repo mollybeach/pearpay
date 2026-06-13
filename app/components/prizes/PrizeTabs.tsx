@@ -55,12 +55,12 @@ const PRIZES: Prize[] = [
       "Turn Conversations Into Transactions — the universal payment layer for messaging, social apps, and AI agents.",
     amount: "ETHGlobal NYC 2026 · Top Finalist",
     intro:
-      "Pear Pay turns natural language into secure, private, chain-abstracted USDC payments — anywhere you communicate. One deposit, no addresses, no chain selection, no gas. It integrates six sponsors at production depth (Arc, Dynamic, Unlink, Hedera, ENS, Twilio) behind a single message.",
+      "Pear Pay turns natural language into secure, private, chain-abstracted USDC payments — anywhere you communicate. One deposit, no addresses, no chain selection, no gas. It integrates four sponsors at production depth (Arc, Dynamic, Unlink, Twilio) behind a single message.",
     built: [
       { icon: "💬", title: "Natural-Language Payments", body: "An NLP core turns “Send Molly $20” into an executable payment — recipient, rail, amount, privacy — with zero crypto jargon." },
       { icon: "📱", title: "3 Live Chat Playgrounds", body: "Fully interactive, screen-recordable iMessage, Telegram, and Discord simulators with on-screen keyboards and in-app confirmation flows." },
       { icon: "🔗", title: "Claimable Payments + Escrow", body: "Pay anyone — even with no wallet. Funds escrow in USDC and release on claim, solving the crypto cold-start problem." },
-      { icon: "🪪", title: "Human-Readable Identity", body: "ENS resolution for people and agents — pay molly.eth or pearpay-agent.eth, never 0x4E2B5C…" },
+      { icon: "👛", title: "Pay Any Wallet", body: "Send straight to a 0x address, phone, email, or @handle — Pear Pay resolves the recipient and settles in USDC." },
       { icon: "🕶️", title: "Private by Default", body: "Optional shielded transfers hide balances, amounts, and counterparties via Unlink — privacy as a feature, not a premium." },
       { icon: "🤖", title: "Agentic Economy", body: "AI agents pay APIs and each other autonomously via Dynamic server wallets and x402 — machine-to-machine commerce settled in USDC." },
     ],
@@ -72,7 +72,7 @@ const PRIZES: Prize[] = [
       { file: "contracts/PearPayEscrow.sol", desc: "On-chain conditional escrow with time-based refunds, deployed to EVM rails.", code: "function claim(bytes32 id) / refund()" },
     ],
     why: [
-      { icon: "✅", title: "Deep multi-sponsor integration", body: "Arc, Dynamic, Unlink, Hedera, ENS, and Twilio wired at production depth — not logo-dropping." },
+      { icon: "✅", title: "Deep multi-sponsor integration", body: "Arc, Dynamic, Unlink, and Twilio wired at production depth — not logo-dropping." },
       { icon: "✅", title: "Consumer-grade UX", body: "Three live chat playgrounds with native keyboards and in-app confirmation — no 0x addresses, no jargon." },
       { icon: "✅", title: "Solves the cold-start problem", body: "Claimable payments + Twilio reach recipients who have no wallet yet. The payment never blocks on onboarding." },
       { icon: "✅", title: "Production engineering", body: "Typed TypeScript core, 40 passing unit tests, an orchestrator + serializer, and a deployed escrow contract." },
@@ -80,7 +80,7 @@ const PRIZES: Prize[] = [
     ],
     metrics: [
       { icon: "🌐", label: "8+ Channels", sub: "iMessage, Telegram, Discord, Slack, WhatsApp, SMS, Voice, Agents" },
-      { icon: "🤝", label: "6 Sponsors", sub: "Arc · Dynamic · Unlink · Hedera · ENS · Twilio" },
+      { icon: "🤝", label: "4 Sponsors", sub: "Arc · Dynamic · Unlink · Twilio" },
       { icon: "🧪", label: "40 Tests", sub: "Typed core, all passing" },
     ],
     ctas: [

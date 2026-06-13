@@ -355,7 +355,7 @@ function WaMessage({
           <span className="mt-0.5 block text-[12px] text-[#667781]">
             {p.outcome === "claimable"
               ? "They'll get a claim link · settles in USDC"
-              : "Routes via Hedera → Arc · settles in USDC"}
+              : "Routes via Arc · settles in USDC"}
           </span>
         </div>
         {active && phase === "confirm" ? (
