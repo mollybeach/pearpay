@@ -88,8 +88,7 @@ and the counterparties are hidden on-chain.**
 2. **Rail selection** (`src/core/payments/settlement.ts` → `selectRail`)
    returns the **`unlink`** rail whenever `isPrivate`.
 3. **Settlement** (`settleOnRail("unlink", …)`) calls
-   `privateTransfer()` and records a tamper-proof HCS audit receipt (without
-   leaking the amount — the receipt logs the rail, not the cleartext value).
+   `privateTransfer()` so amounts and counterparties stay shielded.
 4. **Integration** (`src/integrations/unlink/index.ts`) wraps the SDK:
    - `deposit()` → `client.deposit({ token: USDC, amount })`
    - `privateTransfer()` → `client.transfer({ token, amount, recipientAddress })`
@@ -136,7 +135,7 @@ and every private payment runs through the **real** Unlink SDK. Verify:
 ```bash
 curl -s -XPOST localhost:3000/api/privacy/shield \
   -H 'content-type: application/json' \
-  -d '{"amount":50,"recipient":"molly.eth","intent_id":"t1"}'
+  -d '{"amount":50,"recipient":"+15555550123","intent_id":"t1"}'
 # → { "status": "shielded", "note_id": "...", "mode": "live" }
 ```
 
