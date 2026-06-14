@@ -74,6 +74,48 @@ Pear Pay is deployed at **[https://pearpay.app/](https://pearpay.app/)**.
 
 ---
 
+# 🏆 Sponsor Integrations & What Is Private (judges start here)
+
+PearPay's flagship flow is a **private nanopayment**: an autonomous agent pays a
+sub-cent, gas-free USDC fee for a paywalled resource — and the public ledger can
+**never link the payment back to the user**. All three sponsors are core,
+non-removable components of that single flow.
+
+### The one contiguous flow
+
+```mermaid
+flowchart LR
+  U[User / Agent] -->|Dynamic wallet<br/>signs authorization| POOL[Unlink shielded pool]
+  POOL -->|withdraw to<br/>ephemeral burner| BURNER[Single-use burner EOA]
+  BURNER -->|Circle Gateway x402<br/>EIP-3009, gas-free batched| SELLER[Arc Testnet settlement]
+  SELLER -->|settlementTx| ARCSCAN[(testnet.arcscan.app)]
+  BURNER -.->|dispose + wipe key| X[(unlinkable)]
+```
+
+| Sponsor | How PearPay uses it | Code |
+|---------|---------------------|------|
+| **Dynamic** | Embedded/server wallet onboards the user/agent and signs the off-chain payment authorization (no seed phrase, no per-payment popup). Delegated Access lets the backend agent sign autonomously after one FaceID. | `src/integrations/dynamic/`, `app/api/webhooks/dynamic/route.ts` |
+| **Arc + Circle Gateway** | Sub-cent USDC settled **gas-free** on **Arc Testnet (`eip155:5042002`)** via the real `@circle-fin/x402-batching` SDK — `BatchFacilitatorClient.verify()/settle()` on an EIP-3009 authorization. Real batched micro-settlement, not one large transfer. | `src/integrations/arc/x402-gateway.ts`, `app/api/x402/premium/data/route.ts` |
+| **Unlink** | The payment is funded from the **Unlink shielded pool** into a **single-use ephemeral burner** (`deposit()` to shield, `withdraw()` to fund the burner). The burner pays, then is disposed. | `src/integrations/unlink/burner.ts`, `app/api/privacy/nanopay/route.ts` |
+
+### What is *specifically* private
+
+- **Counterparty link:** the chain only ever sees `pool → burner` and `burner → seller`, **never `user → seller`**. The user's wallet is not the payer of record.
+- **Amount & balance:** the deposit amount and the user's running balance live inside the Unlink shielded pool (ZK), not on the public ledger.
+- **Per-payment identity:** each nanopayment uses a fresh burner EOA that is funded, used once, and **cryptographically retired** — no reusable, traceable spending identity.
+
+### Prove it in one command (after `npm run dev`)
+
+```bash
+curl -s -X POST http://localhost:3000/api/privacy/nanopay \
+  -H 'content-type: application/json' -d '{"amount_usd":"0.001"}' | jq .
+# → { ok:true, burner:"0x…", fundTxId:"0x…", settlementTx:"0x…", payer:"0x<burner>" }
+```
+
+Open `settlementTx` on **https://testnet.arcscan.app** — the payer is the burner, gas is zero, and the user is nowhere in the trace.
+
+---
+
 # The Problem
 
 Despite significant advances in blockchain technology, sending crypto remains difficult for mainstream users.
