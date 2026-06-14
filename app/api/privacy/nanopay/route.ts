@@ -9,9 +9,21 @@ export const runtime = "nodejs";
 export const maxDuration = 300;
 
 const bodySchema = z.object({
-  url: z.string().url().default("http://localhost:3000/api/x402/premium/data"),
+  // Optional — defaults to THIS deployment's own paywalled resource. A hardcoded
+  // localhost default fails on Vercel (the function can't fetch localhost:3000).
+  url: z.string().url().optional(),
   amount_usd: z.union([z.string(), z.number()]).default("0.001"),
 });
+
+/** This deployment's public base URL, for self-referential server-side fetches. */
+function selfBaseUrl(request: Request): string {
+  const env = getEnv();
+  const fromEnv = process.env.NEXT_PUBLIC_APP_URL ?? env.APP_URL;
+  const base = fromEnv && !fromEnv.includes("localhost")
+    ? fromEnv
+    : new URL(request.url).origin;
+  return base.replace(/\/$/, "");
+}
 
 /**
  * Joint Private Nanopayment (Dynamic + Unlink + Arc):
@@ -32,8 +44,11 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "invalid_request" }, { status: 400 });
   }
 
+  const url =
+    parsed.data.url ?? `${selfBaseUrl(request)}/api/x402/premium/data`;
+
   const result = await privateNanopayment({
-    url: parsed.data.url,
+    url,
     amountUsd: parsed.data.amount_usd,
     chainId: env.NEXT_PUBLIC_ARC_CHAIN_ID,
   });
