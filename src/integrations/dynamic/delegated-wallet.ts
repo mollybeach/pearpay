@@ -3,6 +3,7 @@ import { logger } from "@/lib/logger";
 import {
   type DelegationRecord,
   type SpendAuthorization,
+  getActiveDelegation,
   getDelegationByAddress,
   getDelegationRecord,
   markRevoked,
@@ -190,4 +191,4 @@ export async function delegatedSignMessageForWallet(
   return { signature, address: rec.address };
 }
 
-export { getDelegationRecord, getDelegationByAddress };
+export { getDelegationRecord, getDelegationByAddress, getActiveDelegation };

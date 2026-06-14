@@ -1,5 +1,9 @@
 import { createAgentWallet } from "@/integrations/dynamic";
 import { signAgentMessage } from "@/integrations/dynamic/server-wallet";
+import {
+  delegatedSignMessageForWallet,
+  getActiveDelegation,
+} from "@/integrations/dynamic/delegated-wallet";
 import { getEnv } from "@/lib/env";
 import { logger } from "@/lib/logger";
 import { buildX402Message, encodeX402Payment } from "@/lib/x402";
@@ -66,6 +70,7 @@ export class AgentWalletService {
   async autonomousX402Pay(
     url: string,
     appBase: string,
+    opts: { walletId?: string } = {},
   ): Promise<Record<string, unknown>> {
     this.logAction("propose", {
       url,
@@ -87,7 +92,7 @@ export class AgentWalletService {
     const payRes = await fetch(`${appBase}/api/x402/pay`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ url, amount }),
+      body: JSON.stringify({ url, amount, wallet_id: opts.walletId }),
     });
 
     let payData: Record<string, unknown>;
@@ -157,8 +162,40 @@ export function getAgentService(): AgentWalletService {
 export async function createSignedX402Payment(
   url: string,
   amount: number,
+  opts: { walletId?: string } = {},
 ): Promise<Record<string, unknown>> {
   const message = buildX402Message(url, amount);
+
+  // Preferred: sign with the user's DELEGATED MPC wallet (Dynamic Delegated
+  // Access). The agent acts autonomously on the user's behalf within the spend
+  // authorization captured at delegation time — no per-transaction prompt. This
+  // is the "delegate from your own wallet" path the agentic bounty rewards.
+  const walletId = opts.walletId ?? getActiveDelegation()?.walletId;
+  if (walletId) {
+    const delegated = await delegatedSignMessageForWallet(walletId, message, {
+      amountUsd: amount,
+    });
+    if (delegated) {
+      const proof = {
+        wallet: delegated.address,
+        signature: delegated.signature as `0x${string}`,
+        message,
+        amount,
+        url,
+      };
+      return {
+        status: "authorized",
+        mode: "dynamic-delegated-wallet",
+        wallet: delegated.address,
+        wallet_id: walletId,
+        signature: delegated.signature,
+        payment_header: encodeX402Payment(proof),
+        message,
+      };
+    }
+    // No usable active delegation — fall back to the agent server wallet below.
+  }
+
   const signed = await signAgentMessage(message);
 
   if (!signed) {

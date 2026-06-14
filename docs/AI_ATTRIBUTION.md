@@ -17,3 +17,12 @@
 ## Review
 
 All sponsor integrations and security-sensitive payment paths were reviewed by the team before submission.
+
+## AI tool disclosure
+
+The canonical, file-level AI-tool disclosure (required by ETHGlobal rules) lives at
+the repo root: [`AI_ATTRIBUTION.md`](../AI_ATTRIBUTION.md). Summary: **Cursor**,
+**Claude Code**, and **LingCode** were used to assist scaffolding, styling, docs,
+and test runs; **OpenAI** powers only the optional Twilio Voice demo. Core payment
+logic (NLP, orchestrator, escrow, contracts, SDK integrations) was human-authored
+and reviewed. No AI voiceover is used in the demo video.

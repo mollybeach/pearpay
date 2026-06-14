@@ -117,6 +117,12 @@ function RealPaymentInner() {
   }
 
   const injected = connectors[0];
+  // The injected() connector always exists in config, so its presence does NOT
+  // mean a wallet is installed. Detect the actual EIP-1193 provider to avoid the
+  // raw "Provider not found" error and guide the user to install MetaMask.
+  const hasProvider =
+    typeof window !== "undefined" &&
+    Boolean((window as unknown as { ethereum?: unknown }).ethereum);
   const balanceText = balanceLoading
     ? "Loading…"
     : balanceError
@@ -150,13 +156,13 @@ function RealPaymentInner() {
           </p>
           <button
             type="button"
-            disabled={!injected || connecting}
+            disabled={!injected || !hasProvider || connecting}
             onClick={() => injected && connect({ connector: injected })}
             className="mt-4 w-full rounded-xl bg-pear-500 px-6 py-3 font-semibold text-pear-950 shadow-glow transition hover:bg-pear-400 disabled:opacity-60"
           >
             {connecting ? "Connecting…" : "Connect Wallet"}
           </button>
-          {!injected ? (
+          {!hasProvider ? (
             <p className="mt-2 text-xs text-amber-300">
               No browser wallet detected — install{" "}
               <a
@@ -166,11 +172,11 @@ function RealPaymentInner() {
                 className="underline"
               >
                 MetaMask
-              </a>
-              .
+              </a>{" "}
+              (or open this page in your wallet&apos;s browser), then refresh.
             </p>
           ) : null}
-          {connectError ? (
+          {hasProvider && connectError ? (
             <p className="mt-2 text-xs text-red-300">{connectError.message}</p>
           ) : null}
         </div>

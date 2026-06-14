@@ -116,6 +116,56 @@ Open `settlementTx` on **https://testnet.arcscan.app** — the payer is the burn
 
 ---
 
+# 🎯 Arc Bounty Coverage & How To Prove Each
+
+Three Arc/Circle bounties, each backed by real code + a runnable proof.
+
+### 1. Best Smart Contracts on Arc with Advanced Logic — $3,500
+`PearPayEscrow.sol` is a conditional escrow with **advanced programmable logic**:
+hashlock conditional release, time-based auto-refund, sender cancellation, **and
+an on-chain dispute path** (`escrowWithArbiter` → `dispute` → `resolveDispute`).
+
+* Code: `contracts/PearPayEscrow.sol`, TS bindings `src/integrations/arc/escrow.ts`
+* Tests: `npm run test:contracts` → **15 passing** forge tests
+* Make the nanopayment land on the contract (not an EOA): the x402 endpoint
+  `app/api/x402/premium/escrow-gated/data/route.ts` settles the nanopayment, then
+  releases the resource **through an on-chain conditional escrow → claim cycle**
+  (`src/integrations/arc/escrow-gated.ts`). The response returns `escrow_tx` and
+  `claim_tx` you can open on Arcscan — proof the settlement destination is an
+  advanced-logic smart contract, not a bare EOA.
+* ⚠️ **Redeploy required:** the previously deployed escrow predates the dispute
+  logic. Run `npm run deploy:escrow` (needs a funded `FUNDER_PRIVATE_KEY`) and the
+  script writes the new `ARC_ESCROW_CONTRACT_ADDRESS` into `.env`.
+
+### 2. Best Chain Abstracted USDC App Using Arc as a Liquidity Hub — $3,500
+USDC is sourced from **any** Circle-Gateway-supported chain into one **unified
+balance** and minted onto Arc on demand — many chains, one liquidity surface.
+
+* Code: `src/integrations/arc/gateway-bridge.ts` (`getUnifiedBalances`,
+  `bridgeUsdcToArc` via the real `GatewayClient.withdraw({ chain: 'arcTestnet' })`,
+  Arc Gateway domain `26`), wired into `settleUsdc` (`src/integrations/arc/index.ts`)
+  for any `source-to-arc` route.
+* Backend surface: `GET/POST /api/arc/bridge` (`app/api/arc/bridge/route.ts`).
+* Proof: `npm run verify:bridge` (read the unified balance) →
+  `EXECUTE_BRIDGE=1 npm run verify:bridge` (mint onto Arc; prints the Arc mint tx).
+
+### 3. Best Private Nanopayments — $1,000+ (joint: Dynamic + Arc + Unlink)
+Shielded pool → ephemeral burner → **gas-free batched x402 settlement on Arc**.
+
+* Code: `src/integrations/unlink/burner.ts`, `app/api/privacy/nanopay/route.ts`,
+  `src/integrations/arc/x402-gateway.ts` (real `@circle-fin/x402-batching`).
+* Proof: `npm run verify:nanopay` (needs Unlink + funder env) — returns the
+  burner, the Unlink fund tx, and the Arc settlement tx.
+
+> ⚠️ The technical blueprint that circulated for this project referenced
+> `@circle-fin/x402-batching/server`'s `createGatewayMiddleware`/`gateway.require`
+> and an RPC at `testnet-rpc.arc.io`. **Those do not exist** — the real SDK
+> exports `BatchFacilitatorClient` (server) + `GatewayClient` (client) and Arc's
+> RPC is `https://rpc.testnet.arc.network`. This repo uses the correct APIs; do
+> not paste that blueprint over `src/integrations/arc/`.
+
+---
+
 # The Problem
 
 Despite significant advances in blockchain technology, sending crypto remains difficult for mainstream users.
@@ -377,12 +427,17 @@ Features include:
 
 * Time-based expiration
 * Automatic refunds
-* Recipient verification
+* Recipient verification (claim-secret hashlock)
 * Transfer cancellation before claim
+* **On-chain dispute resolution** — a per-payment arbiter can freeze a contested
+  payment (`dispute()`) and adjudicate it (`resolveDispute()`), releasing to the
+  recipient or refunding the sender as a final on-chain settlement step
 * Cross-chain settlement
 * Private claims via Unlink
 
 This ensures funds remain secure while preserving a frictionless user experience.
+See `contracts/PearPayEscrow.sol` (15 passing forge tests in
+`contracts/test/PearPayEscrow.t.sol`).
 
 ---
 
@@ -526,7 +581,7 @@ flowchart TD
   Escrow -->|Expired| Message
 ```
 
-See `ARC_BOUNTY.md` for the full architecture diagram, Circle developer tools,
+See [`docs/ARC_BOUNTY.md`](docs/ARC_BOUNTY.md) for the full architecture diagram, Circle developer tools,
 video demo script, and live-judging setup checklist.
 
 ---
@@ -884,6 +939,27 @@ Qualification checklist (Unlink):
 * For the joint prize: also use the Dynamic SDK and Circle's tools, with an MVP, diagram, and presentation
 
 Resources: [Unlink docs](https://docs.unlink.xyz) · [Dynamic x Unlink x Arc integration guide](https://docs.unlink.xyz/partner-integrations) · [Circle Nanopayments](https://developers.circle.com/gateway/nanopayments) · [unlink.xyz](https://unlink.xyz)
+
+---
+
+# Running Tests
+
+```bash
+nvm use            # picks Node 20 from .nvmrc (recommended)
+npm test           # TypeScript/integration suite (vitest) — 85 pass, 5 live-gated skips
+npm run test:contracts   # Solidity escrow suite (forge) — 15 pass
+```
+
+> ⚠️ **Node version:** vitest uses a worker pool that **segfaults on macOS arm64
+> Node v22.20.0** (a bad V8 build in that specific release) — even for a trivial
+> `1 + 1` test. This is a Node bug, not a test failure. The repo pins Node 20 via
+> `.nvmrc` and forces vitest's `forks` pool (`vitest.config.ts`) to avoid it. If
+> `npm test` ever exits with code 139, you are on the broken Node — run
+> `nvm use` (or switch to Node 20 / 24+) and re-run.
+
+The 5 skipped tests are live on-chain flows gated behind env flags
+(`LIVE_ARC=1`, `FUND_UNLINK=1`, `LIVE_NANOPAY=1`) so CI stays hermetic; run them
+with real testnet credentials via the `verify:*` npm scripts below.
 
 ---
 

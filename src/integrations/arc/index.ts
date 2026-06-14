@@ -4,6 +4,11 @@ import { formatUsdc, type UsdcAmount } from "@/lib/money";
 import { transferUsdcOnArc } from "./escrow";
 import { isArcOnChainSettlementLive } from "./client";
 import {
+  bridgeUsdcToArc,
+  gatewayChainName,
+  isGatewayBridgeConfigured,
+} from "./gateway-bridge";
+import {
   ARC_TESTNET_CHAIN_ID,
   ARC_USDC_ADDRESS,
   ARC_TESTNET_EURC_ADDRESS,
@@ -111,6 +116,7 @@ export async function settleUsdc(
   const tokenAddress = usdcAddress(destinationChainId);
   const route = sourceChainId === destinationChainId ? "arc-native" : "source-to-arc";
 
+  // ── Same-chain Arc settlement (direct USDC transfer via viem) ──────────────
   if (
     isArcOnChainSettlementLive() &&
     sourceChainId === destinationChainId &&
@@ -135,8 +141,42 @@ export async function settleUsdc(
     };
   }
 
+  // ── Cross-chain -> Arc via Circle Gateway unified balance (real bridge) ─────
+  // When funds originate on a different chain, mint them onto Arc from the
+  // unified Gateway balance (liquidity pooled across chains, settled on Arc).
   if (
-    !env.CIRCLE_API_KEY ||
+    sourceChainId !== destinationChainId &&
+    destinationChainId === arc.chainId &&
+    env.NODE_ENV !== "test" &&
+    isGatewayBridgeConfigured() &&
+    gatewayChainName(sourceChainId) !== null
+  ) {
+    const bridge = await bridgeUsdcToArc({
+      amountUsd: formatUsdc(req.amount),
+      recipient: req.toAddress,
+      sourceChainId,
+    });
+    log.info("arc cross-chain settlement (gateway bridge) confirmed", {
+      mintTx: bridge.mintTxHash,
+      sourceChain: bridge.sourceChain,
+    });
+    return {
+      settlementId: `gw_${req.idempotencyKey ?? bridge.mintTxHash.slice(2, 10)}`,
+      txHash: bridge.mintTxHash,
+      chainId: destinationChainId,
+      sourceChainId,
+      destinationChainId,
+      amount: req.amount,
+      status: "settled",
+      tokenAddress,
+      route: "source-to-arc",
+      forwarder: "circle-gateway",
+    };
+  }
+
+  // ── Local/test/unconfigured: deterministic stub (never silently "real") ────
+  if (
+    !isGatewayBridgeConfigured() ||
     env.NODE_ENV === "test" ||
     (env.NODE_ENV !== "production" && !isArcOnChainSettlementLive())
   ) {
@@ -149,54 +189,10 @@ export async function settleUsdc(
     );
   }
 
-  // Circle Wallets / Gateway API — not the blockchain RPC URL.
-  const circleApiBase = env.ARC_RPC_URL?.includes("rpc.")
-    ? "https://api.circle.com"
-    : (env.ARC_RPC_URL ?? "https://api.circle.com");
-
-  const res = await fetch(`${circleApiBase}/v1/transfers`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${env.CIRCLE_API_KEY}`,
-      ...(req.idempotencyKey
-        ? { "X-Idempotency-Key": req.idempotencyKey }
-        : {}),
-    },
-    body: JSON.stringify({
-      source: { address: req.fromAddress },
-      destination: { address: req.toAddress },
-      amount: { currency: "USDC", amount: formatUsdc(req.amount) },
-      sourceChainId,
-      destinationChainId,
-      tokenAddress,
-      route,
-    }),
-  });
-
-  if (!res.ok) {
-    throw new Error(`Arc settlement failed: ${res.status}`);
-  }
-
-  const data = (await res.json()) as {
-    id: string;
-    txHash: `0x${string}`;
-    status: string;
-  };
-
-  log.info("arc settlement submitted", { id: data.id, status: data.status });
-  return {
-    settlementId: data.id,
-    txHash: data.txHash,
-    chainId: destinationChainId,
-    sourceChainId,
-    destinationChainId,
-    amount: req.amount,
-    status: data.status === "complete" ? "settled" : "pending",
-    tokenAddress,
-    route,
-    forwarder: "circle-gateway",
-  };
+  // Production, configured, but the route isn't one we can settle live.
+  throw new Error(
+    `Arc settlement: no live rail for source ${sourceChainId} -> dest ${destinationChainId} (route ${route})`,
+  );
 }
 
 export {
@@ -209,7 +205,30 @@ export {
 export { isArcEscrowLive, isArcOnChainSettlementLive } from "./client";
 export {
   escrowOnChain,
+  escrowWithArbiterOnChain,
   claimOnChain,
+  disputeOnChain,
+  resolveDisputeOnChain,
+  cancelOnChain,
+  refundOnChain,
   paymentIdToBytes32,
   generateClaimCredentials,
 } from "./escrow";
+export { escrowGatedRelease } from "./escrow-gated";
+export type {
+  EscrowGatedReleaseParams,
+  EscrowGatedReleaseResult,
+} from "./escrow-gated";
+export {
+  bridgeUsdcToArc,
+  depositToGateway,
+  getUnifiedBalances,
+  gatewayChainName,
+  isGatewayBridgeConfigured,
+  GATEWAY_TESTNET_DOMAINS,
+} from "./gateway-bridge";
+export type {
+  BridgeToArcParams,
+  BridgeToArcResult,
+  UnifiedBalances,
+} from "./gateway-bridge";

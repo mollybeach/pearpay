@@ -139,6 +139,108 @@ export async function escrowOnChain(
   };
 }
 
+/**
+ * Escrow USDC into PearPayEscrow on Arc with an on-chain dispute resolver.
+ * Identical to {@link escrowOnChain} but records a per-payment `arbiter` that can
+ * adjudicate a contested payment via {@link resolveDisputeOnChain}.
+ */
+export async function escrowWithArbiterOnChain(
+  params: OnChainEscrowParams & { arbiter: `0x${string}` },
+): Promise<OnChainEscrowResult> {
+  if (!isArcEscrowLive()) {
+    throw new Error(
+      "Arc escrow is not configured (FUNDER_PRIVATE_KEY + contract address)",
+    );
+  }
+
+  const contract = getEscrowContractAddress()!;
+  const token = ARC_USDC_ADDRESS;
+  const onChainPaymentId = paymentIdToBytes32(params.paymentId);
+  const { claimSecret, claimHash } = generateClaimCredentials();
+  const expiresAt = BigInt(Math.floor(params.expiresAtMs / 1000));
+
+  await ensureUsdcApproval(token, contract, params.amount);
+
+  const publicClient = getArcPublicClient();
+  const walletClient = getArcWalletClient();
+  const account = getArcSignerAccount();
+
+  const escrowTxHash = await walletClient.writeContract({
+    account,
+    address: contract,
+    abi: PEARPAY_ESCROW_ABI,
+    functionName: "escrowWithArbiter",
+    args: [onChainPaymentId, token, params.amount, expiresAt, claimHash, params.arbiter],
+    chain: null,
+  });
+
+  await waitForTransactionReceipt(publicClient, { hash: escrowTxHash });
+
+  const config = getArcNetworkConfig();
+  log.info("on-chain escrow (with arbiter) confirmed", {
+    paymentId: params.paymentId,
+    arbiter: params.arbiter,
+    txHash: escrowTxHash,
+  });
+
+  return {
+    onChainPaymentId,
+    claimSecret,
+    claimHash,
+    escrowTxHash,
+    explorerUrl: arcExplorerTxUrl(escrowTxHash, config.explorerUrl),
+  };
+}
+
+/** Raise a dispute on an escrowed payment (sender only; freezes the funds). */
+export async function disputeOnChain(
+  onChainPaymentId: `0x${string}`,
+): Promise<Hash> {
+  const contract = getEscrowContractAddress()!;
+  const publicClient = getArcPublicClient();
+  const walletClient = getArcWalletClient();
+  const account = getArcSignerAccount();
+
+  const hash = await walletClient.writeContract({
+    account,
+    address: contract,
+    abi: PEARPAY_ESCROW_ABI,
+    functionName: "dispute",
+    args: [onChainPaymentId],
+    chain: null,
+  });
+  await waitForTransactionReceipt(publicClient, { hash });
+  log.info("on-chain dispute raised", { txHash: hash });
+  return hash;
+}
+
+/** Resolve a disputed payment as the arbiter: release to recipient or refund. */
+export async function resolveDisputeOnChain(params: {
+  onChainPaymentId: `0x${string}`;
+  releaseToRecipient: boolean;
+  recipient: `0x${string}`;
+}): Promise<Hash> {
+  const contract = getEscrowContractAddress()!;
+  const publicClient = getArcPublicClient();
+  const walletClient = getArcWalletClient();
+  const account = getArcSignerAccount();
+
+  const hash = await walletClient.writeContract({
+    account,
+    address: contract,
+    abi: PEARPAY_ESCROW_ABI,
+    functionName: "resolveDispute",
+    args: [params.onChainPaymentId, params.releaseToRecipient, params.recipient],
+    chain: null,
+  });
+  await waitForTransactionReceipt(publicClient, { hash });
+  log.info("on-chain dispute resolved", {
+    txHash: hash,
+    releasedToRecipient: params.releaseToRecipient,
+  });
+  return hash;
+}
+
 /** Claim escrowed USDC on Arc — anyone can submit the secret + recipient. */
 export async function claimOnChain(
   params: OnChainClaimParams,

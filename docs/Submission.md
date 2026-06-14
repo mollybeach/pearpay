@@ -287,11 +287,9 @@ Twilio Voice
 ### Describe how AI tools were used *(if applicable)*
 
 ```
-Cursor — used throughout the hackathon for scaffolding, refactors, and documentation (README, Submission.md, contract comments). All payment-critical paths (escrow, Flow, signing, webhooks) were reviewed manually by the team before demo.
+Cursor — inline completion, refactors, Next.js/Tailwind scaffolding, and docs throughout the hackathon. Claude Code — documentation consolidation and submission-prep review. LingCode — terminal-native backend automation and running the test suite. OpenAI — optional Twilio Voice demo path only (interprets spoken intent "Send Alex twenty dollars"); the core NLP parser is rule-based TypeScript in src/core/nlp/.
 
-OpenAI — optional Twilio Voice demo path interprets spoken payment intent ("Send Alex twenty dollars"); NLP parser is primarily rule-based TypeScript in src/core/nlp/ with AI assist for edge-case phrasing during development.
-
-No AI-generated code was submitted without human review. See AI_ATTRIBUTION.md in the repo for team scope and review notes.
+All payment-critical paths (escrow, Flow, signing, webhooks, SDK integrations) were written and/or reviewed manually by the team before demo. No AI-generated code was submitted without human review, and no AI voiceover is used in the demo video. See AI_ATTRIBUTION.md at the repo root for the full file-level disclosure.
 ```
 
 ---

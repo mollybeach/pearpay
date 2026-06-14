@@ -21,6 +21,8 @@ export function AgentDemo() {
   const [intent, setIntent] = useState("Fetch premium agent intelligence");
   const [nanopayLoading, setNanopayLoading] = useState(false);
   const [nanopayResult, setNanopayResult] = useState<Record<string, unknown> | null>(null);
+  const [delegatedLoading, setDelegatedLoading] = useState(false);
+  const [delegatedResult, setDelegatedResult] = useState<Record<string, unknown> | null>(null);
 
   async function loadStatus() {
     try {
@@ -74,6 +76,25 @@ export function AgentDemo() {
     }
   }
 
+  async function runDelegatedPay() {
+    setDelegatedLoading(true);
+    setDelegatedResult(null);
+    try {
+      const res = await fetch("/api/agent/delegated-pay", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({}),
+      });
+      setDelegatedResult(await res.json());
+    } catch (err) {
+      setDelegatedResult({
+        error: err instanceof Error ? err.message : "Delegated pay failed",
+      });
+    } finally {
+      setDelegatedLoading(false);
+    }
+  }
+
   return (
     <div className="w-full max-w-xl space-y-4 rounded-2xl border border-pear-500/20 bg-pear-900/40 p-6">
       <div className="flex items-center justify-between">
@@ -120,6 +141,21 @@ export function AgentDemo() {
           Dynamic delegated access
         </p>
         <DelegatedAuthButton />
+        <button
+          type="button"
+          onClick={runDelegatedPay}
+          disabled={delegatedLoading}
+          className="w-full rounded-xl border border-violet-500/40 py-2.5 text-sm font-semibold text-violet-300 hover:bg-violet-500/10 disabled:opacity-50"
+        >
+          {delegatedLoading
+            ? "Signing via delegated wallet…"
+            : "Agent pays via delegated wallet ($0.001)"}
+        </button>
+        {delegatedResult && (
+          <pre className="max-h-32 overflow-auto rounded-lg bg-black/40 p-2 text-[10px] text-violet-200">
+            {JSON.stringify(delegatedResult, null, 2)}
+          </pre>
+        )}
       </div>
 
       <div className="rounded-xl border border-pear-500/30 bg-pear-950/40 p-4 space-y-3">

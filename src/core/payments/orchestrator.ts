@@ -107,44 +107,56 @@ async function processLeg(params: LegParams): Promise<PaymentLeg> {
   // Instant settlement: recipient has a wallet address or is a Pear Pay user.
   if (recipient.deliveryMode === "instant" && recipient.address) {
     // Pick the optimal settlement rail (Arc for Circle-native USDC, Unlink for
-    // private transfers).
-    const rail = selectRail({ amount, isPrivate });
-    const settlement = await settleOnRail(rail, {
-      fromAddress: sender.address,
-      toAddress: recipient.address,
-      amount,
-      sourceChainId,
-      chainId: ARC_TESTNET_CHAIN_ID,
-      memo,
-    });
+    // private transfers). If on-chain settlement reverts (e.g. the funder is
+    // short on Arc USDC), degrade to a claimable payment rather than failing
+    // the whole request — the demo always returns a usable result.
+    try {
+      const rail = selectRail({ amount, isPrivate });
+      const settlement = await settleOnRail(rail, {
+        fromAddress: sender.address,
+        toAddress: recipient.address,
+        amount,
+        sourceChainId,
+        chainId: ARC_TESTNET_CHAIN_ID,
+        memo,
+      });
 
-    log.info("instant leg settled", { to: recipient.label, rail: settlement.rail });
+      log.info("instant leg settled", {
+        to: recipient.label,
+        rail: settlement.rail,
+      });
 
-    const amountDollars = Number(formatUsdc(amount));
-    const intentId = newPaymentId();
-    const payUrl = buildPayUrl({
-      amount: amountDollars,
-      recipient: recipient.address,
-      intentId,
-      recipientLabel: recipient.label,
-      recipientType: recipient.contact?.startsWith("+") ? "phone" : "address",
-    });
+      const amountDollars = Number(formatUsdc(amount));
+      const intentId = newPaymentId();
+      const payUrl = buildPayUrl({
+        amount: amountDollars,
+        recipient: recipient.address,
+        intentId,
+        recipientLabel: recipient.label,
+        recipientType: recipient.contact?.startsWith("+") ? "phone" : "address",
+      });
 
-    return {
-      recipient,
-      amount,
-      outcome: "instant",
-      rail: settlement.rail,
-      txHash: settlement.txHash,
-      settlementRef: settlement.ref,
-      sourceChainId: settlement.sourceChainId,
-      destinationChainId: settlement.destinationChainId,
-      tokenAddress: settlement.tokenAddress,
-      route: settlement.route,
-      notified: false,
-      private: isPrivate,
-      payUrl,
-    };
+      return {
+        recipient,
+        amount,
+        outcome: "instant",
+        rail: settlement.rail,
+        txHash: settlement.txHash,
+        settlementRef: settlement.ref,
+        sourceChainId: settlement.sourceChainId,
+        destinationChainId: settlement.destinationChainId,
+        tokenAddress: settlement.tokenAddress,
+        route: settlement.route,
+        notified: false,
+        private: isPrivate,
+        payUrl,
+      };
+    } catch (err) {
+      log.warn("instant settlement failed — degrading to claimable", {
+        to: recipient.label,
+        err: err instanceof Error ? err.message : String(err),
+      });
+    }
   }
 
   // Claimable: escrow funds and deliver a claim link via Twilio.
@@ -161,19 +173,31 @@ async function processLeg(params: LegParams): Promise<PaymentLeg> {
   });
 
   let notified = false;
+  // Only attempt SMS/WhatsApp delivery to a real phone number (E.164-ish:
+  // starts with "+"). Handles like "@alex" or names resolve to a claim link
+  // shown in-app instead. Delivery failures (invalid number, Twilio outage)
+  // must never fail the payment — the claim link is always returned.
+  const isPhone = (c?: string): c is string => Boolean(c && /^\+[1-9]\d{6,14}$/.test(c));
   if (
     (recipient.notificationChannel === "sms" ||
       recipient.notificationChannel === "whatsapp") &&
-    recipient.contact
+    isPhone(recipient.contact)
   ) {
-    const result = await sendClaimLink({
-      to: recipient.contact,
-      senderLabel: sender.label,
-      amountDisplay: formatUsdcDisplay(amount),
-      claimUrl: claimUrl(payment.claimToken),
-      channel: recipient.notificationChannel,
-    });
-    notified = result.delivered;
+    try {
+      const result = await sendClaimLink({
+        to: recipient.contact,
+        senderLabel: sender.label,
+        amountDisplay: formatUsdcDisplay(amount),
+        claimUrl: claimUrl(payment.claimToken),
+        channel: recipient.notificationChannel,
+      });
+      notified = result.delivered;
+    } catch (err) {
+      log.warn("claim link delivery failed (non-fatal)", {
+        to: recipient.label,
+        err: err instanceof Error ? err.message : String(err),
+      });
+    }
   }
 
   return {

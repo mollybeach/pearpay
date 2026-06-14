@@ -140,6 +140,17 @@ export function getDelegationByAddress(
   );
 }
 
+/**
+ * Most-recently delegated, non-revoked wallet. Lets the autonomous agent act
+ * on the user's behalf without the caller having to know the walletId — the
+ * common case right after a single FaceID approval during onboarding.
+ */
+export function getActiveDelegation(): DelegationRecord | null {
+  const active = Object.values(load().byWalletId).filter((r) => !r.revokedAt);
+  if (active.length === 0) return null;
+  return active.sort((a, b) => b.createdAt - a.createdAt)[0] ?? null;
+}
+
 export function markRevoked(walletId: string): void {
   const store = load();
   const rec = store.byWalletId[walletId];

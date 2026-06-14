@@ -19,6 +19,7 @@
     "verify:dynamic": "node scripts/verify-dynamic.mjs",
     "verify:flow": "node scripts/verify-flow.mjs",
     "verify:unlink": "node scripts/verify-unlink.mjs",
+    "verify:bridge": "node scripts/verify-bridge.mjs",
     "fund:unlink-pool": "FUND_UNLINK=1 vitest run tests/fund-unlink-pool.test.ts",
     "verify:nanopay": "node scripts/verify-nanopay.mjs",
     "judge:demo": "node scripts/judge-demo.mjs"

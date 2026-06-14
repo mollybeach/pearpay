@@ -63,19 +63,30 @@ export async function createClaimablePayment(
   const useOnChain = !payment.private && isArcEscrowLive();
 
   if (useOnChain) {
-    const onChain = await escrowOnChain({
-      paymentId: payment.id,
-      amount: payment.amount,
-      expiresAtMs: payment.expiresAt,
-    });
-    payment.onChainPaymentId = onChain.onChainPaymentId;
-    payment.claimSecret = onChain.claimSecret;
-    payment.escrowTxHash = onChain.escrowTxHash;
-    payment.escrowExplorerUrl = onChain.explorerUrl;
-    log.info("USDC escrowed on Arc", {
-      id: payment.id,
-      txHash: onChain.escrowTxHash,
-    });
+    // On-chain escrow can revert (e.g. the funder wallet is short on Arc USDC,
+    // RPC hiccup). That must NOT fail the whole payment — fall back to an
+    // app-layer claimable so the flow still completes and is demoable. Funds
+    // settle at claim time via the orchestrator rail.
+    try {
+      const onChain = await escrowOnChain({
+        paymentId: payment.id,
+        amount: payment.amount,
+        expiresAtMs: payment.expiresAt,
+      });
+      payment.onChainPaymentId = onChain.onChainPaymentId;
+      payment.claimSecret = onChain.claimSecret;
+      payment.escrowTxHash = onChain.escrowTxHash;
+      payment.escrowExplorerUrl = onChain.explorerUrl;
+      log.info("USDC escrowed on Arc", {
+        id: payment.id,
+        txHash: onChain.escrowTxHash,
+      });
+    } catch (err) {
+      log.warn("on-chain escrow failed — falling back to off-chain claimable", {
+        id: payment.id,
+        err: err instanceof Error ? err.message : String(err),
+      });
+    }
   }
 
   await getEscrowStore().save(payment);

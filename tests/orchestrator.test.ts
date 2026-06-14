@@ -2,6 +2,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { processIntent, processMessage } from "@/core/payments";
 import { serializePaymentResult } from "@/core/payments/serialize";
 import type { PaymentIntent } from "@/core/nlp/types";
+import { settleUsdc } from "@/integrations/arc";
+import { sendClaimLink } from "@/integrations/twilio";
 
 vi.mock("@/integrations/dynamic", () => ({
   lookupPearPayUser: vi.fn(async (identifier: string) => {
@@ -132,6 +134,32 @@ describe("payment orchestrator", () => {
     expect(result.ok).toBe(true);
     expect(result.legs[0]?.rail).toBe("unlink");
     expect(result.legs[0]?.settlementRef).toBe("note_private");
+  });
+
+  it("degrades to claimable when instant on-chain settlement reverts", async () => {
+    // Funder short on Arc USDC / RPC revert must NOT fail the request.
+    vi.mocked(settleUsdc).mockRejectedValueOnce(
+      new Error("ERC20: transfer amount exceeds balance"),
+    );
+    const result = await processMessage(
+      "Send $5 to 0x2222222222222222222222222222222222222222",
+      sender,
+    );
+    expect(result.ok).toBe(true);
+    expect(result.legs[0]?.outcome).toBe("claimable");
+    expect(result.legs[0]?.claimUrl).toContain("/claim/");
+  });
+
+  it("keeps the payment successful when claim-link delivery fails", async () => {
+    vi.mocked(sendClaimLink).mockRejectedValueOnce(
+      new Error("The 'To' number is not a valid phone number."),
+    );
+    const result = await processMessage("Pay +12065550100 $8", sender, {
+      channel: "sms",
+    });
+    expect(result.ok).toBe(true);
+    expect(result.legs[0]?.outcome).toBe("claimable");
+    expect(result.legs[0]?.notified).toBe(false);
   });
 
   it("returns structured failures for unknown or incomplete intents", async () => {

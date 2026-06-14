@@ -5,6 +5,7 @@ import { createSignedX402Payment } from "@/core/agents/wallet";
 const bodySchema = z.object({
   url: z.string().url(),
   amount: z.number().positive().default(0.001),
+  wallet_id: z.string().optional(),
 });
 
 export async function POST(request: Request) {
@@ -23,6 +24,7 @@ export async function POST(request: Request) {
   const result = await createSignedX402Payment(
     parsed.data.url,
     parsed.data.amount,
+    { walletId: parsed.data.wallet_id },
   );
 
   if (result.mode === "stub" || result.status === "unconfigured") {

@@ -14,11 +14,43 @@ export const PEARPAY_ESCROW_ABI = [
   },
   {
     type: "function",
+    name: "escrowWithArbiter",
+    stateMutability: "nonpayable",
+    inputs: [
+      { name: "paymentId", type: "bytes32" },
+      { name: "token", type: "address" },
+      { name: "amount", type: "uint256" },
+      { name: "expiresAt", type: "uint64" },
+      { name: "claimHash", type: "bytes32" },
+      { name: "arbiter", type: "address" },
+    ],
+    outputs: [],
+  },
+  {
+    type: "function",
     name: "claim",
     stateMutability: "nonpayable",
     inputs: [
       { name: "paymentId", type: "bytes32" },
       { name: "secret", type: "bytes32" },
+      { name: "recipient", type: "address" },
+    ],
+    outputs: [],
+  },
+  {
+    type: "function",
+    name: "dispute",
+    stateMutability: "nonpayable",
+    inputs: [{ name: "paymentId", type: "bytes32" }],
+    outputs: [],
+  },
+  {
+    type: "function",
+    name: "resolveDispute",
+    stateMutability: "nonpayable",
+    inputs: [
+      { name: "paymentId", type: "bytes32" },
+      { name: "releaseToRecipient", type: "bool" },
       { name: "recipient", type: "address" },
     ],
     outputs: [],
