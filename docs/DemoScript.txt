@@ -1,0 +1,21 @@
+Pear Pay turns plain English into USDC payments — inside iMessage, Telegram, Discord, and every app you already use. No wallet addresses, no chain picking, no crypto jargon. Let me show you.
+
+This is iMessage. I type "Send Molly $20" — just like a normal text. Pear Pay parses the intent, resolves Molly as an existing user, and settles instantly in USDC. Confirm with Face ID, same as Apple Pay. Done.
+
+What if they don't have a wallet yet? I send Alex fifty dollars. Pear Pay escrows the USDC and delivers a claim link by text. Alex taps it, gets an embedded wallet, and the money releases. Payments never fail because someone hasn't onboarded.
+
+Privacy is built in — just add "privately." I send Molly fifty USDC privately. Pear Pay routes through Unlink's shielded pool so amounts and counterparties stay hidden, while still settling in USDC on Arc.
+
+Same brain, different skin. On Telegram I message the Pear Pay bot — "Send Jordan forty dollars" — tap Pay, confirm. Native inline buttons, native checkout. One parser, one settlement orchestrator, six channels.
+
+Discord gets slash commands and bot embeds. "/tip newuser five" — confirm on the embed, USDC settles. Every platform keeps its own confirmation pattern; Pear Pay handles the payment logic underneath.
+
+WhatsApp quick-replies, Slack splits, X DMs — same protocol everywhere.
+
+That's the simulator. This is real. On the Try It page I connect my wallet and send actual Circle testnet USDC on Arc — signed by me, verifiable on Arcscan. Not a mock.
+
+Pear Pay also powers AI agents. One click — the agent shields funds with Unlink, pays an x402 API with Dynamic, and settles on Arc. Human payments and machine payments, same infrastructure.
+
+Pear Pay — send money anywhere you communicate. Try it live at pearpay.app. Thanks for watching.
+
+And this isn't just a simulator — there's a live Telegram bot. Go to t.me/pearpay_bot, open it in Telegram, and tap Start. From there you can DM the bot in plain English — "Send Molly twenty dollars" or "Send fifty USDC privately" — and Pear Pay runs the same payment orchestrator as the web app, right inside your Telegram chat. One bot, same parser, real replies.
