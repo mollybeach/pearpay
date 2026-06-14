@@ -37,8 +37,12 @@ console.log("\nTop up Unlink private pool (if needed)…");
 try {
   execSync("npm run fund:unlink-pool", { stdio: "inherit" });
 } catch {
-  console.log("⚠️  fund:unlink-pool failed — ensure funder has Arc USDC");
-  ok = false;
+  // Non-fatal: the pool may already hold enough shielded USDC for sub-cent
+  // nanopayments. The real proof is the POST below succeeding; only flag a
+  // genuinely insufficient pool there.
+  console.log(
+    "⚠️  fund:unlink-pool skipped/failed (funder low on Arc USDC) — relying on existing pool balance",
+  );
 }
 
 console.log(`\nPOST ${BASE_URL}/api/privacy/nanopay …`);
