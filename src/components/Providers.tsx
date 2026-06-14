@@ -16,15 +16,23 @@ export function Providers({ children }: { children: React.ReactNode }) {
     setMounted(true);
   }, []);
 
-  // Dynamic SDK touches window/localStorage — must not run during SSR.
-  if (!DYNAMIC_ENVIRONMENT_ID) {
-    return <>{children}</>;
-  }
-
+  // The Dynamic SDK store only exists client-side, and children may call Dynamic
+  // hooks (useAuthMode, etc.). Gate on `mounted` FIRST so children never render
+  // during SSR / static prerender — otherwise the build throws
+  // "Store not initialized" when no env id is configured (e.g. CI without
+  // secrets). useEffect only runs in the browser, so `mounted` is always false
+  // during SSG.
   if (!mounted) {
     return (
       <div className="min-h-screen bg-ambient" aria-busy="true" aria-label="Loading" />
     );
+  }
+
+  // No Dynamic env configured: render the app without the provider. Safe here
+  // because we are past SSR (mounted === true), so no Dynamic hook runs on the
+  // server.
+  if (!DYNAMIC_ENVIRONMENT_ID) {
+    return <>{children}</>;
   }
 
   return (
