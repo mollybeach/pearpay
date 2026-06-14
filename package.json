@@ -16,6 +16,7 @@
     "deploy:escrow": "bash scripts/deploy-escrow.sh",
     "verify:arc": "node scripts/arc-live-verify.mjs",
     "verify:dynamic": "node scripts/verify-dynamic.mjs",
+    "verify:flow": "node scripts/verify-flow.mjs",
     "verify:unlink": "node scripts/verify-unlink.mjs",
     "judge:demo": "node scripts/judge-demo.mjs"
   },
