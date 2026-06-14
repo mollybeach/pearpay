@@ -34,6 +34,15 @@ export const ARC_USDC_ADDRESS =
 export const ARC_EURC_ADDRESS =
   process.env.NEXT_PUBLIC_ARC_EURC_ADDRESS ?? ARC_TESTNET_EURC_ADDRESS;
 
+/** PearPayEscrow on Arc Testnet — override via NEXT_PUBLIC_ESCROW_CONTRACT_ADDRESS. */
+export const ESCROW_CONTRACT_ADDRESS = (
+  process.env.NEXT_PUBLIC_ESCROW_CONTRACT_ADDRESS ??
+  process.env.NEXT_PUBLIC_ARC_ESCROW_CONTRACT_ADDRESS ??
+  "0x065484A8DAc3A9c3288b9C575a54947B0A1bC7eB"
+) as `0x${string}`;
+
+export const ESCROW_EXPLORER_URL = `${ARC_EXPLORER_URL.replace(/\/$/, "")}/address/${ESCROW_CONTRACT_ADDRESS}`;
+
 /** Common Flow source tokens for cross-chain demo. */
 export const FLOW_SOURCE_TOKENS = {
   native: {
