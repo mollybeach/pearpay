@@ -1,14 +1,81 @@
 import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
 import { logger } from "@/lib/logger";
-import { parseUsdc, type UsdcAmount } from "@/lib/money";
+import { parseUsdc, formatUsdc, type UsdcAmount } from "@/lib/money";
 import {
   agentGatewayPay,
   type AgentPayResult,
 } from "@/integrations/arc/x402-gateway";
-import { ARC_TESTNET_CHAIN_ID } from "@/integrations/arc/config";
+import { ARC_TESTNET_CHAIN_ID, ARC_USDC_ADDRESS } from "@/integrations/arc/config";
+import { getArcPublicClient, getArcWalletClient, getArcSignerAccount } from "@/integrations/arc/client";
+import { ERC20_ABI } from "@/integrations/arc/abi";
 import { withdraw } from "./index";
 
 const log = logger.scoped("unlink:burner");
+
+const BALANCE_POLL_MS = 2_000;
+const BALANCE_TIMEOUT_MS = 90_000;
+/** Extra shielded USDC so the burner can pay Gateway deposit gas on Arc. */
+const GATEWAY_DEPOSIT_BUFFER = parseUsdc("0.015");
+/** Keep this much ERC-20 on the EOA after Gateway deposit (EIP-3009 auth headroom). */
+const EOA_PAYMENT_HEADROOM = parseUsdc("0.005");
+
+/** Wait until USDC has landed on the burner's EOA (RPC can lag the sequencer). */
+async function waitForBurnerBalance(
+  burner: EphemeralBurner,
+  amount: UsdcAmount,
+): Promise<void> {
+  const client = getArcPublicClient();
+  const deadline = Date.now() + BALANCE_TIMEOUT_MS;
+  while (Date.now() < deadline) {
+    const balance = await client.readContract({
+      address: ARC_USDC_ADDRESS,
+      abi: ERC20_ABI,
+      functionName: "balanceOf",
+      args: [burner.address],
+    });
+    if (balance >= amount) {
+      log.info("burner on-chain balance confirmed", {
+        burner: burner.address,
+        balance: balance.toString(),
+      });
+      return;
+    }
+    await new Promise((r) => setTimeout(r, BALANCE_POLL_MS));
+  }
+  throw new Error(
+    `burner USDC not confirmed on-chain within ${BALANCE_TIMEOUT_MS}ms`,
+  );
+}
+
+/** Arc gas is native USDC (18 dec); top up from funder if Unlink withdraw omitted it. */
+async function ensureBurnerNativeGas(burner: EphemeralBurner): Promise<void> {
+  const client = getArcPublicClient();
+  const minNative = 500_000_000_000_000n; // ~0.0005 native USDC
+  let native = await client.getBalance({ address: burner.address });
+  if (native >= minNative) {
+    log.info("burner native gas ok", {
+      burner: burner.address,
+      native: native.toString(),
+    });
+    return;
+  }
+
+  const funder = getArcWalletClient();
+  const account = getArcSignerAccount();
+  const topUp = 2_000_000_000_000_000n; // 0.002 native USDC for approve+deposit
+  const hash = await funder.sendTransaction({
+    account,
+    chain: null,
+    to: burner.address,
+    value: topUp,
+  });
+  await client.waitForTransactionReceipt({ hash });
+  native = await client.getBalance({ address: burner.address });
+  log.info("burner native gas topped up", {
+    burner: burner.address,
+    native: native.toString(),
+  });
+}
 
 /**
  * Ephemeral burner wallet — the blueprint's privacy primitive, implemented with
@@ -98,26 +165,31 @@ export async function privateNanopayment(params: {
 }): Promise<PrivateNanopaymentResult> {
   const chainId = params.chainId ?? ARC_TESTNET_CHAIN_ID;
   const amount = parseUsdc(params.amountUsd);
+  const fundAmount = amount + GATEWAY_DEPOSIT_BUFFER + EOA_PAYMENT_HEADROOM;
   const burner = createEphemeralBurner();
 
   try {
-    // 1. Fund the burner privately from the Unlink shielded pool.
-    const fund = await fundBurnerFromPool(burner, amount, chainId);
-
-    // 2. The burner autonomously pays the x402 resource (Circle Gateway).
+    const fund = await fundBurnerFromPool(burner, fundAmount, chainId);
+    await waitForBurnerBalance(burner, fundAmount);
+    await ensureBurnerNativeGas(burner);
     const pay: AgentPayResult = await agentGatewayPay(params.url, {
-      depositUsd:
-        typeof params.amountUsd === "number"
-          ? params.amountUsd.toString()
-          : params.amountUsd,
       privateKey: burner.privateKey,
+      depositUsd: formatUsdc(GATEWAY_DEPOSIT_BUFFER),
+    });
+    log.info("burner x402 result", {
+      burner: burner.address,
+      ok: pay.paid,
+      error: pay.error,
+      payTx: pay.payTx,
     });
 
     return {
       ok: pay.paid,
       burner: burner.address,
       fundTxId: fund.txId,
-      settlementTx: pay.payTx,
+      settlementTx:
+        pay.payTx ||
+        (pay.data as { settlement_tx?: string } | undefined)?.settlement_tx,
       payer: pay.payer,
       error: pay.error,
     };

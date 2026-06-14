@@ -4,6 +4,7 @@ import {
   build402Body,
   buildPaymentRequirements,
   decodePaymentHeader,
+  encodePaymentRequired,
   encodePaymentResponse,
   isGatewaySellerConfigured,
   sellerAddress,
@@ -38,12 +39,13 @@ export async function GET(request: Request) {
         url: request.url,
         description: "PearPay premium agent intelligence dataset",
       });
+      const paymentRequired = encodePaymentRequired(body);
       return NextResponse.json(body, {
         status: 402,
         headers: {
-          "X-Payment-Required": Buffer.from(JSON.stringify(body)).toString(
-            "base64",
-          ),
+          // Circle GatewayClient reads `PAYMENT-REQUIRED` (x402 v2).
+          "PAYMENT-REQUIRED": paymentRequired,
+          "X-Payment-Required": paymentRequired,
         },
       });
     }

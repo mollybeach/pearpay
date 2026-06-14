@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { DelegatedAuthButton } from "@/components/DelegatedAuthButton";
 
 interface AgentStatus {
   configured: boolean;
@@ -18,6 +19,8 @@ export function AgentDemo() {
   const [result, setResult] = useState<Record<string, unknown> | null>(null);
   const [actions, setActions] = useState<AgentAction[]>([]);
   const [intent, setIntent] = useState("Fetch premium agent intelligence");
+  const [nanopayLoading, setNanopayLoading] = useState(false);
+  const [nanopayResult, setNanopayResult] = useState<Record<string, unknown> | null>(null);
 
   async function loadStatus() {
     try {
@@ -49,6 +52,25 @@ export function AgentDemo() {
       });
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function runPrivateNanopay() {
+    setNanopayLoading(true);
+    setNanopayResult(null);
+    try {
+      const res = await fetch("/api/privacy/nanopay", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ amount_usd: "0.001" }),
+      });
+      setNanopayResult(await res.json());
+    } catch (err) {
+      setNanopayResult({
+        error: err instanceof Error ? err.message : "Nanopay failed",
+      });
+    } finally {
+      setNanopayLoading(false);
     }
   }
 
@@ -92,6 +114,32 @@ export function AgentDemo() {
       >
         {loading ? "Agent executing…" : "Run Autonomous Agent"}
       </button>
+
+      <div className="rounded-xl border border-white/10 bg-black/20 p-4 space-y-3">
+        <p className="text-xs font-medium text-cream/70">
+          Dynamic delegated access
+        </p>
+        <DelegatedAuthButton />
+      </div>
+
+      <div className="rounded-xl border border-pear-500/30 bg-pear-950/40 p-4 space-y-3">
+        <p className="text-xs font-medium text-pear-300/90">
+          Private nanopayment (Unlink → burner → Arc x402)
+        </p>
+        <button
+          type="button"
+          onClick={runPrivateNanopay}
+          disabled={nanopayLoading}
+          className="w-full rounded-xl border border-pear-500/40 py-2.5 text-sm font-semibold text-pear-300 hover:bg-pear-500/10 disabled:opacity-50"
+        >
+          {nanopayLoading ? "Shielding & settling…" : "Run private nanopay ($0.001)"}
+        </button>
+        {nanopayResult && (
+          <pre className="max-h-32 overflow-auto rounded-lg bg-black/40 p-2 text-[10px] text-pear-200">
+            {JSON.stringify(nanopayResult, null, 2)}
+          </pre>
+        )}
+      </div>
 
       {result && (
         <pre className="max-h-48 overflow-auto rounded-xl bg-black/40 p-3 text-[11px] text-emerald-300">

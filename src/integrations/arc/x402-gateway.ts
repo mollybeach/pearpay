@@ -28,6 +28,11 @@ export const ARC_NETWORK_ID = `eip155:${ARC_TESTNET_CHAIN_ID}`; // eip155:504200
 /** Circle GatewayWallet (EIP-712 verifyingContract for the batched scheme). */
 export const DEFAULT_GATEWAY_WALLET =
   "0x0077777d7EBA4688BDeF3E311b846F25870A19B9" as const;
+/** Default Circle Gateway x402 facilitator (testnet includes Arc 5042002). */
+export const DEFAULT_X402_FACILITATOR_URL =
+  "https://gateway-api-testnet.circle.com";
+export const GATEWAY_BATCHING_NAME = "GatewayWalletBatched";
+export const GATEWAY_BATCHING_VERSION = "1";
 
 // ── Types mirrored from @circle-fin/x402-batching@3.0.4 ──────────────────────
 export interface PaymentRequirements {
@@ -103,8 +108,8 @@ export function buildPaymentRequirements(params: {
     payTo: params.payTo,
     maxTimeoutSeconds: params.maxTimeoutSeconds ?? 60,
     extra: {
-      name: "USDC",
-      version: "2",
+      name: GATEWAY_BATCHING_NAME,
+      version: GATEWAY_BATCHING_VERSION,
       verifyingContract: gatewayWallet(),
     },
   };
@@ -144,6 +149,11 @@ export function encodePaymentResponse(settle: SettleResponse): string {
   return Buffer.from(JSON.stringify(settle), "utf8").toString("base64");
 }
 
+/** Base64-encode the x402 402 body for the `PAYMENT-REQUIRED` header. */
+export function encodePaymentRequired(body: ReturnType<typeof build402Body>): string {
+  return Buffer.from(JSON.stringify(body), "utf8").toString("base64");
+}
+
 /** Seller side is usable once a payTo address exists. */
 export function isGatewaySellerConfigured(): boolean {
   return Boolean(sellerAddress());
@@ -170,9 +180,9 @@ export async function verifyAndSettle(
 ): Promise<{ verify: VerifyResponse; settle?: SettleResponse }> {
   const env = getEnv();
   const mod = await loadModule("@circle-fin/x402-batching/server");
-  const facilitator = new mod.BatchFacilitatorClient(
-    env.X402_FACILITATOR_URL ? { url: env.X402_FACILITATOR_URL } : undefined,
-  );
+  const facilitatorUrl =
+    env.X402_FACILITATOR_URL ?? DEFAULT_X402_FACILITATOR_URL;
+  const facilitator = new mod.BatchFacilitatorClient({ url: facilitatorUrl });
 
   const verify = (await facilitator.verify(payload, requirements)) as VerifyResponse;
   if (!verify.isValid) {
@@ -185,6 +195,7 @@ export async function verifyAndSettle(
     success: settle.success,
     tx: settle.transaction,
     network: settle.network,
+    reason: settle.errorReason,
   });
   return { verify, settle };
 }
@@ -227,23 +238,41 @@ export async function agentGatewayPay(
     rpcUrl: env.ARC_RPC_URL || env.NEXT_PUBLIC_ARC_RPC_URL,
   });
 
-  // One-time top-up so the agent has Gateway balance to spend.
+  // Top up Gateway balance before pay. Burners need a larger on-chain fund first
+  // (see privateNanopayment) so the approve+deposit txs have gas headroom.
   if (opts.depositUsd) {
     try {
       await client.deposit(opts.depositUsd);
     } catch (err) {
-      log.warn("gateway deposit skipped", { err: String(err) });
+      const msg = String(err);
+      log.warn("gateway deposit failed", { err: msg });
+      if (opts.privateKey) {
+        return {
+          mode: "gateway",
+          paid: false,
+          status: 0,
+          error: `gateway deposit failed: ${msg}`,
+        };
+      }
     }
   }
 
-  // `.pay()` performs the full 402 -> EIP-3009 sign -> retry handshake.
-  const res = await client.pay(url);
-  return {
-    mode: "gateway",
-    paid: Boolean(res?.success ?? true),
-    status: res?.status ?? 200,
-    data: res?.data,
-    payTx: res?.payment?.transaction ?? res?.transaction,
-    payer: client.address,
-  };
+  try {
+    const res = await client.pay(url);
+    return {
+      mode: "gateway",
+      paid: Boolean(res?.success ?? true),
+      status: res?.status ?? 200,
+      data: res?.data,
+      payTx: res?.payment?.transaction ?? res?.transaction,
+      payer: client.address,
+    };
+  } catch (err) {
+    return {
+      mode: "gateway",
+      paid: false,
+      status: 0,
+      error: err instanceof Error ? err.message : String(err),
+    };
+  }
 }

@@ -72,8 +72,8 @@ npm run verify:dynamic        # env + Flow client OK
 npm run verify:flow           # status→start→source→QUOTE must pass (needs §1 toggles)
 npm run verify:arc            # escrows + claims 0.01 USDC on Arc → prints ArcScan URLs
 npm run verify:unlink         # registers account + probes a private transfer
-
-# the joint private-nanopayment flow (Dynamic+Unlink+Arc in one call):
+npm run fund:unlink-pool      # shield ~0.10 USDC into Unlink private balance (run before nanopay)
+npm run verify:nanopay        # joint Unlink burner → Circle x402 on Arc (needs dev server)
 curl -s -X POST http://localhost:3000/api/privacy/nanopay \
   -H 'content-type: application/json' \
   -d '{"amount_usd":"0.001"}' | jq .
