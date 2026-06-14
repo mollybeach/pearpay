@@ -124,3 +124,15 @@ temp/
 *.pid
 *.seed
 *.local
+
+# Generated key material
+secrets/
+*.pem
+
+# Runtime secret/state (never commit)
+.delegation-store.json
+.dynamic-webhook-log.json
+.dynamic-agent-wallet.json
+.flow-store.json
+.flow-webhook-log.json
+.webauthn-store.json

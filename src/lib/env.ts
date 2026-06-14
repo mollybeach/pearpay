@@ -41,12 +41,37 @@ const envSchema = z.object({
   DYNAMIC_WALLET_PASSWORD: z.string().optional(),
   FLOW_STORE_PATH: z.string().optional(),
   AGENT_WALLET_ADDRESS: z.string().optional(),
+
+  // Dynamic Delegated Access — server signs on behalf of the user after the
+  // FaceID/WebAuthn approval. The frontend calls delegateKeyShares(); Dynamic
+  // POSTs the encrypted shares to /api/webhooks/dynamic, which we HMAC-verify,
+  // RSA-decrypt, and store sealed-at-rest.
+  DYNAMIC_DELEGATION_WEBHOOK_SECRET: z.string().optional(),
+  // RSA private key (PEM) whose public counterpart is configured on the Dynamic
+  // environment; used to decrypt the delegation webhook envelope. Store with
+  // literal "\n" in .env — we normalize newlines at read time.
+  DYNAMIC_DELEGATED_RSA_PRIVATE_KEY_PEM: z.string().optional(),
+  // Where decrypted (then resealed) delegation materials persist locally.
+  DELEGATION_STORE_PATH: z.string().optional(),
+  // 32-byte hex key (or passphrase) used to AES-256-GCM seal delegation
+  // secrets at rest. Falls back to a key derived from the wallet password.
+  DELEGATION_ENCRYPTION_KEY: z.string().optional(),
   ARC_USDC_ADDRESS: z.string().optional(),
   ARC_EURC_ADDRESS: z.string().optional(),
 
   // x402 / Arc funder
   FUNDER_PRIVATE_KEY: z.string().optional(),
   X402_GATEWAY_ADDRESS: z.string().optional(),
+
+  // Circle Gateway x402 batched nanopayments (@circle-fin/x402-batching).
+  // Seller (payTo) receives settlement; buyer key signs EIP-3009 authorizations.
+  X402_SELLER_ADDRESS: z.string().regex(/^0x[a-fA-F0-9]{40}$/).optional(),
+  X402_BUYER_PRIVATE_KEY: z.string().optional(),
+  // Circle's SupportedChainName literal for Arc testnet (confirm exact value
+  // after `npm i`: node -e "console.log(require('@circle-fin/x402-batching/client'))").
+  X402_CHAIN_NAME: z.string().optional(),
+  // Optional override for the batch facilitator endpoint.
+  X402_FACILITATOR_URL: z.string().url().optional(),
 
   // Blockchain access (viem / wagmi).
   RPC_URL: z.string().url().optional(),
@@ -133,6 +158,10 @@ const PRODUCTION_REQUIRED: Record<string, Array<keyof Env>> = {
   webauthn: ["WEBAUTHN_RP_ID", "WEBAUTHN_ORIGIN"],
   contracts: ["ESCROW_CONTRACT_ADDRESS"],
   persistence: ["ESCROW_DATABASE_URL"],
+  delegation: [
+    "DYNAMIC_DELEGATION_WEBHOOK_SECRET",
+    "DYNAMIC_DELEGATED_RSA_PRIVATE_KEY_PEM",
+  ],
 };
 
 export type ProductionIntegration = keyof typeof PRODUCTION_REQUIRED;
