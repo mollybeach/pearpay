@@ -4,13 +4,12 @@ import { PrizeTabs } from "../components/prizes/PrizeTabs";
 export const metadata: Metadata = {
   title: "Prize Tracks — Pear Pay",
   description:
-    "How Pear Pay satisfies its ETHGlobal NYC 2026 tracks — Finalist, Arc, Dynamic, and Unlink. Bounty asks, what we built, code evidence, and why we should win.",
+    "How Pear Pay satisfies ETHGlobal NYC 2026 tracks — Finalist, Arc, Dynamic, and Unlink. Live Arc Testnet escrow, x402 nanopayments, Delegated Access, and private burner flow.",
 };
 
 /**
  * Prize-pool showcase page — in-page tabs (Finalist, Arc, Dynamic, Unlink)
- * documenting Pear Pay's sponsor integrations, modeled on HedgePod's per-prize
- * implementation pages.
+ * documenting Pear Pay's sponsor integrations with current code evidence.
  */
 export default function PrizesPage() {
   return (
@@ -21,8 +20,12 @@ export default function PrizesPage() {
         </h1>
         <p className="mx-auto mt-3 max-w-2xl text-cream/70">
           Pear Pay is built to win across multiple ETHGlobal NYC 2026 sponsor
-          tracks. Switch tabs to see the bounty asks, what we built, the code
-          evidence, and why we should win.
+          tracks. Switch tabs for bounty asks, what we built, code evidence, and
+          proof commands — including the live Autonomous Private Agent flow on
+          the homepage.
+        </p>
+        <p className="mx-auto mt-4 max-w-xl rounded-xl border border-white/10 bg-pear-900/40 px-4 py-3 font-mono text-xs text-pear-200/90">
+          npm run judge:demo · verify:arc · verify:nanopay · verify:dynamic
         </p>
       </div>
 

@@ -1,9 +1,5 @@
 # Dynamic Flow + Agentic Build — PearPay
 
-PearPay is a unified Next.js app for conversational payments, biometric approval, cross-chain Flow settlement, and autonomous agent payments.
-
-**Live app:** [https://pearpay.app/](https://pearpay.app/)
-
 ## Judging narrative (say this in demo video)
 
 > "A user types *Pay the security agent $45* in chat. PearPay's NLP engine **proposes** the payment — it never holds keys. The user taps the Apple Pay card, **FaceID** fires via WebAuthn, then **Fireblocks Flow** routes funds from whatever chain and token they hold — ETH on Arbitrum, USDC on Base — and **settles USDC on Arc** to the agent wallet. Meanwhile, the **security agent** uses a **Dynamic server wallet** to autonomously pay x402-gated APIs without human approval per call."
@@ -12,93 +8,87 @@ PearPay is a unified Next.js app for conversational payments, biometric approval
 
 | Bounty | How PearPay qualifies |
 |--------|-------------------------|
-| **Best Use of Flow ($3k)** | Full 8-step checkout via `/api/flow/payment/*`: create transaction → attach source → quote → prepare → sign → broadcast → webhook/poll settlement. |
-| **Best Agentic Build ($2k)** | Dynamic server wallet + `/api/agent/run-intent` autonomously hits 402, pays, retries. Action log at `/api/agent/actions`. |
+| **Best Use of Flow ($3k)** | Full 8-step checkout: create transaction → attach source → quote → prepare → sign → broadcast → webhook/poll settlement. Per-payment `destinationAddresses` routes to agent recipient on Arc. |
+| **Best Agentic Build ($2k)** | Python `dynamic-wallet-sdk` server wallet. `/agent/run-intent` autonomously hits 402, pays, retries. Action log proves agent decides + executes. |
 
 ## Required env vars
 
-See [`docs/DYNAMIC_SETUP.md`](docs/DYNAMIC_SETUP.md) and [`.env.example`](.env.example). Key vars:
-
 ```bash
-NEXT_PUBLIC_DYNAMIC_ENVIRONMENT_ID=...
-DYNAMIC_ENV_ID=...
+# Dynamic dashboard → Developer → API
+DYNAMIC_ENVIRONMENT_ID=...
 DYNAMIC_API_TOKEN=dyn_...
-DYNAMIC_WALLET_PASSWORD=...          # agent server wallet MPC signing
-DYNAMIC_FLOW_CHECKOUT_ID=...         # optional — auto-created if unset
+
+# Arc testnet USDC contract
+ARC_USDC_ADDRESS=0x...
+NEXT_PUBLIC_ARC_USDC_ADDRESS=0x...
+
+# Optional — reuse existing Flow checkout
+DYNAMIC_FLOW_CHECKOUT_ID=...
+
+# Agent server wallet
+DYNAMIC_WALLET_PASSWORD=secure-password
+AGENT_WALLET_ADDRESS=0x...   # or leave empty to auto-create
+
+# Webhook (register in Dynamic dashboard)
 DYNAMIC_FLOW_WEBHOOK_SECRET=...
-ARC_USDC_ADDRESS=0x3600000000000000000000000000000000000000
+# Point webhook URL to: https://your-engine.com/webhooks/flow
 ```
 
-## Live vs local
+## Enable Flow in Dynamic dashboard
 
-| Feature | Status after this branch |
-|---------|--------------------------|
-| Flow 8-step API | Wired with persistent sessions |
-| Pay page Flow UX | Wallet required when configured; no silent stub |
-| Flow webhooks | HMAC verify + persisted event log |
-| Agent server wallet | Dynamic Node SDK (`@dynamic-labs-wallet/node-evm`) |
-| x402 agent pay | Server-wallet signed `X-Payment` header |
-
-Run `npm run verify:dynamic` to check env + unit tests.
-
-**Master checklist:** [`docs/JUDGING.md`](./JUDGING.md) · **Run all pools:** `npm run judge:demo`
-
-## Live judging demo script
-
-**Duration:** ~2 minutes · **Name the bounty:** *Best Use of Flow* and/or *Best Agentic Build*.
-
-### What judges need to see
-
-| Track | Must demonstrate |
-|-------|------------------|
-| Best Use of Flow | Dynamic wallet connect → Face ID → Flow 8-step checkout → USDC on Arc |
-| Best Agentic Build | Server wallet autonomously pays x402-gated API without human per-call approval |
-| Best Overall Use | End-to-end conversational payment with Dynamic embedded wallet |
-| Joint nanopayments | Mention Unlink private mode + Arc settlement in same sentence |
+1. [Book a call](https://www.dynamic.xyz/book-a-call) or enable Flow for hackathon environment
+2. Enable **embedded wallets** under Wallets
+3. Enable **Arc Testnet** (chain ID `5042002`) under Chains
+4. Create API token with checkout permissions
 
 ## Demo script for judges
 
 ### Human + Flow (Best Use of Flow)
 
-1. `POST /api/payments` with message *"Send Molly $20"* → copy `payUrl` from response
-2. Open pay link in iMessage (HTTPS) or Safari — OG card unfurls
-3. Connect Dynamic wallet · Tap **Pay with Face ID + Flow**
-4. Show Flow quote → sign → Arc explorer
-5. Webhook events at `GET /api/webhooks/flow`
+1. Connect Dynamic embedded wallet funded on **any** chain (e.g. Arbitrum ETH)
+2. Generate pay link: *"Pay the security agent $45"*
+3. Open in iMessage (deployed HTTPS) or Safari
+4. Tap **Pay with Face ID + Flow**
+5. Show Flow quote (from_amount, fees, routing)
+6. Sign transaction
+7. Show Arc explorer + webhook event at `/webhooks/flow/events`
 
 ### Agent autonomy (Best Agentic Build)
 
 1. Home page → **Run Autonomous Agent**
 2. Intent: *"Fetch premium agent intelligence"*
-3. Action log: `propose` → `decide` → `execute` → `complete`
-4. 402 → pay → 200 from `/api/x402/premium/data`
+3. Show action log: `propose` → `decide` → `execute` → `complete`
+4. Show 402 → pay → 200 response from `/x402/premium/data`
 
 ## API reference
 
 | Endpoint | Purpose |
 |----------|---------|
-| `POST /api/flow/payment/start` | Create Flow checkout transaction |
-| `POST /api/flow/payment/source` | Attach payer wallet + chain |
-| `POST /api/flow/payment/quote` | Cross-chain swap quote |
-| `POST /api/flow/payment/prepare` | Get signing payload |
-| `POST /api/flow/payment/broadcast` | Record tx hash |
-| `GET /api/flow/payment/status/{intentId}` | Poll settlement |
-| `POST /api/webhooks/flow` | HMAC webhook receiver |
-| `POST /api/agent/run-intent` | Autonomous agent execution |
-| `GET /api/agent/actions` | Agent decision audit log |
-| `GET /pay/{data}` | Shareable pay page with OG unfurl |
+| `POST /flow/payment/start` | Create Flow checkout transaction |
+| `POST /flow/payment/source` | Attach payer wallet + chain |
+| `POST /flow/payment/quote` | Cross-chain swap quote |
+| `POST /flow/payment/prepare` | Get signing payload |
+| `POST /flow/payment/broadcast` | Record tx hash |
+| `GET /flow/payment/status/{intent_id}` | Poll settlement |
+| `POST /webhooks/flow` | HMAC webhook receiver |
+| `POST /agent/run-intent` | Autonomous agent execution |
+| `GET /agent/actions` | Agent decision audit log |
 
 ## Architecture
 
 ```
 Human path:
-  NLP (Molly) → payUrl → WebAuthn FaceID → Flow → USDC on Arc
+  NLP propose → WebAuthn FaceID → Flow (any chain in) → USDC on Arc out
 
 Agent path:
-  Agent intent → server wallet → x402 pay → API access
+  NLP intent → server wallet decides → x402 pay → API access
+  (wrong chain? Flow API funds agent wallet — same infra)
 ```
 
-## Team Scope
+## Docs
 
-- Conversational payment parser, recipient resolution, escrow, channels, iOS, and contracts
-- Flow API, WebAuthn, OG pay page, agent x402 demo, and Dynamic wallet experience
+- [Fireblocks Flow overview](https://www.dynamic.xyz/docs/overview/fireblocks-flow)
+- [Flow API guide](https://www.dynamic.xyz/docs/overview/fireblocks-flow-api)
+- [Agents overview](https://www.dynamic.xyz/docs/overview/agents/overview)
+- [Agent payments](https://www.dynamic.xyz/docs/overview/agents/agent-payments)
+- [Flow demo site](https://flow.dynamic.dev/)
