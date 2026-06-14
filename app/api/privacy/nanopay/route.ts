@@ -4,6 +4,9 @@ import { getEnv } from "@/lib/env";
 import { privateNanopayment } from "@/integrations/unlink/burner";
 
 export const runtime = "nodejs";
+// The flow does an on-chain balance poll + Gateway deposit + settle; allow time.
+// (Effective on Vercel Pro; Hobby caps at 60s — run the proof locally if it times out.)
+export const maxDuration = 300;
 
 const bodySchema = z.object({
   url: z.string().url().default("http://localhost:3000/api/x402/premium/data"),
