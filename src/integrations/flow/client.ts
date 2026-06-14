@@ -146,7 +146,11 @@ export class FlowClient {
             recipient: params.recipient,
           },
           destinationAddresses: [
-            { address: params.recipient, chain: "EVM", chainId: ARC_CHAIN_ID },
+            {
+              address: params.recipient,
+              chainName: "EVM",
+              chainId: ARC_CHAIN_ID,
+            },
           ],
         },
       },
