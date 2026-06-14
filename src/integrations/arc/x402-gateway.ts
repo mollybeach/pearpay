@@ -167,19 +167,16 @@ export function isGatewayBuyerConfigured(): boolean {
   );
 }
 
-// ── Runtime SDK loader (keeps build/tsc green before install) ────────────────
-async function loadModule(spec: string): Promise<any> {
-  // `spec` is a widened string, so neither tsc nor webpack tries to resolve it.
-  return import(/* webpackIgnore: true */ spec);
-}
-
 // ── SELLER: verify + settle a received payment (gas-free batched) ────────────
 export async function verifyAndSettle(
   payload: PaymentPayload,
   requirements: PaymentRequirements,
 ): Promise<{ verify: VerifyResponse; settle?: SettleResponse }> {
   const env = getEnv();
-  const mod = await loadModule("@circle-fin/x402-batching/server");
+  // Static specifier so webpack bundles the SDK (incl. its viem imports) into
+  // the serverless function — a webpackIgnore dynamic import is NOT traced by
+  // Vercel and fails at runtime with "Cannot find package".
+  const mod = (await import("@circle-fin/x402-batching/server")) as any;
   const facilitatorUrl =
     env.X402_FACILITATOR_URL ?? DEFAULT_X402_FACILITATOR_URL;
   const facilitator = new mod.BatchFacilitatorClient({ url: facilitatorUrl });
@@ -231,7 +228,7 @@ export async function agentGatewayPay(
     };
   }
 
-  const mod = await loadModule("@circle-fin/x402-batching/client");
+  const mod = (await import("@circle-fin/x402-batching/client")) as any;
   const client = new mod.GatewayClient({
     chain,
     privateKey: privateKey.startsWith("0x") ? privateKey : `0x${privateKey}`,
