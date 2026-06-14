@@ -123,6 +123,26 @@ function RealPaymentInner() {
   const hasProvider =
     typeof window !== "undefined" &&
     Boolean((window as unknown as { ethereum?: unknown }).ethereum);
+
+  // Connect with the first connector that actually resolves a provider (handles
+  // multiple wallets / EIP-6963 discovery), not blindly connectors[0].
+  function connectBest() {
+    void (async () => {
+      for (const c of connectors) {
+        try {
+          const provider = await c.getProvider();
+          if (provider) {
+            connect({ connector: c });
+            return;
+          }
+        } catch {
+          /* try the next connector */
+        }
+      }
+      if (connectors[0]) connect({ connector: connectors[0] });
+    })();
+  }
+
   const balanceText = balanceLoading
     ? "Loading…"
     : balanceError
@@ -157,7 +177,7 @@ function RealPaymentInner() {
           <button
             type="button"
             disabled={!injected || !hasProvider || connecting}
-            onClick={() => injected && connect({ connector: injected })}
+            onClick={connectBest}
             className="mt-4 w-full rounded-xl bg-pear-500 px-6 py-3 font-semibold text-pear-950 shadow-glow transition hover:bg-pear-400 disabled:opacity-60"
           >
             {connecting ? "Connecting…" : "Connect Wallet"}

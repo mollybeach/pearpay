@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { AgentDemo } from "@/components/AgentDemo";
+import { PrivateAgentRun } from "@/components/PrivateAgentRun";
 import { WaitlistForm } from "./components/WaitlistForm";
 import { ARC_CHAIN_ID, ARC_EURC_ADDRESS, ARC_USDC_ADDRESS } from "@/lib/constants";
 
@@ -238,6 +239,21 @@ export default function HomePage() {
               ))}
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* Unified private-agent flow — the joint Dynamic × Unlink × Circle/Arc demo */}
+      <section className="mx-auto max-w-4xl px-5 py-16">
+        <h2 className="text-center text-3xl font-bold sm:text-4xl">
+          Private nanopayments, in one click
+        </h2>
+        <p className="mx-auto mt-3 max-w-xl text-center text-cream/65">
+          Watch an AI agent pay a paywalled API autonomously — Dynamic signs,
+          Unlink keeps it private, and Circle Gateway settles gas-free on Arc.
+          Every step is real and on-chain.
+        </p>
+        <div className="mt-8 flex justify-center">
+          <PrivateAgentRun />
         </div>
       </section>
 
