@@ -20,7 +20,7 @@ Answers for every field on the ETHGlobal project submission form, in **the same 
 
 ## 1. Project details
 
-**Last updated:** 2026-06-13 15:05 EDT
+**Last updated:** 2026-06-14 06:45 EDT
 
 ### Project name
 
@@ -67,9 +67,9 @@ Behind that single message, Pear Pay resolves the recipient (wallet address, pho
 
 Crucially, payments never fail because the recipient hasn't onboarded. If they have no wallet, Pear Pay escrows the USDC and delivers a claim link over SMS/WhatsApp via Twilio; the recipient taps it, an embedded wallet is created instantly through Dynamic, and the funds release — solving the cold-start problem that kills most crypto payment apps.
 
-Pear Pay also extends to the agentic economy: AI agents get their own Dynamic server wallet and can pay each other for APIs, compute, and data autonomously using HTTP 402 / x402 — the same infrastructure that powers human payments powering machine-to-machine commerce.
+Pear Pay also extends to the agentic economy: AI agents get their own Dynamic server wallet (or Delegated Access MPC wallet after one Face ID grant) and can pay each other for APIs, compute, and data autonomously using HTTP 402 / x402 — the same infrastructure that powers human payments powering machine-to-machine commerce.
 
-You can try it live at https://pearpay.app/: a clickable, screen-recordable Simulator reproduces the in-chat payment experience across six platforms (iMessage, Telegram, Discord, WhatsApp, Slack, X), and a "Try it" page does a real on-chain USDC transfer from your own wallet on Base Sepolia testnet — a genuine, verifiable transaction, not a mock.
+You can try it live at https://pearpay.app/: a clickable, screen-recordable Simulator reproduces the in-chat payment experience across six platforms (iMessage, Telegram, Discord, WhatsApp, Slack, X), and a "Try it" page does a real on-chain USDC transfer from your own wallet on Arc Testnet — a genuine, verifiable transaction on testnet.arcscan.app, not a mock. The homepage also runs a one-click Autonomous Private Agent timeline (Dynamic sign → Unlink shield → Circle Gateway x402 settle on Arc) that judges can screen-record end to end. A live Telegram bot webhook at /api/telegram parses payment intents and replies in-chat when configured.
 ```
 
 ### How it's made *(min 280 characters)*
@@ -79,25 +79,28 @@ Pear Pay is one unified TypeScript app: a Next.js (App Router) frontend + API th
 
 The brain is a dependency-free core in TypeScript so it behaves identically across every channel: an NLP parser turns "Send Molly $20 privately" into a structured PaymentIntent; a universal recipient resolver maps wallet address / phone / email / handle / existing-user to a delivery mode; a programmable escrow handles claimable payments; and a settlement orchestrator selects the rail per payment and serializes a JSON-safe result for the UI. Blockchain access is via viem/wagmi.
 
-Two demo surfaces show this end to end: (1) a screen-recordable Simulator that reproduces the real in-chat UX across six platforms (iMessage, Telegram, Discord, WhatsApp, Slack, X) — pixel-faithful phone frame, on-screen iOS keyboard, and each platform's native confirmation pattern (Apple Pay sheet, Telegram inline buttons, Discord embeds, WhatsApp quick-replies, Slack Block Kit, X cards) — all sharing one tested component foundation; and (2) a live "Try it" page that does a REAL on-chain USDC transfer on Base Sepolia: connect a browser wallet via wagmi (injected connector), and transfer() Circle's testnet USDC to any address with a verifiable BaseScan link — no sponsor accounts or funded server keys required.
+Two demo surfaces show this end to end: (1) a screen-recordable Simulator that reproduces the real in-chat UX across six platforms (iMessage, Telegram, Discord, WhatsApp, Slack, X) — pixel-faithful phone frame, on-screen iOS keyboard, and each platform's native confirmation pattern (Apple Pay sheet, Telegram inline buttons, Discord embeds, WhatsApp quick-replies, Slack Block Kit, X cards) — all sharing one tested component foundation; and (2) a live "Try it" page at /pay that does a REAL on-chain USDC transfer on Arc Testnet (chain 5042002): connect a browser wallet via wagmi (injected connector), switch to Arc if needed, and transfer() Circle's testnet USDC to any address with a verifiable Arcscan link — no sponsor accounts or funded server keys required.
 
 Partner tech and how it helps:
-- Dynamic — embedded wallets for instant onboarding-on-claim and server/agent wallets for autonomous payments; powers login + signing.
-- Arc (Circle) — Circle-native USDC settlement and chain-abstracted liquidity for the Arc rail.
-- Unlink — private transfers via the real @unlink-xyz/sdk client (createUnlink + unlinkAccount.fromMnemonic, primitives deposit/transfer/withdraw) so balances, amounts, and counterparties stay hidden in "private mode."
+- Dynamic — embedded wallets for instant onboarding-on-claim, Fireblocks Flow for cross-chain checkout that settles USDC on Arc, server/agent wallets for autonomous payments, and Delegated Access (Face ID once → backend signs autonomously via sealed MPC key shares).
+- Arc (Circle) — Circle-native USDC settlement on Arc Testnet, PearPayEscrow.sol deployed on-chain (claim-secret release, expiry refund, sender cancel, dispute/arbiter), real @circle-fin/x402-batching gas-free nanopayments via BatchFacilitatorClient, and Circle Gateway bridge for chain-abstracted liquidity.
+- Unlink — private transfers via the real @unlink-xyz/sdk client (createUnlink + unlinkAccount.fromMnemonic, primitives deposit/transfer/withdraw) plus ephemeral burner EOAs for unlinkable private nanopayments (shielded pool → burner → x402 → dispose).
 - Twilio — SMS/WhatsApp claim-link delivery + Verify; this is what reaches recipients who don't have a wallet yet and solves the cold-start problem.
+- Telegram — live bot webhook (/api/telegram) that parses natural-language payment intents and replies in-chat, sharing the same orchestrator as Twilio.
 
-On-chain, PearPayEscrow.sol is a programmable USDC/EURC escrow (conditional release behind a keccak256 claim-secret, time-based auto-refund, sender cancellation) designed to deploy to Arc.
+On-chain, PearPayEscrow.sol is deployed on Arc Testnet at 0x065484A8DAc3A9c3288b9C575a54947B0A1bC7eB — a programmable USDC/EURC escrow (conditional release behind a keccak256 claim-secret, time-based auto-refund, sender cancellation, optional arbiter dispute resolution).
 
 Hacky / notable bits:
 - A "rail selector" replaces cross-chain bridging — Pear Pay treats Arc/Unlink as one settlement surface and picks the best one, while still abstracting chains away from the user.
 - Claim links unfurl as rich payment cards in iMessage via a dynamic Next.js opengraph-image (1200×630) generated per pay-link.
-- "Pay with Face ID" uses WebAuthn passkeys (@simplewebauthn) for biometric approval in the browser.
-- Agent-to-agent payments use HTTP 402 / x402 with a Dynamic server wallet — no human in the loop.
-- The "Try it" page is genuinely on-chain: wagmi + an injected browser wallet send a real Circle USDC transfer() on Base Sepolia (chain 84532) with a BaseScan receipt — judges can verify an actual transaction with zero sponsor credentials.
+- "Pay with Face ID" uses WebAuthn passkeys (@simplewebauthn) for biometric approval in the browser and bootstraps Dynamic Delegated Access.
+- Agent-to-agent payments use HTTP 402 / x402 with Dynamic server wallets or delegated MPC signing — no human in the loop after one Face ID grant.
+- The joint private nanopayment flow (Unlink shield → ephemeral burner → Circle Gateway x402 on Arc) runs live via POST /api/privacy/nanopay and is visualized on the homepage in PrivateAgentRun.tsx.
+- The "Try it" page is genuinely on-chain: wagmi + an injected browser wallet send a real Circle USDC transfer() on Arc Testnet (chain 5042002) with an Arcscan receipt — judges can verify an actual transaction with zero sponsor credentials.
 - The Simulator is one reusable foundation: a shared PhoneFrame, a theme-aware on-screen IosKeyboard, and a shared PearPayCard, with each of the six channel components layering on its platform-native chrome and confirmation flow.
+- Escrow persistence degrades gracefully: without ESCROW_DATABASE_URL the app uses an in-memory EscrowStore so production never crashes on missing Postgres.
 
-The sponsor settlement rails (Arc/Unlink) run in sandbox/testnet mode for the demo so the full flow is reproducible without funded mainnet keys, while the "Try it" page is live on Base Sepolia.
+The sponsor settlement rails (Arc/Unlink/x402) run on Arc Testnet for the demo so the full flow is reproducible without funded mainnet keys. Circle Gateway bridge can mint USDC onto Arc from a cross-chain pool (default source: Base Sepolia) when CIRCLE_API_KEY is set.
 ```
 
 ### GitHub Repositories
@@ -112,7 +115,7 @@ https://github.com/mollybeach/pearpay
 
 ## 2. Images
 
-**Last updated:** 2026-06-13 15:05 EDT
+**Last updated:** 2026-06-14 06:45 EDT
 
 Upload these in the **Images** step of the form.
 
@@ -120,14 +123,14 @@ Upload these in the **Images** step of the form.
 |-------|-------------|----------------|
 | **Logo** | Square ~512×512 | Pear Pay pear mascot + wordmark (upload from your design folder) |
 | **Cover image** | 16:9 (~640×360+) | Banner: "Turn Conversations into Web3 Transactions" + QR to https://pearpay.app/ |
-| **Screenshots** | Min 3 | Use: Simulator (iMessage), Try it (real USDC), Prizes/Arc page |
+| **Screenshots** | Min 3 | Use: Simulator (iMessage), Try it (Arc Testnet USDC), Private Agent timeline / Prizes page |
 
 **Suggested screenshot sources in repo:**
 
 - `design/figma/02-simulator.svg` — export PNG for Simulator
 - `design/figma/03-try-it.svg` — export PNG for Try it flow
 - `design/figma/01-home.svg` — export PNG for landing page
-- Live captures from https://pearpay.app/messages and https://pearpay.app/pay
+- Live captures from https://pearpay.app/messages, https://pearpay.app/pay, and https://pearpay.app/prizes (Autonomous Private Agent timeline)
 
 **Checklist before Save & Continue:**
 
@@ -139,7 +142,7 @@ Upload these in the **Images** step of the form.
 
 ## 3. Tech stack
 
-**Last updated:** 2026-06-13 15:10 EDT
+**Last updated:** 2026-06-14 06:45 EDT
 
 Copy each multiselect block into the matching ETHGlobal dropdown.
 
@@ -230,7 +233,7 @@ React.js
 Supabase
 ```
 
-*(Production path for durable escrow + claimable-payment storage; hackathon MVP also uses in-memory `EscrowStore` for local demos.)*
+*(Production path for durable escrow + claimable-payment storage via Supabase/Postgres; without ESCROW_DATABASE_URL the app falls back to in-memory `EscrowStore` so Vercel never crashes.)*
 
 ---
 
@@ -260,8 +263,10 @@ wagmi
 Dynamic SDK
 Fireblocks Flow
 Circle Arc
+Circle x402-batching
 Unlink SDK
 Twilio
+Telegram Bot API
 WebAuthn
 HTTP 402
 Tailwind CSS
@@ -296,7 +301,7 @@ All payment-critical paths (escrow, Flow, signing, webhooks, SDK integrations) w
 
 ## 4. Select prizes
 
-**Last updated:** 2026-06-13 15:05 EDT
+**Last updated:** 2026-06-14 06:45 EDT
 
 ### Continuity Mode
 
@@ -325,15 +330,17 @@ Top 10 Finalist & Partner Prizes
 #### How are you using this Protocol / API? *(1–2 sentences)*
 
 ```
-Pear Pay uses Arc as its default USDC settlement and liquidity hub. Users never pick a chain — they send a message like "Pay Alex $20" and Pear Pay routes funds to Arc via PearPayEscrow.sol (conditional claim-secret release, expiry refund, sender cancel) and chain-abstracted settlement through our Arc integration. Claimable payments escrow USDC on Arc until the recipient onboards via Dynamic and claims.
+Pear Pay uses Arc as its default USDC settlement and liquidity hub on Arc Testnet (5042002). Users never pick a chain — they send a message like "Pay Alex $20" and Pear Pay routes funds via PearPayEscrow.sol (deployed on Arc: conditional claim-secret release, expiry refund, sender cancel, dispute/arbiter) and chain-abstracted settlement through our Arc integration. Sub-cent gas-free nanopayments settle via the real @circle-fin/x402-batching SDK (BatchFacilitatorClient verify/settle on EIP-3009). Claimable payments escrow USDC on Arc until the recipient onboards via Dynamic and claims.
 ```
 
 #### Link to the line of code where the tech is used
 
 ```
-https://github.com/mollybeach/pearpay/blob/main/contracts/PearPayEscrow.sol#L68-L74
-https://github.com/mollybeach/pearpay/blob/main/src/integrations/arc/index.ts#L67-L75
-https://github.com/mollybeach/pearpay/blob/main/src/core/payments/settlement.ts#L78-L90
+https://github.com/mollybeach/pearpay/blob/main/contracts/PearPayEscrow.sol#L88-L96
+https://github.com/mollybeach/pearpay/blob/main/src/integrations/arc/index.ts#L109-L128
+https://github.com/mollybeach/pearpay/blob/main/src/integrations/arc/x402-gateway.ts#L185-L220
+https://github.com/mollybeach/pearpay/blob/main/app/api/x402/premium/data/route.ts#L22-L50
+https://github.com/mollybeach/pearpay/blob/main/src/core/payments/settlement.ts#L68-L85
 ```
 
 #### How easy is it to use? *(1–10)*
@@ -343,7 +350,7 @@ https://github.com/mollybeach/pearpay/blob/main/src/core/payments/settlement.ts#
 #### Additional feedback for the Sponsor
 
 ```
-Arc's USDC-native model maps cleanly to conversational payments — one settlement surface, no chain picker in UX. Foundry deploy + Arc testnet USDC address were straightforward. Circle Gateway/Forwarder for live source-to-Arc routing would benefit from a single end-to-end TypeScript example (detect source chain → quote → settle on Arc) in the docs; we scaffolded this in src/integrations/arc/ but had to infer request shapes from scattered Circle docs. A canonical "claimable escrow on Arc" reference repo would help hackathon teams ship faster.
+Arc's USDC-native model maps cleanly to conversational payments — one settlement surface, no chain picker in UX. Foundry deploy + Arc testnet USDC address were straightforward; PearPayEscrow is live on Arc Testnet. We shipped real @circle-fin/x402-batching (BatchFacilitatorClient + GatewayClient) for gas-free sub-cent settlement — the SDK worked once we mapped eip155:5042002 and the GatewayWallet verifying contract. A canonical "private nanopayment on Arc" reference (shield → burner → x402 → Arcscan proof) would help joint-bounty teams; we documented ours in README and npm run verify:nanopay.
 ```
 
 **Bounty tracks to name in demo:** Best Smart Contracts on Arc with Advanced Stablecoin Logic · Best Chain Abstracted USDC Apps Using Arc as a Liquidity Hub
@@ -355,17 +362,20 @@ Arc's USDC-native model maps cleanly to conversational payments — one settleme
 #### How are you using this Protocol / API? *(1–2 sentences)*
 
 ```
-Pear Pay uses Dynamic for embedded wallet onboarding when recipients claim funds (no seed phrases), Fireblocks Flow for cross-chain checkout that settles USDC on Arc, and server wallets for autonomous agent payments (HTTP 402 / x402). Human path: NLP → WebAuthn Face ID → Flow checkout → Arc. Agent path: natural-language intent → Dynamic server wallet → pay gated API → retry on 402.
+Pear Pay uses Dynamic for embedded wallet onboarding when recipients claim funds (no seed phrases), Fireblocks Flow for cross-chain checkout that settles USDC on Arc, server wallets for autonomous agent payments (HTTP 402 / x402), and Delegated Access so the backend signs autonomously after one Face ID/WebAuthn grant (RSA-decrypted key shares via /api/webhooks/dynamic). Human path: NLP → WebAuthn Face ID → Flow checkout → Arc. Agent path: natural-language intent → Dynamic server wallet or delegated MPC wallet → pay gated API → retry on 402. The homepage PrivateAgentRun component runs this as a live step-by-step timeline.
 ```
 
 #### Link to the line of code where the tech is used
 
 ```
-https://github.com/mollybeach/pearpay/blob/main/src/components/Providers.tsx#L13-L21
-https://github.com/mollybeach/pearpay/blob/main/app/api/flow/payment/start/route.ts#L46-L50
-https://github.com/mollybeach/pearpay/blob/main/src/integrations/dynamic/index.ts#L86-L112
-https://github.com/mollybeach/pearpay/blob/main/src/integrations/dynamic/index.ts#L118-L133
+https://github.com/mollybeach/pearpay/blob/main/src/components/Providers.tsx#L12-L26
+https://github.com/mollybeach/pearpay/blob/main/src/components/PrivateAgentRun.tsx#L1-L15
+https://github.com/mollybeach/pearpay/blob/main/src/integrations/dynamic/delegated-wallet.ts#L18-L33
+https://github.com/mollybeach/pearpay/blob/main/app/api/webhooks/dynamic/route.ts#L1-L11
+https://github.com/mollybeach/pearpay/blob/main/app/api/flow/payment/start/route.ts#L46-L53
+https://github.com/mollybeach/pearpay/blob/main/src/integrations/dynamic/index.ts#L88-L113
 https://github.com/mollybeach/pearpay/blob/main/app/api/agent/run-intent/route.ts#L36-L42
+https://github.com/mollybeach/pearpay/blob/main/app/api/agent/delegated-pay/route.ts
 ```
 
 #### How easy is it to use? *(1–10)*
@@ -375,7 +385,7 @@ https://github.com/mollybeach/pearpay/blob/main/app/api/agent/run-intent/route.t
 #### Additional feedback for the Sponsor
 
 ```
-Dynamic SDK integration for embedded wallets and auth was smooth — Providers + wallet button worked in under an hour. Flow's multi-step checkout (create → source → quote → prepare → broadcast → webhook) is powerful but dense; a single "happy path" sequence diagram with expected JSON payloads per step would reduce integration time. Server wallet REST API for agentic x402 flows is a strong differentiator — clearer docs on signing/submitting txs from server wallets (not just creating them) would unlock more agent builds.
+Dynamic SDK integration for embedded wallets and auth was smooth — Providers + wallet button worked in under an hour. Delegated Access is a strong differentiator for agentic flows: one Face ID grant, then the server signs x402 autonomously. Flow's multi-step checkout (create → source → quote → prepare → broadcast → webhook) is powerful but dense; a single "happy path" sequence diagram with expected JSON payloads per step would reduce integration time. Server wallet REST API + delegation webhook docs on signing/submitting txs from server wallets (not just creating them) would unlock more agent builds.
 ```
 
 **Bounty tracks to name in demo:** Best Use of Flow · Best Agentic Build · Best Overall Use · Best Private Nanopayments App *(joint with Unlink + Arc)*
@@ -387,16 +397,17 @@ Dynamic SDK integration for embedded wallets and auth was smooth — Providers +
 #### How are you using this Protocol / API? *(1–2 sentences)*
 
 ```
-Pear Pay adds an optional private payment mode: users say "Send Sarah 50 USDC privately" and the orchestrator routes through Unlink's deposit/transfer/withdraw primitives so balances, amounts, and counterparties stay hidden while Arc still settles the public leg when needed. Private rail selection is automatic when isPrivate is set — no separate UX for shielding.
+Pear Pay adds an optional private payment mode: users say "Send Sarah 50 USDC privately" and the orchestrator routes through Unlink's deposit/transfer/withdraw primitives so balances, amounts, and counterparties stay hidden while Arc still settles the public leg when needed. For the joint private-nanopayment bounty, Unlink shields USDC into a single-use ephemeral burner EOA that pays via Circle Gateway x402 on Arc — the chain only ever sees pool → burner → seller, never user → seller. Private rail selection is automatic when isPrivate is set — no separate UX for shielding.
 ```
 
 #### Link to the line of code where the tech is used
 
 ```
-https://github.com/mollybeach/pearpay/blob/main/src/integrations/unlink/index.ts#L57-L74
-https://github.com/mollybeach/pearpay/blob/main/src/integrations/unlink/index.ts#L98-L126
-https://github.com/mollybeach/pearpay/blob/main/src/core/payments/settlement.ts#L27-L28
-https://github.com/mollybeach/pearpay/blob/main/src/core/payments/settlement.ts#L68-L76
+https://github.com/mollybeach/pearpay/blob/main/src/integrations/unlink/index.ts#L74-L99
+https://github.com/mollybeach/pearpay/blob/main/src/integrations/unlink/burner.ts#L157-L178
+https://github.com/mollybeach/pearpay/blob/main/app/api/privacy/nanopay/route.ts#L16-L20
+https://github.com/mollybeach/pearpay/blob/main/src/core/payments/settlement.ts#L22-L25
+https://github.com/mollybeach/pearpay/blob/main/src/core/payments/settlement.ts#L58-L65
 ```
 
 #### How easy is it to use? *(1–10)*
@@ -406,7 +417,7 @@ https://github.com/mollybeach/pearpay/blob/main/src/core/payments/settlement.ts#
 #### Additional feedback for the Sponsor
 
 ```
-Unlink's privacy primitives (deposit → private transfer → withdraw) fit naturally as a "private mode" toggle on top of conversational payments. Local stub mode made hackathon development fast. For production, clearer docs on how private balances interact with USDC on Arc (settlement timing, fee model, and error codes on failed shield/transfer) would help. A minimal Next.js example showing one private peer-to-peer transfer end-to-end would complement the SDK reference.
+Unlink's privacy primitives (deposit → private transfer → withdraw) fit naturally as a "private mode" toggle on top of conversational payments. The real @unlink-xyz/sdk on Arc Testnet powers live private transfers and the burner nanopay path; stub mode remains for local dev without credentials. For production, clearer docs on how private balances interact with USDC on Arc (settlement timing, fee model, and error codes on failed shield/transfer) would help. Our npm run verify:nanopay script returns a settlementTx on testnet.arcscan.app where the payer is the burner, not the user — a concrete proof judges can open.
 ```
 
 **Bounty tracks to name in demo:** Best Private Nano Payment App *(joint)* · Best Unlink Integration into a Major Open-Source App
@@ -415,7 +426,7 @@ Unlink's privacy primitives (deposit → private transfer → withdraw) fit natu
 
 ## 5. Video
 
-**Last updated:** 2026-06-13 15:05 EDT
+**Last updated:** 2026-06-14 06:45 EDT
 
 ### Demo video requirements
 
@@ -436,27 +447,29 @@ TODO: add the recorded demo link before final submission
 **Cover in the video:**
 
 1. Simulator — "Send Molly $20" across a messaging app
-2. Try it — real Base Sepolia USDC transfer + BaseScan link
-3. Arc escrow lifecycle + Flow checkout (if credentialed)
-4. Private mode mention (Unlink) + agent x402 path (Dynamic server wallet)
+2. Try it — real Arc Testnet USDC transfer + Arcscan link (https://pearpay.app/pay)
+3. Autonomous Private Agent — one-click timeline on homepage (Dynamic → Unlink → Circle Gateway x402 on Arc)
+4. Arc escrow lifecycle + Flow checkout (if credentialed)
+5. Private nanopayment proof — open settlementTx on testnet.arcscan.app (payer is burner, not user)
+6. Optional: live Telegram bot in-chat payment intent
 
 ---
 
 ## 6. Future
 
-**Last updated:** 2026-06-13 15:05 EDT
+**Last updated:** 2026-06-14 06:45 EDT
 
 *(Use this if the form asks about future plans / what happens after the hackathon.)*
 
 ```
-After ETHGlobal NYC, Pear Pay will ship production escrow persistence (Postgres/KV), live Circle Gateway settlement on Arc, and Twilio claim delivery at scale. The iMessage extension moves from preview to TestFlight. Agent payments expand beyond the x402 demo to a marketplace where named agents discover and pay each other for APIs, compute, and data — all through the same conversational interface humans use. Private mode via Unlink becomes a one-tap default for sensitive transfers.
+After ETHGlobal NYC, Pear Pay will ship production escrow persistence (Postgres/Supabase — in-memory fallback already prevents prod crashes when ESCROW_DATABASE_URL is unset), Twilio claim delivery at scale, and the iMessage extension from preview to TestFlight. Agent payments expand beyond the x402 demo to a marketplace where named agents discover and pay each other for APIs, compute, and data — all through the same conversational interface humans use. Private mode via Unlink becomes a one-tap default for sensitive transfers. Live Circle Gateway x402 settlement, Delegated Access, and the private nanopay flow are already on Arc Testnet at https://pearpay.app/.
 ```
 
 ---
 
 ## 7. Final
 
-**Last updated:** 2026-06-13 15:05 EDT
+**Last updated:** 2026-06-14 06:45 EDT
 
 ### Submission checklist *(before you hit Submit)*
 
@@ -474,9 +487,10 @@ After ETHGlobal NYC, Pear Pay will ship production escrow persistence (Postgres/
 
 - Name the bounty explicitly in your demo (e.g. "Arc — Best Smart Contracts with Advanced Stablecoin Logic").
 - Arc + joint Unlink prize require: **MVP + architecture diagram + video + public repo**.
-- Dynamic requires: **deployed app judges can use** — https://pearpay.app/ — + SDK integration visible in demo.
-- Unlink requires: **working private flow demo** + README explaining what is private.
+- Dynamic requires: **deployed app judges can use** — https://pearpay.app/ — + SDK integration visible in demo (PrivateAgentRun on homepage).
+- Unlink requires: **working private flow demo** + README explaining what is private — run `npm run verify:nanopay` and open `settlementTx` on testnet.arcscan.app.
 - Keep `docs/DYNAMIC_BOUNTY.md` open during the Dynamic booth / video.
+- Run `npm run judge:demo` before recording — runs verify:arc, verify:dynamic, verify:flow, verify:unlink, verify:bridge, verify:nanopay.
 
 ### Reference docs in repo
 
@@ -487,7 +501,8 @@ After ETHGlobal NYC, Pear Pay will ship production escrow persistence (Postgres/
 | `docs/DYNAMIC_BOUNTY.md` | Flow + agentic demo script |
 | `docs/UNLINK_BOUNTY.md` | Unlink private-mode demo + env setup |
 | `docs/AI_ATTRIBUTION.md` | AI tool disclosure |
-| `README.md` | Architecture diagram + quick start |
+| `README.md` | Architecture diagram + quick start + judges' Sponsor Integrations section |
+| `docs/ENV_SETUP.md` | Env var setup for all integrations |
 
 ---
 
