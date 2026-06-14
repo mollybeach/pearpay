@@ -1,5 +1,5 @@
 import { http, createConfig } from "wagmi";
-import { injected } from "wagmi/connectors";
+import { injected } from "@wagmi/core";
 import { arcTestnet } from "@/integrations/arc/chain";
 import {
   ARC_CHAIN_ID,

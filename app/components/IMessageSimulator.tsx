@@ -279,14 +279,6 @@ export function IMessageSimulator() {
           </>
         ) : null}
       </PhoneFrame>
-
-      <p className="max-w-sm text-center text-xs text-cream/45">
-        Type with the keyboard (or your real one), tap{" "}
-        <span className="text-cream/70">↑</span>, then confirm with Face ID. Try{" "}
-        <span className="text-cream/70">“Send Alex $50”</span> for the claimable
-        flow or add <span className="text-cream/70">“privately”</span> for a
-        shielded transfer.
-      </p>
     </div>
   );
 }

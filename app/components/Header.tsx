@@ -5,14 +5,30 @@ import Image from "next/image";
 import Link from "next/link";
 import { ESCROW_EXPLORER_URL } from "@/lib/constants";
 
-type NavItem = { href: string; label: string; external?: boolean };
+type NavItem = {
+  href: string;
+  label: string;
+  external?: boolean;
+  title?: string;
+};
 
 const NAV: NavItem[] = [
   { href: "/", label: "Home" },
   { href: "/pay", label: "Try it" },
   { href: "/messages", label: "Simulator" },
+  {
+    href: "https://t.me/pearpay_bot",
+    label: "Telegram",
+    external: true,
+    title: "Chat with the Pear Pay bot on Telegram",
+  },
   { href: "/prizes", label: "Prizes" },
-  { href: ESCROW_EXPLORER_URL, label: "Explorer", external: true },
+  {
+    href: ESCROW_EXPLORER_URL,
+    label: "Explorer",
+    external: true,
+    title: "PearPayEscrow on Arc Testnet",
+  },
   { href: "/about", label: "About" },
 ];
 
@@ -53,7 +69,7 @@ export function Header() {
                 target="_blank"
                 rel="noreferrer"
                 className={linkClass}
-                title="PearPayEscrow on Arc Testnet"
+                title={item.title}
               >
                 {item.label}
               </a>
@@ -103,7 +119,7 @@ export function Header() {
                 rel="noreferrer"
                 onClick={close}
                 className="block rounded-lg px-3 py-3 text-base font-medium text-cream/85 transition hover:bg-white/5"
-                title="PearPayEscrow on Arc Testnet"
+                title={item.title}
               >
                 {item.label}
               </a>
