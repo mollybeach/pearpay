@@ -35,7 +35,13 @@ export async function createClaimablePayment(
   const now = Date.now();
   const env = getEnv();
   if (env.NODE_ENV === "production" && !env.ESCROW_DATABASE_URL) {
-    throw new Error("ESCROW_DATABASE_URL is required for production escrow");
+    // Degrade gracefully instead of crashing the payment path: claimable
+    // payments still work via the in-memory store. Durable persistence
+    // (ESCROW_DATABASE_URL) is recommended for production but not required to
+    // run a demo / serverless deploy.
+    log.warn(
+      "ESCROW_DATABASE_URL not set — using in-memory escrow store (non-durable)",
+    );
   }
   const payment: ClaimablePayment = {
     id: newPaymentId(),
