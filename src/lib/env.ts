@@ -98,6 +98,11 @@ const envSchema = z.object({
   UNLINK_ENVIRONMENT: z.string().default("arc-testnet"),
   UNLINK_ACCOUNT_MNEMONIC: z.string().optional(),
 
+  // Telegram bot (live messaging channel). Token from @BotFather; optional
+  // secret is echoed by Telegram in the x-telegram-bot-api-secret-token header.
+  TELEGRAM_BOT_TOKEN: z.string().optional(),
+  TELEGRAM_WEBHOOK_SECRET: z.string().optional(),
+
   // Twilio notification + delivery.
   TWILIO_ACCOUNT_SID: z.string().optional(),
   TWILIO_AUTH_TOKEN: z.string().optional(),
