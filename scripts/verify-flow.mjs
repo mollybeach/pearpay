@@ -17,11 +17,18 @@ const ARC_USDC =
   process.env.ARC_USDC_ADDRESS ??
   process.env.NEXT_PUBLIC_ARC_USDC_ADDRESS ??
   "0x3600000000000000000000000000000000000000";
-const BASE_USDC = "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913";
+// Source for the smoke test must be a TESTNET chain so Flow can route into the
+// Arc testnet settlement (a mainnet source can't bridge to a testnet target).
+// Base Sepolia (84532) USDC is a Flow-supported testnet source.
+const SOURCE_CHAIN_ID = process.env.FLOW_TEST_SOURCE_CHAIN_ID ?? "84532";
+const SOURCE_USDC =
+  process.env.FLOW_TEST_SOURCE_USDC ??
+  "0x036CbD53842c5426634e7929541eC2318f3dCF7e";
 const TEST_RECIPIENT =
   process.env.AGENT_WALLET_ADDRESS ??
   "0xB214476310000000000000000000000000004763";
-const TEST_PAYER = "0x0000000000000000000000000000000000000001";
+const TEST_PAYER =
+  process.env.FUNDER_ADDRESS ?? "0xB214f8D70AB85F2628b8ba684D0C45a1a5bE4763";
 
 const requiredEnv = [
   "NEXT_PUBLIC_DYNAMIC_ENVIRONMENT_ID",
@@ -125,7 +132,7 @@ async function main() {
     body: JSON.stringify({
       intent_id: intentId,
       from_address: TEST_PAYER,
-      from_chain_id: "8453",
+      from_chain_id: SOURCE_CHAIN_ID,
       from_chain_name: "EVM",
     }),
   });
@@ -142,7 +149,7 @@ async function main() {
     method: "POST",
     body: JSON.stringify({
       intent_id: intentId,
-      from_token_address: BASE_USDC,
+      from_token_address: SOURCE_USDC,
       slippage: 0.01,
     }),
   });
@@ -152,9 +159,14 @@ async function main() {
     log("POST quote", false, detail);
     if (detail.includes("unknown")) {
       console.log(
-        "\n⚠️  Quote failed with unknown token/chain — enable Arc Testnet USDC",
+        "\n⚠️  No route for this source → settlement pair. Use a TESTNET source",
       );
-      console.log("   settlement in Dynamic dashboard (chain 5042002).");
+      console.log(
+        `   that Flow can bridge to Arc testnet (default: Base Sepolia ${SOURCE_CHAIN_ID}).`,
+      );
+      console.log(
+        "   A mainnet source (e.g. chain 8453) cannot route to a testnet settlement.",
+      );
     }
     passed = false;
   } else {

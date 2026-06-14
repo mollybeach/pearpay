@@ -114,7 +114,9 @@ try {
     method: "POST",
     headers: { "content-type": "application/json" },
     body: JSON.stringify({
-      amount: 1,
+      // Nanopayment-sized probe — the shielded pool is testnet-funded, and a
+      // sub-dollar amount is on-thesis for a private *nanopayments* app.
+      amount: Number(process.env.SHIELD_PROBE_USD ?? "0.05"),
       recipient: "+15555550123",
       intent_id: `verify-${Date.now()}`,
     }),
