@@ -74,7 +74,7 @@ if (!wantInfo) {
   }
   const body = {
     url: webhookUrl,
-    allowed_updates: ["message"],
+    allowed_updates: ["message", "callback_query"],
     drop_pending_updates: true,
   };
   if (secret) body.secret_token = secret;
