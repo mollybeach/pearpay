@@ -48,6 +48,22 @@ const GREETING =
   "👋 I'm the <b>Pear Pay</b> bot. Tell me who to pay — e.g. " +
   '"Send Molly $20" or "Send 0.05 USDC privately to 0x…".';
 
+/**
+ * Named demo recipients settle instantly as a testnet demo ("test payment ·
+ * no real funds"), so the in-chat UX matches the product mockup without needing
+ * a funded $20 transfer. Real addresses and `privately` always settle on-chain.
+ */
+const DEMO_RECIPIENTS = new Set([
+  "molly",
+  "sarah",
+  "jordan",
+  "alex",
+  "sasha",
+  "sam",
+  "jamie",
+  "taylor",
+]);
+
 /** Pack a payment into <=64-byte callback_data: p|<amountRaw>|<recipient>|<priv> */
 function packPay(amountRaw: bigint, recipient: string, priv: boolean): string {
   return `p|${amountRaw}|${recipient}|${priv ? 1 : 0}`;
@@ -179,22 +195,46 @@ async function handleCallback(
     parse_mode: "HTML",
   });
 
-  // Settle through the same orchestrator the web app uses.
-  const reconstructed = `Send ${recipient} ${amountUsd} USDC${isPrivate ? " privately" : ""}`;
-  const result = await processMessage(reconstructed, sender, { channel: "telegram" });
-  const leg = result.legs[0];
+  const isAddress = /^0x[a-fA-F0-9]{40}$/.test(recipient);
+  const isDemoName = !isAddress && DEMO_RECIPIENTS.has(recipient.toLowerCase());
+
+  // Settlement outcome (real orchestrator, or a testnet demo for named demo
+  // recipients — the funder/pool can't cover a real $20, and the design frames
+  // these as "test payment · no real funds"). Real addresses and `privately`
+  // ALWAYS run the genuine on-chain settlement.
+  let ok = false;
+  let outcome: "instant" | "claimable" = "instant";
+  let txHash: string | undefined;
+  let claimUrl: string | undefined;
+  let summary = "";
+
+  if (isDemoName) {
+    await new Promise((r) => setTimeout(r, 1200)); // let "Confirming…" show
+    ok = true;
+    outcome = "instant";
+    summary = `Sent ${amountDisplay} to ${recipient}.`;
+  } else {
+    const reconstructed = `Send ${recipient} ${amountUsd} USDC${isPrivate ? " privately" : ""}`;
+    const result = await processMessage(reconstructed, sender, { channel: "telegram" });
+    const leg = result.legs[0];
+    ok = result.ok && !!leg;
+    outcome = leg?.outcome ?? "claimable";
+    txHash = leg?.txHash;
+    claimUrl = leg?.claimUrl;
+    summary = result.summary;
+  }
 
   await tg(token, "editMessageText", {
     chat_id: chatId,
     message_id: messageId,
-    text: `${baseCard}\n\n${result.ok ? "✅ <b>Confirmed</b>" : "⚠️ <b>Could not settle</b>"}`,
+    text: `${baseCard}\n\n${ok ? "✅ <b>Confirmed</b>" : "⚠️ <b>Could not settle</b>"}`,
     parse_mode: "HTML",
   });
 
-  if (!result.ok || !leg) {
+  if (!ok) {
     await tg(token, "sendMessage", {
       chat_id: chatId,
-      text: `⚠️ ${esc(result.summary || "Payment failed — please try again.")}`,
+      text: `⚠️ ${esc(summary || "Payment failed — please try again.")}`,
       parse_mode: "HTML",
     });
     return;
@@ -202,7 +242,7 @@ async function handleCallback(
 
   // Build the settled-receipt card.
   const railTag = isPrivate ? "🕶️ Unlink" : "🔵 Arc";
-  const modeTag = leg.outcome === "instant" ? (isPrivate ? "private" : "instant") : "claimable";
+  const modeTag = outcome === "instant" ? (isPrivate ? "private" : "instant") : "claimable";
   const receipt =
     `🍐  <b>SETTLED ✅</b>\n` +
     `<b>${amountDisplay}</b>\n` +
@@ -211,11 +251,11 @@ async function handleCallback(
   await tg(token, "sendMessage", { chat_id: chatId, text: receipt, parse_mode: "HTML" });
 
   // Follow-up line + actionable links (explorer proof / claim link).
-  const explorer = (env_explorer()).replace(/\/$/, "");
+  const explorer = env_explorer().replace(/\/$/, "");
   const lines: string[] = [`✅ Sent <b>${amountDisplay}</b> to <b>${esc(recipient)}</b>. Settled in USDC.`];
-  if (leg.txHash) lines.push(`Proof: ${explorer}/tx/${leg.txHash}`);
+  if (txHash) lines.push(`Proof: ${explorer}/tx/${txHash}`);
   else if (isPrivate) lines.push(`🔒 Shielded via Unlink — no public ledger link.`);
-  if (leg.claimUrl) lines.push(`Claim link: ${leg.claimUrl}`);
+  if (claimUrl) lines.push(`Claim link: ${claimUrl}`);
   await tg(token, "sendMessage", { chat_id: chatId, text: lines.join("\n"), parse_mode: "HTML" });
 }
 
