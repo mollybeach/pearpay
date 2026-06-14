@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import {
   WagmiProvider,
   useAccount,
-  useChainId,
   useConnect,
   useDisconnect,
   useReadContract,
@@ -52,14 +51,20 @@ function RealPaymentInner() {
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
 
-  const { address, isConnected } = useAccount();
-  const chainId = useChainId();
+  // Use the WALLET's actual chain (useAccount), not useChainId() — the latter
+  // returns the wagmi config's selected chain (always Arc here), so it never
+  // detects that the wallet is on mainnet. That mismatch is what caused the
+  // "wallet chain (1) ≠ target (5042002)" send error.
+  const { address, isConnected, chainId: walletChainId } = useAccount();
   const { connect, connectors, isPending: connecting, error: connectError } =
     useConnect();
   const { disconnect } = useDisconnect();
   const { switchChain, isPending: switching } = useSwitchChain();
 
-  const wrongChain = isConnected && chainId !== ARC_TESTNET_CHAIN_ID;
+  const wrongChain =
+    isConnected &&
+    walletChainId !== undefined &&
+    walletChainId !== ARC_TESTNET_CHAIN_ID;
 
   const {
     data: balance,
